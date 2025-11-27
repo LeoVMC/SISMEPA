@@ -1,0 +1,29 @@
+[2025-11-27 01:17:45,130] WARNING django.request: Bad Request: /api/pensums/
+[2025-11-27 01:17:46,296] WARNING django.request: Bad Request: /api/planificaciones/
+[2025-11-27 01:22:49,878] WARNING django.request: Bad Request: /api/pensums/
+[2025-11-27 01:22:50,945] WARNING django.request: Bad Request: /api/planificaciones/
+[2025-11-27 01:25:31,561] WARNING django.request: Bad Request: /api/pensums/
+[2025-11-27 01:25:32,700] WARNING django.request: Bad Request: /api/planificaciones/
+[2025-11-27 01:28:25,202] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-11-27 01:30:39,138] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,152] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,159] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,162] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,381] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,386] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,391] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:30:39,395] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:31:39,697] WARNING django.request: Not Found: /api/estudiantes/2/progreso/
+[2025-11-27 01:31:40,153] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:31:40,953] WARNING django.request: Not Found: /api/estudiantes/2/progreso/
+[2025-11-27 01:31:41,219] WARNING django.request: Not Found: /api/estudiantes/3/progreso/
+[2025-11-27 01:31:41,405] WARNING django.request: Not Found: /api/estudiantes/4/progreso/
+[2025-11-27 01:31:42,236] WARNING django.request: Not Found: /api/estudiantes/3/progreso/
+[2025-11-27 01:31:42,440] WARNING django.request: Not Found: /api/estudiantes/2/progreso/
+[2025-11-27 01:31:42,621] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:32:13,845] WARNING django.request: Not Found: /
+[2025-11-27 01:32:13,982] WARNING django.request: Not Found: /favicon.ico
+[2025-11-27 01:34:00,938] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:34:00,938] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:34:00,938] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
+[2025-11-27 01:34:00,949] WARNING django.request: Forbidden: /api/estudiantes/1/progreso/
