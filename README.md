@@ -112,7 +112,3 @@ Notas y recomendaciones:
 - El servicio `frontend` apunta a `./frontend`. Si no tienes aún un frontend, puedes crear una app (por ejemplo con Create React App) dentro de `frontend/` o eliminar/ajustar ese servicio.
 - La variable `DATABASE_URL` está fijada para usar el servicio `db` de Docker Compose. Para entornos de producción cambia la contraseña y otras configuraciones.
 - Si `requirements.txt` tiene `psycopg2` en lugar de `psycopg2-binary`, el Dockerfile instala `libpq-dev` y herramientas de compilación para compilar la dependencia.
-
-Si quieres, puedo:
-- Ajustar `docker-compose.yml` para ejecutar migraciones automáticamente al arrancar.
-- Crear un `frontend/` mínimo (React) para que el `frontend` build funcione.
