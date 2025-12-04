@@ -9,6 +9,11 @@ services:
       POSTGRES_PASSWORD: secure_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
   backend:
     build: .
@@ -19,8 +24,10 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+      - redis
     environment:
       - DATABASE_URL=postgres://unefa_user:secure_password@db:5432/unefa_monitoring_db
+      - REDIS_URL=redis://redis:6379/0
 
   frontend:
     build: ./frontend
@@ -31,6 +38,16 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:8000/api
+  
+  huey:
+    build: .
+    command: >
+      sh -c "python -m pip install --no-deps huey redis && huey_consumer.py gestion.tasks.HUEY"
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - .:/app
 
 volumes:
   postgres_data:
