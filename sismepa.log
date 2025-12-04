@@ -31,3 +31,51 @@
 [2025-12-03 21:26:56,715] WARNING django.request: Bad Request: /api/planificaciones/
 [2025-12-03 21:44:21,270] WARNING django.request: Bad Request: /api/pensums/
 [2025-12-03 21:44:22,072] WARNING django.request: Bad Request: /api/planificaciones/
+[2025-12-04 21:22:29,166] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:27:32,926] WARNING django.request: Not Found: /favicon.ico
+[2025-12-04 21:44:14,086] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-04 21:44:14,801] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:46:35,785] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:48:03,632] WARNING django.request: Not Found: /
+[2025-12-04 21:48:03,638] WARNING django.request: Not Found: /
+[2025-12-04 21:48:03,786] WARNING django.request: Not Found: /favicon.ico
+[2025-12-04 21:48:03,821] WARNING django.request: Not Found: /favicon.ico
+[2025-12-04 21:53:32,963] WARNING django.request: Not Found: /
+[2025-12-04 21:54:13,200] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-04 21:54:13,910] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:54:15,160] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-04 21:54:15,944] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:54:28,730] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 21:57:09,469] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,484] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,494] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,507] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,756] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,769] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,781] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 21:57:09,790] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:05:30,162] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:05:30,173] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:05:30,184] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:05:30,194] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:05:33,868] WARNING django.request: Not Found: /api/estudiantes/2/progreso/
+[2025-12-04 22:05:34,354] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:06:28,840] WARNING django.request: Forbidden: /api/pensums/
+[2025-12-04 22:08:57,214] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-04 22:08:57,967] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 22:09:01,302] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-04 22:09:02,002] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-04 22:09:33,100] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:09:33,113] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:09:33,124] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:09:33,136] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:11:33,098] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:11:33,110] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:11:33,120] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:11:33,131] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:14:33,077] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:14:33,089] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:14:33,099] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:14:33,109] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-04 22:17:11,715] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-04 22:17:12,455] INFO django.utils.autoreload: Watching for file changes with StatReloader

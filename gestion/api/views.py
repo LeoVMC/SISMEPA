@@ -19,6 +19,8 @@ from django.contrib.auth.models import User
 class EstudianteViewSet(viewsets.ModelViewSet):
     queryset = Estudiante.objects.all()
     serializer_class = EstudianteSerializer
+    filterset_fields = ['programa', 'cedula']
+    search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     def get_permissions(self):
         # admin: full; listing/creation restricted to admin
@@ -87,6 +89,8 @@ class EstudianteViewSet(viewsets.ModelViewSet):
 class AsignaturaViewSet(viewsets.ModelViewSet):
     queryset = Asignatura.objects.all()
     serializer_class = AsignaturaSerializer
+    filterset_fields = ['programa', 'semestre']
+    search_fields = ['nombre_asignatura', 'codigo']
 
 
 class UserManagementViewSet(viewsets.ViewSet):
@@ -104,6 +108,8 @@ class PensumViewSet(viewsets.ModelViewSet):
     queryset = Pensum.objects.all()
     serializer_class = PensumSerializer
     parser_classes = [MultiPartParser, FormParser]
+    filterset_fields = ['programa']
+    search_fields = ['programa__nombre_programa']
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -115,6 +121,8 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
     queryset = Planificacion.objects.all()
     serializer_class = PlanificacionSerializer
     parser_classes = [MultiPartParser, FormParser]
+    filterset_fields = ['asignatura']
+    search_fields = ['asignatura__nombre_asignatura', 'asignatura__codigo']
 
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
@@ -129,6 +137,8 @@ class DocumentoCalificacionesViewSet(viewsets.ModelViewSet):
     queryset = DocumentoCalificaciones.objects.all()
     serializer_class = DocumentoCalificacionesSerializer
     parser_classes = [MultiPartParser, FormParser]
+    filterset_fields = ['estudiante']
+    search_fields = ['estudiante__cedula', 'estudiante__usuario__first_name', 'estudiante__usuario__last_name']
 
     def get_permissions(self):
         if self.action in ['create']:

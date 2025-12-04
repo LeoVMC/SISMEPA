@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Instalar dependencias del sistema necesarias para psycopg2 y compilación
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libpq-dev gcc \
+    && apt-get install -y --no-install-recommends build-essential libpq-dev gcc libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements e instalar paquetes

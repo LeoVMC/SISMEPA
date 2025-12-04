@@ -67,6 +67,9 @@ class Estudiante(models.Model):
     # [cite: 64, 74, 77]
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=100, blank=True)
+    apellido = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
     fecha_ingreso = models.DateField(auto_now_add=True)
@@ -109,6 +112,7 @@ class Estudiante(models.Model):
 class PeriodoAcademico(models.Model):
     # [cite: 99, 108]
     nombre_periodo = models.CharField(max_length=50)  # Ej: 2-2025
+    anio = models.IntegerField(default=2025)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     activo = models.BooleanField(default=True)

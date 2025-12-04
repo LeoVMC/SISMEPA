@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from rest_framework.routers import DefaultRouter
 
 from gestion.views import (
@@ -36,6 +37,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     # dj-rest-auth endpoints (login/logout/password reset)
     path('api/auth/', include('dj_rest_auth.urls')),
+    path('', RedirectView.as_view(url='/api/', permanent=False)),
 ]
 
 from django.conf import settings

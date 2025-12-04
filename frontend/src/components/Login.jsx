@@ -8,7 +8,7 @@ export default function Login() {
   const doLogin = async (e) => {
     e.preventDefault()
     try {
-      const res = await fetch('http://localhost:8000/api/auth/login/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -35,8 +35,8 @@ export default function Login() {
     <div className="p-4 bg-white rounded shadow mb-4">
       <h3 className="font-semibold">Login (dev)</h3>
       <form onSubmit={doLogin} className="mt-2 grid grid-cols-2 gap-2">
-        <input placeholder="username" value={username} onChange={(e)=>setUsername(e.target.value)} className="border p-1" />
-        <input placeholder="password" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} className="border p-1" />
+        <input placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border p-1" />
+        <input placeholder="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="border p-1" />
         <button className="col-span-2 bg-blue-600 text-white py-1 px-3 rounded">Entrar</button>
       </form>
       {msg && <div className="mt-2 text-sm">{msg}</div>}

@@ -23,7 +23,7 @@ const Dashboard = () => {
     const fetchData = async (id = studentId) => {
       try {
         // Por defecto usamos id 1 — puedes parametrizar según necesites
-        const response = await axios.get(`http://localhost:8000/api/estudiantes/${id}/progreso/`)
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/estudiantes/${id}/progreso/`)
         setDataEstudiante(response.data)
       } catch (error) {
         console.error('Error cargando datos', error)
@@ -39,7 +39,7 @@ const Dashboard = () => {
     setLoading(true)
     const fetch = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/estudiantes/${studentId}/progreso/`)
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/estudiantes/${studentId}/progreso/`)
         setDataEstudiante(response.data)
       } catch (err) {
         console.error(err)
@@ -82,7 +82,7 @@ const Dashboard = () => {
         </div>
         <div>
           <button
-            onClick={() => window.open('http://localhost:8000/api/estudiantes/reporte_excel/')}
+            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/estudiantes/reporte_excel/`)}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           >
             Descargar Reporte Excel
@@ -124,7 +124,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      
+
 
       <AdminPanel />
     </div>
