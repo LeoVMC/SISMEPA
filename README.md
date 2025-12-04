@@ -113,10 +113,6 @@ Notas y recomendaciones:
 - La variable `DATABASE_URL` está fijada para usar el servicio `db` de Docker Compose. Para entornos de producción cambia la contraseña y otras configuraciones.
 - Si `requirements.txt` tiene `psycopg2` en lugar de `psycopg2-binary`, el Dockerfile instala `libpq-dev` y herramientas de compilación para compilar la dependencia.
 
-Si quieres, puedo:
-- Ajustar `docker-compose.yml` para ejecutar migraciones automáticamente al arrancar.
-- Crear un `frontend/` mínimo (React) para que el `frontend` build funcione.
-
 ---
 
 **Local setup (rápido)**
@@ -150,4 +146,3 @@ Notas de seguridad:
 - Crea un archivo `.env` desde `.env.example` con `SECRET_KEY` y otras variables sensibles, y nunca subas `.env` al repositorio.
 - Para eliminar archivos sensibles ya commiteados (ej. `venv/`, `db.sqlite3`), puedes usar `git rm --cached <archivo>` seguido de commit, o reescribir historial con `git filter-repo`/BFG (esta última opción es destructiva; pídeme que la ejecute y la preparo).
 
-Si quieres, hago los commits locales con los cambios y limpio los archivos rastreados en git. Si prefieres que reescriba el historial para eliminar por completo archivos previamente commiteados, confírmamelo y lo hago (esto sobrescribirá commits pasados y necesitarás forzar push al remoto).
