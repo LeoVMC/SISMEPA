@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
-import AdminPanel from './AdminPanel'
+
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
@@ -66,10 +66,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Monitoreo de Avance Educativo</h1>
+    <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Monitoreo de Avance Educativo</h1>
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Seleccionar Estudiante (ID)</label>
           <input
@@ -77,13 +77,13 @@ const Dashboard = () => {
             value={studentId}
             min={1}
             onChange={(e) => setStudentId(Number(e.target.value))}
-            className="mt-1 block w-32 rounded-md border-gray-300 shadow-sm"
+            className="mt-1 block w-full md:w-32 rounded-md border-gray-300 shadow-sm p-2 border"
           />
         </div>
         <div>
           <button
             onClick={() => window.open(`${import.meta.env.VITE_API_URL}/estudiantes/reporte_excel/`)}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
           >
             Descargar Reporte Excel
           </button>
@@ -126,7 +126,6 @@ const Dashboard = () => {
 
 
 
-      <AdminPanel />
     </div>
   )
 }

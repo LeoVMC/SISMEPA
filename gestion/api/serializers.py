@@ -6,7 +6,8 @@ from gestion.models import Estudiante, Asignatura, Pensum, Planificacion, Docume
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups']
+        depth = 1
 
 
 class CreateUserSerializer(serializers.Serializer):
@@ -50,10 +51,16 @@ class CreateUserSerializer(serializers.Serializer):
         return user
 
 
+class ProgramaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Programa
+        fields = ['id', 'nombre_programa', 'titulo_otorgado', 'duracion_anios']
+
+
 class AsignaturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asignatura
-        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa']
+        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente']
 
 
 class EstudianteSerializer(serializers.ModelSerializer):
@@ -117,20 +124,26 @@ class PlanificacionSerializer(serializers.ModelSerializer):
         if value.size > max_size:
             raise serializers.ValidationError(f"Archivo demasiado grande (máx {max_size} bytes)")
 
-        allowed_ext = ['.pdf', '.docx']
-        allowed_mimes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        allowed_ext = ['.pdf', '.docx', '.doc', '.xls', '.xlsx']
+        allowed_mimes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ]
         try:
             import magic
             buf = value.read(2048)
             value.seek(0)
             mime = magic.from_buffer(buf, mime=True)
             if mime not in allowed_mimes:
-                raise serializers.ValidationError("Tipo de archivo no permitido (mime)")
+                raise serializers.ValidationError(f"Tipo de archivo no permitido (mime: {mime})")
         except Exception:
             import os
             ext = os.path.splitext(value.name)[1].lower()
             if ext not in allowed_ext:
-                raise serializers.ValidationError("Tipo de archivo no permitido (ext)")
+                raise serializers.ValidationError(f"Tipo de archivo no permitido (ext: {ext})")
 
         return value
 

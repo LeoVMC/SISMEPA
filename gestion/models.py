@@ -58,6 +58,7 @@ class Asignatura(models.Model):
     semestre = models.IntegerField()
     # Auto-relación para manejar prelaciones (requisitos)
     prelaciones = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='es_requisito_de')
+    docente = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_asignatura}"

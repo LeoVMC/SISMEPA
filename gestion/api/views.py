@@ -11,6 +11,7 @@ from gestion.models import (
 from gestion.api.serializers import (
     EstudianteSerializer, AsignaturaSerializer, PensumSerializer,
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
+    ProgramaSerializer,
 )
 from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner
 from django.contrib.auth.models import User
@@ -93,6 +94,13 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
     search_fields = ['nombre_asignatura', 'codigo']
 
 
+class ProgramaViewSet(viewsets.ModelViewSet):
+    from gestion.models import Programa
+    queryset = Programa.objects.all()
+    serializer_class = ProgramaSerializer
+    permission_classes = [IsAdmin]
+
+
 class UserManagementViewSet(viewsets.ViewSet):
     """Endpoints for admin to create users (docente/estudiante)."""
     permission_classes = [IsAdmin]
@@ -102,6 +110,12 @@ class UserManagementViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+class DocenteViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.filter(groups__name='Docente')
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
 
 
 class PensumViewSet(viewsets.ModelViewSet):
@@ -129,7 +143,7 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsDocente()]
+            return [IsDocenteOrAdminOrOwner()]
         return []
 
 

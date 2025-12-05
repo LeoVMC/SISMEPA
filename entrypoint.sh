@@ -21,8 +21,8 @@ for i in range(60):
         conn.close()
         print('Base de datos disponible')
         break
-    except Exception:
-        print('DB no lista, reintentando...')
+    except Exception as e:
+        print(f'DB no lista, reintentando... Error: {e}')
         time.sleep(2)
 else:
     print('No fue posible conectar con la base de datos', flush=True)

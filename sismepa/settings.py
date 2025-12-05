@@ -83,6 +83,7 @@ AUTHENTICATION_BACKENDS = (
 # REST Framework minimal settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -107,6 +108,10 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_USERNAME_REQUIRED = True
+
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'gestion.api.serializers.UserSerializer',
+}
 
 # En desarrollo, si prefieres permitir todos los orígenes usa:
 # CORS_ALLOW_ALL_ORIGINS = True
