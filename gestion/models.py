@@ -26,8 +26,10 @@ class Asignatura(models.Model):
     semestre = models.IntegerField()
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE)
     prelaciones = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='es_requisito_de')
+    orden = models.IntegerField(default=0)
     # Keeping docente for backward compatibility, though specific assignments will move to Seccion
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
+    tutores = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_asignadas')
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_asignatura}"

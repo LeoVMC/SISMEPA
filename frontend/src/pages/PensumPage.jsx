@@ -193,6 +193,40 @@ export default function PensumPage() {
         }
     }
 
+    const handleAssignTutor = async () => {
+        if (!selectedDocenteId || !selectedSubject) return
+        setActionLoading(true)
+        setActionMessage(null)
+
+        const backendSubject = subjectsMap[selectedSubject.code]
+        if (!backendSubject) return
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/${backendSubject.id}/assign-tutor/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                },
+                body: JSON.stringify({
+                    docente: selectedDocenteId
+                })
+            })
+
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: `Tutor asignado exitosamente.` })
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
+            } else {
+                const data = await res.json()
+                throw new Error(data.error || 'Error al asignar tutor.')
+            }
+        } catch (err) {
+            setActionMessage({ type: 'error', text: String(err.message || err) })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
     const handleUploadClick = () => {
         fileInputRef.current.click()
     }
@@ -281,81 +315,110 @@ export default function PensumPage() {
                     onChange={handleFileChange}
                 />
 
-                {/* Display Current Assignments */}
-                {backendSubject?.secciones?.length > 0 && (
-                    <div className="mb-4">
-                        <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">Docentes Asignados</label>
-                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
-                            {backendSubject.secciones.map(sec => (
-                                <div key={sec.id} className="flex justify-between items-center text-sm">
-                                    <span className="font-semibold text-gray-600 dark:text-gray-300">Sección {sec.codigo_seccion}</span>
-                                    <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Admin Assign Controls */}
-                {isAdmin && (
-                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
-                        <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">Asignar Docente a Sección</label>
-                        <div className="flex flex-col gap-2">
-                            <div className="flex gap-2">
-                                <select
-                                    className="w-20 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                    value={selectedSeccion}
-                                    onChange={e => setSelectedSeccion(e.target.value)}
-                                >
-                                    {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                                <select
-                                    value={selectedDocenteId}
-                                    onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                    className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">Seleccione docente...</option>
-                                    {docentes.map(d => (
-                                        <option key={d.id} value={d.id}>{d.first_name} {d.last_name} ({d.username})</option>
-                                    ))}
-                                </select>
+                {/* Special Logic for PSI-30010 (Thesis/Internship) */}
+                {backendSubject?.code === 'PSI-30010' ? (
+                    <>
+                        <div className="mb-4">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
+                                Tutores Asignados ({backendSubject.tutores?.length || 0}/10)
+                            </label>
+                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
+                                {backendSubject.tutores && backendSubject.tutores.length > 0 ? (
+                                    backendSubject.tutores.map(tutor => (
+                                        <div key={tutor.id} className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-800 dark:text-white font-medium">{tutor.first_name} {tutor.last_name}</span>
+                                            <span className="text-xs text-gray-500">({tutor.username})</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-gray-400 italic">No hay tutores asignados.</p>
+                                )}
                             </div>
-                            <button
-                                onClick={handleAssignDocente}
-                                disabled={!selectedDocenteId || actionLoading}
-                                className="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
-                            >
-                                {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
-                                Asignar
-                            </button>
                         </div>
-                    </div>
+
+                        {isAdmin && (
+                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800 mb-3">
+                                <label className="block text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1 uppercase">Asignar Tutor</label>
+                                <div className="flex gap-2">
+                                    <select
+                                        value={selectedDocenteId}
+                                        onChange={(e) => setSelectedDocenteId(e.target.value)}
+                                        className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                    >
+                                        <option value="">Seleccione tutor...</option>
+                                        {docentes.map(d => (
+                                            <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={handleAssignTutor}
+                                        disabled={!selectedDocenteId || actionLoading || (backendSubject.tutores?.length >= 10)}
+                                        className="bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
+                                    >
+                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+                                        Asignar
+                                    </button>
+                                </div>
+                                {backendSubject.tutores?.length >= 10 && <p className="text-xs text-red-500 mt-1">Límite de tutores alcanzado.</p>}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {/* Display Current Assignments (Standard Subjects) */}
+                        {backendSubject?.secciones?.length > 0 && (
+                            <div className="mb-4">
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">Docentes Asignados</label>
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
+                                    {backendSubject.secciones.map(sec => (
+                                        <div key={sec.id} className="flex justify-between items-center text-sm">
+                                            <span className="font-semibold text-gray-600 dark:text-gray-300">Sección {sec.codigo_seccion}</span>
+                                            <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Admin Assign Controls (Standard) */}
+                        {isAdmin && (
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
+                                <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">Asignar Docente a Sección</label>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex gap-2">
+                                        <select
+                                            className="w-20 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                            value={selectedSeccion}
+                                            onChange={e => setSelectedSeccion(e.target.value)}
+                                        >
+                                            {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        <select
+                                            value={selectedDocenteId}
+                                            onChange={(e) => setSelectedDocenteId(e.target.value)}
+                                            className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        >
+                                            <option value="">Seleccione docente...</option>
+                                            {docentes.map(d => (
+                                                <option key={d.id} value={d.id}>{d.first_name} {d.last_name} ({d.username})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <button
+                                        onClick={handleAssignDocente}
+                                        disabled={!selectedDocenteId || actionLoading}
+                                        className="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
+                                    >
+                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
+                                        Asignar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
-
-                {isEstudiante && backendSubject?.has_plan && (
-                    <button
-                        onClick={handleDownloadPlan}
-                        disabled={actionLoading}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    >
-                        {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        Descargar Plan de Evaluación
-                    </button>
-                )}
-
-                {isDocente && (
-                    <button
-                        onClick={handleUploadClick}
-                        disabled={actionLoading}
-                        className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                    >
-                        {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-                        Cargar Plan de Evaluación
-                    </button>
-                )}
-
-                {/* Admin Upload/Download Controls */}
+                {/* Upload/Download Controls (Shared) */}
                 {isAdmin && (
                     <div className="flex gap-2">
                         <button
@@ -525,8 +588,8 @@ export default function PensumPage() {
                                             {subject.prereqs.length > 0 && (
                                                 <div className="mt-2 pt-2 border-t border-gray-50 dark:border-gray-800 flex flex-wrap gap-1">
                                                     {subject.prereqs.map(pre => (
-                                                        <span key={pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
-                                                            {pre} #
+                                                        <span key={typeof pre === 'object' ? pre.codigo : pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
+                                                            {typeof pre === 'object' ? pre.codigo : pre} #
                                                         </span>
                                                     ))}
                                                 </div>
@@ -571,7 +634,7 @@ export default function PensumPage() {
                             </button>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-6 max-h-[80vh] overflow-y-auto">
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/30">
                                     <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">Código</span>
@@ -586,15 +649,22 @@ export default function PensumPage() {
                             {selectedSubject.prereqs.length > 0 ? (
                                 <div className="mb-6">
                                     <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2 block">Prelaciones</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {/* Since prereqs are just IDs in new format, we might need a lookup if we want names. For now just ID */}
-                                        {selectedSubject.prereqs.map(pre => (
-                                            <span key={pre} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-md font-mono border border-gray-200 dark:border-gray-700">
-                                                {/* If pre is object, use ID or code. Modify as needed depending on backend serializer */}
-                                                {typeof pre === 'object' ? pre.codigo : pre}
-                                            </span>
-                                        ))}
-                                    </div>
+
+                                    {/* Special Display for Thesis (Too many prereqs) */}
+                                    {selectedSubject.code === 'PSI-30010' ? (
+                                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg border border-amber-100 dark:border-amber-800/30">
+                                            <strong>Todas las asignaturas anteriores.</strong>
+                                            <p className="text-xs mt-1 opacity-80">Esta materia requiere la aprobación de todo el pensum previo.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedSubject.prereqs.map(pre => (
+                                                <span key={typeof pre === 'object' ? pre.codigo : pre} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-md font-mono border border-gray-200 dark:border-gray-700">
+                                                    {typeof pre === 'object' ? pre.codigo : pre}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <p className="text-sm text-gray-400 italic mb-6">Sin prelaciones</p>

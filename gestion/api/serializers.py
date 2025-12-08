@@ -73,10 +73,12 @@ class AsignaturaSerializer(serializers.ModelSerializer):
     secciones = SeccionSerializer(many=True, read_only=True)
     has_assignments = serializers.SerializerMethodField()
     has_plan = serializers.SerializerMethodField()
+    prelaciones = serializers.SlugRelatedField(slug_field='codigo', many=True, read_only=True)
+    tutores = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Asignatura
-        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan']
+        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan', 'prelaciones', 'orden', 'tutores']
 
     def get_has_assignments(self, obj):
         # Return true if any section has a teacher assigned

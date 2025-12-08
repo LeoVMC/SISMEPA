@@ -350,3 +350,124 @@ django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. Y
 [2025-12-08 05:01:28,173] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
 [2025-12-08 05:01:28,185] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
 [2025-12-08 05:01:28,196] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:05,404] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:05,420] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:05,444] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:05,457] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:07,317] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:07,330] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:07,352] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:14:07,365] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:33,084] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:33,105] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:33,117] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:33,127] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:58,260] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:58,274] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:58,301] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:20:58,314] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:41:11,449] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:41:11,460] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:41:11,472] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:41:11,485] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:53:10,795] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:53:10,816] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:53:10,829] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:53:10,840] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:38,159] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:38,173] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:38,192] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:38,206] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:43,281] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:43,295] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:43,344] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:56:43,355] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:58:59,773] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:58:59,785] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:58:59,803] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:58:59,815] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:01,052] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:01,064] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:01,080] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:01,092] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:30,541] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:30,554] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:30,567] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 05:59:30,581] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:04:59,342] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:04:59,354] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:04:59,365] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:04:59,375] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:18,372] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:18,385] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:18,405] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:18,416] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:31,897] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:31,910] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:31,933] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:05:31,946] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:07:30,379] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:07:31,116] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:14:46,322] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:14:47,065] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:18:26,279] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:18:26,293] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:18:26,315] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:18:26,326] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:19:40,956] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:19:41,698] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:29:36,649] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:29:37,373] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:32:32,436] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-08 06:32:33,187] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:33:19,200] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:33:19,960] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:47:42,220] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 06:47:43,190] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:53:51,017] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:51,029] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:51,041] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:51,053] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:51,996] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:52,008] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:52,021] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:53:52,032] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:54:53,010] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:54:53,022] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:54:53,033] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:54:53,044] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:56:03,413] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:56:03,427] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:56:03,443] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:56:03,455] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:57:09,676] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:57:09,695] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:57:09,711] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 06:57:09,723] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:03:22,170] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 07:03:22,971] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:04:33,694] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 07:04:34,466] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:05:03,055] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 07:05:03,664] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:12:56,497] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:13:26,573] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:13:51,260] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 07:13:51,993] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:13:56,186] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:16:37,289] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:16:37,301] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:16:37,312] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:16:37,322] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:37:08,155] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 07:37:09,011] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:49:26,145] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:49:26,169] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:49:26,180] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:49:26,192] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 07:55:58,265] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-08 07:55:59,046] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:56:37,045] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 07:56:38,458] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 07:58:00,506] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-08 07:58:01,414] INFO django.utils.autoreload: Watching for file changes with StatReloader

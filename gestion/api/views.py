@@ -118,6 +118,27 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
 
         return Response(SeccionSerializer(seccion).data)
 
+    @action(detail=True, methods=['post'], url_path='assign-tutor')
+    def assign_tutor(self, request, pk=None):
+        asignatura = self.get_object()
+        docente_id = request.data.get('docente')
+
+        if not docente_id:
+            return Response({'error': 'Docente ID requerido'}, status=400)
+        
+        try:
+            docente = User.objects.get(pk=docente_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Docente no encontrado'}, status=404)
+
+        # Check limit
+        if asignatura.tutores.count() >= 10:
+             return Response({'error': 'Límite de 10 tutores alcanzado'}, status=400)
+
+        asignatura.tutores.add(docente)
+        # Return updated list of tutors
+        return Response([{'id': d.id, 'username': d.username, 'first_name': d.first_name, 'last_name': d.last_name} for d in asignatura.tutores.all()])
+
 
 class ProgramaViewSet(viewsets.ModelViewSet):
     from gestion.models import Programa
