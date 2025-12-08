@@ -471,3 +471,52 @@ django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. Y
 [2025-12-08 07:56:38,458] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2025-12-08 07:58:00,506] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2025-12-08 07:58:01,414] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 08:20:52,342] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:20:52,370] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:20:52,382] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:20:52,393] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:26:34,740] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:26:34,754] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:26:34,769] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:26:34,780] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:28:16,126] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:28:16,146] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:28:16,159] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:28:16,176] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:30:24,284] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:30:24,297] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:30:24,320] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:30:24,332] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:33:57,035] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:33:57,048] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:33:57,076] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:33:57,087] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:41:37,234] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:41:37,246] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:41:37,271] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:41:37,285] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:42:03,510] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:42:03,523] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:42:03,543] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 08:42:03,555] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 09:17:07,454] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-08 09:17:08,253] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 09:18:20,528] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-08 09:18:21,185] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 09:28:22,609] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 09:28:23,340] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 09:40:47,589] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 09:40:48,325] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 09:42:54,504] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-08 09:42:55,200] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 09:53:08,700] WARNING django.request: Unauthorized: /api/programas/
+[2025-12-08 09:57:52,650] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 09:57:53,401] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 10:09:02,148] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 10:12:20,163] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-08 10:12:20,883] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 06:12:20,976] INFO django.utils.autoreload: C:\Users\leona\Documents\GitHub\SISMEPA\sismepa\settings.py changed, reloading.
+[2025-12-08 10:12:25,251] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+2-08 06:12:24,439] INFO django.utils.autoreload: C:\Users\leona\Documents\GitHub\SISMEPA\gestion\api\serializers.py changed, reloading.
+[2025-12-08 06:12:25,059] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 10:12:25,979] INFO django.utils.autoreload: Watching for file changes with StatReloader

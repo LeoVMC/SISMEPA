@@ -122,6 +122,7 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
     def assign_tutor(self, request, pk=None):
         asignatura = self.get_object()
         docente_id = request.data.get('docente')
+        tutor_type = request.data.get('type', 'generic') # generic, academic, community
 
         if not docente_id:
             return Response({'error': 'Docente ID requerido'}, status=400)
@@ -131,13 +132,22 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({'error': 'Docente no encontrado'}, status=404)
 
-        # Check limit
-        if asignatura.tutores.count() >= 10:
-             return Response({'error': 'Límite de 10 tutores alcanzado'}, status=400)
+        # Determine target relation and limit
+        if tutor_type == 'academic':
+            target_relation = asignatura.tutores_academicos
+            limit_msg = "Límite de tutores académicos alcanzado (10)"
+        elif tutor_type == 'community':
+            target_relation = asignatura.tutores_comunitarios
+            limit_msg = "Límite de tutores comunitarios alcanzado (10)"
+        else:
+            target_relation = asignatura.tutores
+            limit_msg = "Límite de tutores alcanzado (10)"
 
-        asignatura.tutores.add(docente)
-        # Return updated list of tutors
-        return Response([{'id': d.id, 'username': d.username, 'first_name': d.first_name, 'last_name': d.last_name} for d in asignatura.tutores.all()])
+        if target_relation.count() >= 10:
+             return Response({'error': limit_msg}, status=400)
+
+        target_relation.add(docente)
+        return Response({'status': 'Tutor assigned'})
 
 
 class ProgramaViewSet(viewsets.ModelViewSet):

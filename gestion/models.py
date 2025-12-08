@@ -30,6 +30,8 @@ class Asignatura(models.Model):
     # Keeping docente for backward compatibility, though specific assignments will move to Seccion
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
     tutores = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_asignadas')
+    tutores_academicos = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_academicas_asignadas')
+    tutores_comunitarios = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_comunitarias_asignadas')
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_asignatura}"
