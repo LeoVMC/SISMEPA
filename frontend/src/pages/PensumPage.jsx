@@ -20,6 +20,7 @@ export default function PensumPage() {
     const [selectedSeccion, setSelectedSeccion] = useState('D1')
     const [subjectsMap, setSubjectsMap] = useState({}) // code -> backend data
 
+
     const navigate = useNavigate()
     const fileInputRef = useRef(null)
     const [token] = useState(localStorage.getItem('apiToken') || '')
@@ -316,7 +317,7 @@ export default function PensumPage() {
                 />
 
                 {/* Special Logic for PSI-30010 (Thesis/Internship) */}
-                {backendSubject?.code === 'PSI-30010' ? (
+                {backendSubject?.codigo === 'PSI-30010' ? (
                     <>
                         <div className="mb-4">
                             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
@@ -654,7 +655,7 @@ export default function PensumPage() {
                                     {selectedSubject.code === 'PSI-30010' ? (
                                         <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg border border-amber-100 dark:border-amber-800/30">
                                             <strong>Todas las asignaturas anteriores.</strong>
-                                            <p className="text-xs mt-1 opacity-80">Esta materia requiere la aprobación de todo el pensum previo.</p>
+                                            <p className="text-xs mt-1 opacity-80">Se requiere la aprobación de todo el pensum previo.</p>
                                         </div>
                                     ) : (
                                         <div className="flex flex-wrap gap-2">
