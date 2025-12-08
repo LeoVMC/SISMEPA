@@ -1,44 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck } from 'lucide-react'
+import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
-const MOCK_PENSUM_DATA = [
-    {
-        semester: 'SEMESTRE I',
-        uc: 23,
-        subjects: [
-            { code: 'MAT-21215', name: 'MATEMÁTICA I', uc: 5, prereqs: [] },
-            { code: 'MAT-21524', name: 'GEOMETRÍA ANALÍTICA', uc: 4, prereqs: [] },
-            { code: 'ADG-25123', name: 'HOMBRE, SOCIEDAD, CIENCIA Y TECNOLOGÍA', uc: 3, prereqs: [] },
-            { code: 'MAT-21212', name: 'DIBUJO', uc: 2, prereqs: [] },
-            { code: 'ADG-25132', name: 'EDUCACIÓN AMBIENTAL', uc: 2, prereqs: [] },
-            { code: 'IDM-24113', name: 'INGLÉS I', uc: 3, prereqs: [] },
-            { code: 'AC-1', name: 'ACTIVIDAD COMPLEMENTARIA (CULTURAL)', uc: 0, prereqs: [] },
-            { code: 'ADG-25131', name: 'SEMINARIO I', uc: 1, prereqs: [] },
-            { code: 'DIN-21113', name: 'DEFENSA INTEGRAL DE LA NACIÓN I', uc: 3, prereqs: [] },
-        ]
-    },
-    {
-        semester: 'SEMESTRE II',
-        uc: 25,
-        subjects: [
-            { code: 'MAT-21225', name: 'MATEMÁTICA II', uc: 5, prereqs: ['MAT-21215'] },
-            { code: 'QUF-23015', name: 'FÍSICA I', uc: 5, prereqs: ['MAT-21215', 'MAT-21524'] },
-            { code: 'AC-2', name: 'ACTIVIDAD COMPLEMENTARIA (DEPORTIVA)', uc: 0, prereqs: [] },
-            { code: 'MAT-21114', name: 'ÁLGEBRA LINEAL', uc: 4, prereqs: ['MAT-21215', 'MAT-21524'] },
-            { code: 'QUF-22014', name: 'QUÍMICA GENERAL', uc: 4, prereqs: [] },
-            { code: 'IDM-24123', name: 'INGLÉS II', uc: 3, prereqs: ['IDM-24113'] },
-            { code: 'AC-3', name: 'ACTIVIDAD COMPLEMENTARIA (CULTURAL)', uc: 0, prereqs: [] },
-            { code: 'ADG-25141', name: 'SEMINARIO II', uc: 1, prereqs: ['ADG-25131'] },
-            { code: 'DIN-21123', name: 'DEFENSA INTEGRAL DE LA NACIÓN II', uc: 3, prereqs: ['DIN-21113'] },
-        ]
-    }
-]
 
 const SECCIONES = Array.from({ length: 10 }, (_, i) => `D${i + 1}`)
 
 export default function PensumPage() {
     const [userData, setUserData] = useState(null)
+    const [selectedProgram, setSelectedProgram] = useState(null)
+    const [availablePrograms, setAvailablePrograms] = useState([])
+    const [isProgramLoading, setIsProgramLoading] = useState(true)
+
+    const [pensumData, setPensumData] = useState([]) // Dynamic semesters
     const [selectedSubject, setSelectedSubject] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [actionLoading, setActionLoading] = useState(false)
@@ -57,37 +29,105 @@ export default function PensumPage() {
         if (storedUser) {
             setUserData(JSON.parse(storedUser))
         }
+
+        // Check session storage for program
+        const sessionProgram = sessionStorage.getItem('selectedProgram')
+        if (sessionProgram) {
+            setSelectedProgram(JSON.parse(sessionProgram))
+        } else {
+            fetchPrograms()
+        }
     }, [])
 
     useEffect(() => {
-        fetchSubjects()
-    }, [token])
+        if (selectedProgram) {
+            fetchSubjects(selectedProgram.id)
+        }
+    }, [selectedProgram, token])
 
     // Fetch teachers when modal opens if user is admin
     useEffect(() => {
-        const isAdmin = userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
+        const isAdmin = isAdminUser()
         if (isModalOpen && isAdmin) {
             fetchDocentes()
         }
-    }, [isModalOpen, userData])
+    }, [isModalOpen])
 
-    const fetchSubjects = async () => {
+    const isAdminUser = () => {
+        return userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
+    }
+
+    const fetchPrograms = async () => {
+        setIsProgramLoading(true)
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/programas/`, {
                 headers: { Authorization: `Token ${token}` }
             })
             if (res.ok) {
                 const data = await res.json()
-                // Convert list to map for easier lookup by code
+                setAvailablePrograms(data)
+            }
+        } catch (e) {
+            console.error("Error fetching programs", e)
+        } finally {
+            setIsProgramLoading(false)
+        }
+    }
+
+    const handleSelectProgram = (program) => {
+        setSelectedProgram(program)
+        sessionStorage.setItem('selectedProgram', JSON.stringify(program))
+    }
+
+    const handleChangeProgram = () => {
+        setSelectedProgram(null)
+        sessionStorage.removeItem('selectedProgram')
+        setPensumData([])
+        fetchPrograms()
+    }
+
+    const fetchSubjects = async (programId) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/?programa=${programId}`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+
+                // Map for lookups
                 const map = {}
                 data.forEach(sub => {
                     map[sub.codigo] = sub
                 })
                 setSubjectsMap(map)
+
+                // Group by semester for the view
+                const semesters = {}
+                data.forEach(sub => {
+                    if (!semesters[sub.semestre]) {
+                        semesters[sub.semestre] = { semester: `SEMESTRE ${toRoman(sub.semestre)}`, uc: 0, subjects: [] }
+                    }
+                    semesters[sub.semestre].subjects.push({
+                        code: sub.codigo,
+                        name: sub.nombre_asignatura,
+                        uc: sub.creditos,
+                        prereqs: sub.prelaciones || []
+                    })
+                    semesters[sub.semestre].uc += sub.creditos
+                })
+
+                // Convert to array and sort
+                const sortedSemesters = Object.keys(semesters).sort((a, b) => a - b).map(k => semesters[k])
+                setPensumData(sortedSemesters)
             }
         } catch (e) {
             console.error("Error fetching subjects", e)
         }
+    }
+
+    const toRoman = (num) => {
+        const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X' }
+        return lookup[num] || num
     }
 
     const fetchDocentes = async () => {
@@ -116,7 +156,7 @@ export default function PensumPage() {
         setIsModalOpen(false)
         setSelectedSubject(null)
         setActionMessage(null)
-        fetchSubjects() // Refresh data on close
+        if (selectedProgram) fetchSubjects(selectedProgram.id) // Refresh data
     }
 
     const handleAssignDocente = async () => {
@@ -125,11 +165,7 @@ export default function PensumPage() {
         setActionMessage(null)
 
         const backendSubject = subjectsMap[selectedSubject.code]
-        if (!backendSubject) {
-            setActionMessage({ type: 'error', text: 'Asignatura no sincronizada con backend.' })
-            setActionLoading(false)
-            return
-        }
+        if (!backendSubject) return
 
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/${backendSubject.id}/assign-docente/`, {
@@ -146,7 +182,7 @@ export default function PensumPage() {
 
             if (res.ok) {
                 setActionMessage({ type: 'success', text: `Docente asignado a sección ${selectedSeccion} exitosamente.` })
-                fetchSubjects() // Refresh local data
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
                 throw new Error('Error al asignar docente.')
             }
@@ -171,9 +207,7 @@ export default function PensumPage() {
         const backendSubject = subjectsMap[selectedSubject.code]
 
         try {
-            if (!backendSubject) {
-                throw new Error('Asignatura no encontrada en base de datos. Asegúrese de que esté registrada.')
-            }
+            if (!backendSubject) throw new Error('Asignatura no encontrada.')
 
             const fd = new FormData()
             fd.append('asignatura', backendSubject.id)
@@ -187,10 +221,9 @@ export default function PensumPage() {
 
             if (uploadRes.ok) {
                 setActionMessage({ type: 'success', text: 'Plan de evaluación cargado exitosamente.' })
-                fetchSubjects()
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
-                const err = await uploadRes.json()
-                throw new Error(JSON.stringify(err))
+                throw new Error('Error al cargar archivo.')
             }
 
         } catch (err) {
@@ -222,7 +255,7 @@ export default function PensumPage() {
                 window.open(url, '_blank')
                 setActionMessage({ type: 'success', text: 'Descarga iniciada.' })
             } else {
-                setActionMessage({ type: 'error', text: 'No hay plan de evaluación cargado para esta asignatura.' })
+                setActionMessage({ type: 'error', text: 'No hay plan de evaluación cargado.' })
             }
         } catch (err) {
             setActionMessage({ type: 'error', text: 'Error al descargar el plan.' })
@@ -232,7 +265,7 @@ export default function PensumPage() {
     }
 
     const renderModalActions = () => {
-        const isAdmin = userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
+        const isAdmin = isAdminUser()
         const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
         const isEstudiante = !isAdmin && !isDocente
 
@@ -363,80 +396,165 @@ export default function PensumPage() {
         }
     }
 
+    // Helper to get icon based on program name
+    const getProgramIcon = (name) => {
+        if (!name) return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
+
+        const n = name.toLowerCase()
+        if (n.includes('sistema') || n.includes('comput')) return <Cpu className="text-blue-600 dark:text-blue-400" size={28} />
+        if (n.includes('enfermer') || n.includes('salud') || n.includes('medicin')) return <Stethoscope className="text-red-500 dark:text-red-400" size={28} />
+        if (n.includes('civil') || n.includes('arquitect')) return <Building2 className="text-amber-600 dark:text-amber-400" size={28} />
+        if (n.includes('derecho') || n.includes('ley')) return <Gavel className="text-yellow-700 dark:text-yellow-500" size={28} />
+        if (n.includes('administra') || n.includes('gerencia')) return <Briefcase className="text-emerald-600 dark:text-emerald-400" size={28} />
+        if (n.includes('electric') || n.includes('electron')) return <Zap className="text-yellow-500 dark:text-yellow-300" size={28} />
+        if (n.includes('contad') || n.includes('econom')) return <Calculator className="text-cyan-600 dark:text-cyan-400" size={28} />
+
+        return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
+    }
+
+    // --- PROGRAM SELECTOR VIEW ---
+    if (!selectedProgram) {
+        return (
+            <div className="h-full flex flex-col items-center justify-center p-8">
+                <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-5 duration-500">
+                    <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mb-4">
+                        <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Seleccione su Carrera</h2>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                        Para visualizar el pensum de estudios correspondiente, por favor seleccione una de las carreras disponibles.
+                    </p>
+                </div>
+
+                {isProgramLoading ? (
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="animate-spin text-blue-500" size={40} />
+                        <span className="text-sm text-gray-500">Cargando programas...</span>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+                        {availablePrograms.map(prog => (
+                            <div
+                                key={prog.id}
+                                onClick={() => handleSelectProgram(prog)}
+                                className="group bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 pr-2">
+                                        {prog.nombre_programa}
+                                    </h3>
+                                    <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full mt-1 shrink-0">
+                                        <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 pl-1">
+                                    <p>Duración: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.duracion_anios} años</span></p>
+                                    <p>Título: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.titulo_otorgado}</span></p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    // --- PENSUM FLOWCHART VIEW ---
     return (
         <div className="h-full flex flex-col">
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Plan de Estudio - Ingeniería de Sistemas</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Mapa curricular interactivo. Haga clic en una asignatura para ver opciones.</p>
+            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        {getProgramIcon(selectedProgram.nombre_programa)}
+                        {selectedProgram.nombre_programa}
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1 ml-9">Mapa curricular interactivo</p>
+                </div>
+
+                <button
+                    onClick={handleChangeProgram}
+                    className="group flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300"
+                >
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Cambiar Carrera</span>
+                    <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
+                        <ArrowRight size={14} className="text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                    </div>
+                </button>
             </div>
 
             <div className="flex-1 overflow-x-auto pb-4">
                 <div className="flex gap-6 min-w-max">
-                    {MOCK_PENSUM_DATA.map((semester, sIndex) => (
-                        <div key={sIndex} className="w-64 flex flex-col gap-4">
-                            <div className="text-center mb-2">
-                                <h3 className="font-bold text-gray-800 dark:text-white uppercase">{semester.semester}</h3>
-                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
-                                    {semester.uc} UC
-                                </span>
-                            </div>
+                    {pensumData.length > 0 ? (
+                        pensumData.map((semester, sIndex) => (
+                            <div key={sIndex} className="w-64 flex flex-col gap-4">
+                                <div className="text-center mb-2">
+                                    <h3 className="font-bold text-gray-800 dark:text-white uppercase">{semester.semester}</h3>
+                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+                                        {semester.uc} UC
+                                    </span>
+                                </div>
 
-                            {semester.subjects.map((subject, subIndex) => {
-                                const status = getSubjectStatus(subject.code)
-                                // Only admins see the green border for assignment
-                                const isAdmin = userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
-                                const showAssignedBorder = isAdmin && status.assigned
+                                {semester.subjects.map((subject, subIndex) => {
+                                    const status = getSubjectStatus(subject.code)
+                                    // Only admins see the green border for assignment
+                                    const isAdmin = isAdminUser()
+                                    const showAssignedBorder = isAdmin && status.assigned
 
-                                return (
-                                    <div
-                                        key={subIndex}
-                                        onClick={() => handleSubjectClick(subject)}
-                                        className={`
-                                            relative bg-white dark:bg-gray-900 p-3 rounded-lg border shadow-sm hover:shadow-md cursor-pointer transition-all group
-                                            ${showAssignedBorder ? 'border-green-500 dark:border-green-500 border-2' : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-500'}
-                                        `}
-                                    >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-100 dark:border-gray-700">
-                                                {subject.uc} UC
-                                            </span>
-                                            <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
-                                                {subject.code}
-                                            </span>
+                                    return (
+                                        <div
+                                            key={subIndex}
+                                            onClick={() => handleSubjectClick(subject)}
+                                            className={`
+                                                relative bg-white dark:bg-gray-900 p-3 rounded-lg border shadow-sm hover:shadow-md cursor-pointer transition-all group
+                                                ${showAssignedBorder ? 'border-green-500 dark:border-green-500 border-2' : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-500'}
+                                            `}
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-100 dark:border-gray-700">
+                                                    {subject.uc} UC
+                                                </span>
+                                                <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
+                                                    {subject.code}
+                                                </span>
+                                            </div>
+                                            <h4 className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 uppercase">
+                                                {subject.name}
+                                            </h4>
+
+                                            {/* Prereq Indicators */}
+                                            {subject.prereqs.length > 0 && (
+                                                <div className="mt-2 pt-2 border-t border-gray-50 dark:border-gray-800 flex flex-wrap gap-1">
+                                                    {subject.prereqs.map(pre => (
+                                                        <span key={pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
+                                                            {pre} #
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Green Marker for Plan Loaded */}
+                                            {status.hasPlan && (
+                                                <div className="absolute bottom-2 right-2 text-green-500 bg-green-50 dark:bg-green-900/50 rounded-full p-0.5">
+                                                    <CheckCircle size={14} strokeWidth={3} />
+                                                </div>
+                                            )}
                                         </div>
-                                        <h4 className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 uppercase">
-                                            {subject.name}
-                                        </h4>
-
-                                        {/* Prereq Indicators */}
-                                        {subject.prereqs.length > 0 && (
-                                            <div className="mt-2 pt-2 border-t border-gray-50 dark:border-gray-800 flex flex-wrap gap-1">
-                                                {subject.prereqs.map(pre => (
-                                                    <span key={pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
-                                                        {pre}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* Green Marker for Plan Loaded */}
-                                        {status.hasPlan && (
-                                            <div className="absolute bottom-2 right-2 text-green-500 bg-green-50 dark:bg-green-900/50 rounded-full p-0.5">
-                                                <CheckCircle size={14} strokeWidth={3} />
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            })}
+                                    )
+                                })}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="w-full flex flex-col items-center justify-center p-10 text-gray-400">
+                            <Loader2 className="animate-spin mb-2" size={30} />
+                            <p>Cargando materias del pensum...</p>
                         </div>
-                    ))}
+                    )}
 
-                    {/* Placeholder for future semesters */}
-                    <div className="w-64 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                    {/* Placeholder for future semesters (visual only) */}
+                    <div className="w-64 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 opacity-50">
                         <div className="text-center text-gray-400 dark:text-gray-500 p-6">
                             <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm font-medium">Semestres III - IX</p>
-                            <p className="text-xs mt-1">Próximamente</p>
+                            <p className="text-sm font-medium">Fin del Pensum</p>
                         </div>
                     </div>
                 </div>
@@ -469,9 +587,11 @@ export default function PensumPage() {
                                 <div className="mb-6">
                                     <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2 block">Prelaciones</span>
                                     <div className="flex flex-wrap gap-2">
+                                        {/* Since prereqs are just IDs in new format, we might need a lookup if we want names. For now just ID */}
                                         {selectedSubject.prereqs.map(pre => (
                                             <span key={pre} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-md font-mono border border-gray-200 dark:border-gray-700">
-                                                {pre}
+                                                {/* If pre is object, use ID or code. Modify as needed depending on backend serializer */}
+                                                {typeof pre === 'object' ? pre.codigo : pre}
                                             </span>
                                         ))}
                                     </div>
