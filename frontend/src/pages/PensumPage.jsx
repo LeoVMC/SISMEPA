@@ -375,90 +375,8 @@ export default function PensumPage() {
                         </div>
                     </div>
                 ) : backendSubject?.codigo === 'PRO-01' ? (
-                    /* Logic for PRO-01: Service Project (Dual Tutors) */
-                    <>
-                        {/* Section 1: Academic Tutors */}
-                        <div className="mb-6">
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
-                                Tutores Académicos ({backendSubject.tutores_academicos?.length || 0}/10)
-                            </label>
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700 mb-2">
-                                {backendSubject.tutores_academicos && backendSubject.tutores_academicos.length > 0 ? (
-                                    backendSubject.tutores_academicos.map(tutor => (
-                                        <div key={tutor.id} className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-800 dark:text-white font-medium">{tutor.first_name} {tutor.last_name}</span>
-                                            <span className="text-xs text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded">Académico</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-gray-400 italic">No hay tutores académicos asignados.</p>
-                                )}
-                            </div>
-
-                            {isAdmin && (
-                                <div className="flex gap-2">
-                                    <select
-                                        onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                        className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    >
-                                        <option value="">Seleccione tutor académico...</option>
-                                        {docentes.map(d => (
-                                            <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => handleAssignTutor('academic')}
-                                        disabled={!selectedDocenteId || actionLoading || (backendSubject.tutores_academicos?.length >= 10)}
-                                        className="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
-                                    >
-                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-                                        Asignar
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Section 2: Community Tutors */}
-                        <div className="mb-4">
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
-                                Tutores Comunitarios ({backendSubject.tutores_comunitarios?.length || 0}/10)
-                            </label>
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700 mb-2">
-                                {backendSubject.tutores_comunitarios && backendSubject.tutores_comunitarios.length > 0 ? (
-                                    backendSubject.tutores_comunitarios.map(tutor => (
-                                        <div key={tutor.id} className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-800 dark:text-white font-medium">{tutor.first_name} {tutor.last_name}</span>
-                                            <span className="text-xs text-green-500 bg-green-50 dark:bg-green-900/30 px-1 py-0.5 rounded">Comunitario</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-gray-400 italic">No hay tutores comunitarios asignados.</p>
-                                )}
-                            </div>
-
-                            {isAdmin && (
-                                <div className="flex gap-2">
-                                    <select
-                                        onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                        className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
-                                    >
-                                        <option value="">Seleccione tutor comunitario...</option>
-                                        {docentes.map(d => (
-                                            <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => handleAssignTutor('community')}
-                                        disabled={!selectedDocenteId || actionLoading || (backendSubject.tutores_comunitarios?.length >= 10)}
-                                        className="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
-                                    >
-                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-                                        Asignar
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </>
+                    /* Logic for PRO-01: Service Project - No Specific Controls */
+                    null
                 ) : (
                     <>
                         {/* Display Current Assignments (Standard Subjects) */}
@@ -760,6 +678,11 @@ export default function PensumPage() {
                                         <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg border border-amber-100 dark:border-amber-800/30">
                                             <strong>Todas las asignaturas anteriores.</strong>
                                             <p className="text-xs mt-1 opacity-80">Se requiere la aprobación de todo el pensum previo.</p>
+                                        </div>
+                                    ) : (selectedSubject.code === 'TAI-01' || selectedSubject.code === 'PRO-01') ? (
+                                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-lg border border-blue-100 dark:border-blue-800/30">
+                                            <strong>50% de Créditos Aprobados.</strong>
+                                            <p className="text-xs mt-1 opacity-80">Para cursar esta asignatura se requiere tener aprobado más del 50% del pensum.</p>
                                         </div>
                                     ) : (
                                         <div className="flex flex-wrap gap-2">
