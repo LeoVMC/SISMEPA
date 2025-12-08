@@ -520,3 +520,80 @@ django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. Y
 2-08 06:12:24,439] INFO django.utils.autoreload: C:\Users\leona\Documents\GitHub\SISMEPA\gestion\api\serializers.py changed, reloading.
 [2025-12-08 06:12:25,059] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2025-12-08 10:12:25,979] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 19:57:50,855] WARNING django.request: Not Found: /favicon.ico
+[2025-12-08 20:00:24,022] WARNING django.request: Not Found: /favicon.ico
+[2025-12-08 20:03:28,552] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:03:28,564] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:03:28,576] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:03:28,588] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:10:58,071] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+n\api\views.py changed, reloading.
+[2025-12-08 20:10:58,877] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-08 20:21:12,965] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:21:12,979] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:21:12,989] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:21:13,001] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:21:32,492] ERROR django.request: Internal Server Error: /api/estudiantes/reporte_excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 81, in reporte_excel
+    f"{est.calcular_avance()}"
+       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
+[2025-12-08 20:22:05,832] ERROR django.request: Internal Server Error: /api/estudiantes/reporte_excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 81, in reporte_excel
+    f"{est.calcular_avance()}"
+       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
+[2025-12-08 20:22:11,930] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:22:11,942] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:22:11,954] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:22:11,964] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:27:24,439] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:27:24,450] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:27:24,462] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-08 20:27:24,472] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/

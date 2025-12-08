@@ -149,6 +149,30 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         target_relation.add(docente)
         return Response({'status': 'Tutor assigned'})
 
+    @action(detail=True, methods=['post'], url_path='remove-tutor')
+    def remove_tutor(self, request, pk=None):
+        asignatura = self.get_object()
+        docente_id = request.data.get('docente')
+        tutor_type = request.data.get('type', 'generic')
+
+        if not docente_id:
+            return Response({'error': 'Docente ID requerido'}, status=400)
+        
+        try:
+            docente = User.objects.get(pk=docente_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Docente no encontrado'}, status=404)
+
+        if tutor_type == 'academic':
+            target_relation = asignatura.tutores_academicos
+        elif tutor_type == 'community':
+            target_relation = asignatura.tutores_comunitarios
+        else:
+            target_relation = asignatura.tutores
+
+        target_relation.remove(docente)
+        return Response({'status': 'Tutor removed'})
+
 
 class ProgramaViewSet(viewsets.ModelViewSet):
     from gestion.models import Programa

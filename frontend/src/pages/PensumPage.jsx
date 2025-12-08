@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator } from 'lucide-react'
+import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const SECCIONES = Array.from({ length: 10 }, (_, i) => `D${i + 1}`)
@@ -300,6 +300,105 @@ export default function PensumPage() {
         }
     }
 
+
+    const handleDeletePlan = async () => {
+        if (!selectedSubject) return
+        if (!confirm('¿Estás seguro de eliminar el plan de evaluación?')) return
+
+        setActionLoading(true)
+        setActionMessage(null)
+
+        try {
+            // first get the plan id
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?asignatura__codigo=${selectedSubject.code}`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+            const plans = await res.json()
+
+            if (plans && plans.length > 0) {
+                const latestPlan = plans[plans.length - 1]
+                const delRes = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/${latestPlan.id}/`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Token ${token}` }
+                })
+
+                if (delRes.ok) {
+                    setActionMessage({ type: 'success', text: 'Plan eliminado exitosamente.' })
+                    if (selectedProgram) fetchSubjects(selectedProgram.id)
+                } else {
+                    throw new Error('Error al eliminar plan.')
+                }
+            } else {
+                setActionMessage({ type: 'error', text: 'No se encontró plan para eliminar.' })
+            }
+        } catch (err) {
+            setActionMessage({ type: 'error', text: 'Error al eliminar el plan.' })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    const handleRemoveTutor = async (tutorId, type = 'generic') => {
+        if (!confirm('¿Eliminar tutor?')) return
+        setActionLoading(true)
+        const backendSubject = subjectsMap[selectedSubject.code]
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/${backendSubject.id}/remove-tutor/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                },
+                body: JSON.stringify({
+                    docente: tutorId,
+                    type: type
+                })
+            })
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: 'Tutor eliminado.' })
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
+            } else {
+                throw new Error('Error al eliminar tutor.')
+            }
+        } catch (e) {
+            setActionMessage({ type: 'error', text: String(e.message) })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    const handleRemoveDocenteFromSection = async (seccionCode) => {
+        if (!confirm(`¿Quitar docente de la sección ${seccionCode}?`)) return
+        setActionLoading(true)
+        const backendSubject = subjectsMap[selectedSubject.code]
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/asignaturas/${backendSubject.id}/assign-docente/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                },
+                body: JSON.stringify({
+                    codigo_seccion: seccionCode,
+                    docente: '' // Clear assignment
+                })
+            })
+
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: `Docente removido de sección ${seccionCode}.` })
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
+            } else {
+                throw new Error('Error al remover docente.')
+            }
+        } catch (err) {
+            setActionMessage({ type: 'error', text: String(err.message || err) })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
     const renderModalActions = () => {
         const isAdmin = isAdminUser()
         const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
@@ -329,7 +428,18 @@ export default function PensumPage() {
                                     backendSubject.tutores.map(tutor => (
                                         <div key={tutor.id} className="flex justify-between items-center text-sm">
                                             <span className="text-gray-800 dark:text-white font-medium">{tutor.first_name} {tutor.last_name}</span>
-                                            <span className="text-xs text-gray-500">({tutor.username})</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-gray-500">({tutor.username})</span>
+                                                {isAdmin && (
+                                                    <button
+                                                        onClick={() => handleRemoveTutor(tutor.id, 'generic')}
+                                                        className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                        title="Eliminar tutor"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
@@ -387,7 +497,18 @@ export default function PensumPage() {
                                     {backendSubject.secciones.map(sec => (
                                         <div key={sec.id} className="flex justify-between items-center text-sm">
                                             <span className="font-semibold text-gray-600 dark:text-gray-300">Sección {sec.codigo_seccion}</span>
-                                            <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
+                                                {isAdmin && sec.docente_nombre && (
+                                                    <button
+                                                        onClick={() => handleRemoveDocenteFromSection(sec.codigo_seccion)}
+                                                        className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                        title="Quitar docente"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -451,6 +572,17 @@ export default function PensumPage() {
                             {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
                             Descargar Plan
                         </button>
+                        {/* Delete Plan Button */}
+                        {getSubjectStatus(selectedSubject?.code).hasPlan && (
+                            <button
+                                onClick={handleDeletePlan}
+                                disabled={actionLoading}
+                                className="flex items-center justify-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-2 px-3 text-sm rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                                title="Eliminar Plan"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
                     </div>
                 )}
 
