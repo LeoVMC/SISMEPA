@@ -293,7 +293,7 @@ export default function PensumPage() {
                                 className="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
                             >
                                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
-                                Asignar Permanentemente
+                                Asignar
                             </button>
                         </div>
                     </div>
