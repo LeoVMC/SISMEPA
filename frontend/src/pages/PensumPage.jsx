@@ -2,7 +2,62 @@ import React, { useState, useEffect, useRef } from 'react'
 import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+
 const SECCIONES = Array.from({ length: 10 }, (_, i) => `D${i + 1}`)
+
+const ELECTIVAS_TECNICAS = [
+    { code: 'ESI-31116', name: 'PLATAFORMA CLIENTE SERVIDOR' },
+    { code: 'ESI-31123', name: 'TECNOLOGÍA DE REDES' },
+    { code: 'ESI-31133', name: 'ARQUITECTURA DE SOFTWARE' },
+    { code: 'ESI-31153', name: 'INTELIGENCIA ARTIFICIAL' },
+    { code: 'ESI-31173', name: 'REDES DE ÁREA LOCAL' },
+    { code: 'ESI-31193', name: 'SISTEMAS AVANZADOS DE BASES DE DATOS' }
+]
+
+const ELECTIVAS_NO_TECNICAS = [
+    { code: 'ENT-31113', name: 'GERENCIA DE PROYECTOS' },
+    { code: 'ENT-31123', name: 'PRINCIPIOS DE GERENCIA' },
+    { code: 'ENT-31133', name: 'TOMA DE DECISIONES' },
+    { code: 'ENT-31143', name: 'CALIDAD TOTAL' },
+    { code: 'ENT-31213', name: 'ADMINISTRACIÓN DE EMPRESAS' },
+    { code: 'ENT-31223', name: 'PLANIFICACIÓN Y EVALUACIÓN DE PROYECTOS' },
+    { code: 'ENT-31233', name: 'ADMINISTRACIÓN DE RECURSOS HUMANOS' },
+    { code: 'ENT-31243', name: 'INGENIERÍA DE MÉTODOS' },
+    { code: 'ENT-31313', name: 'DERECHO LABORAL' },
+    { code: 'ENT-31323', name: 'DERECHO Y ÉTICA PARA INGENIEROS' },
+    { code: 'ENT-31333', name: 'SEGURIDAD Y DEFENSA' },
+    { code: 'ENT-31413', name: 'ECONOMÍA' },
+    { code: 'ENT-31423', name: 'DECISIONES ÓPTIMAS DE INVERSIÓN' },
+    { code: 'ENT-31513', name: 'HIGIENE Y SEGURIDAD INDUSTRIAL' },
+    { code: 'ENT-31523', name: 'PRODUCCIÓN INDUSTRIAL' },
+    { code: 'ENT-31613', name: 'ORATORIA' },
+    { code: 'ENT-31713', name: 'INFORMÁTICA' },
+    { code: 'ENT-31723', name: 'CONTROL DE CALIDAD' }
+]
+
+const ACTIVIDADES_CULTURALES = [
+    { code: 'ACT-11010', name: 'TRADICIÓN CULTURA Y FOLCLOR LOCAL' },
+    { code: 'ACT-11020', name: 'LECTURA' },
+    { code: 'ACT-11030', name: 'FORMACIÓN SOCIAL' },
+    { code: 'ACT-12010', name: 'LECTURA MUSICAL' },
+    { code: 'ACT-12020', name: 'EJECUCIÓN DE INSTRUMENTO' },
+    { code: 'ACT-12030', name: 'ARTES PLÁSTICAS' },
+    { code: 'ACT-12040', name: 'DIBUJO Y PINTURA' },
+    { code: 'ACT-12050', name: 'DANZA' },
+    { code: 'ACT-12060', name: 'TEATRO' },
+    { code: 'ACT-13010', name: 'CULTURA Y COMUNICACIÓN' },
+    { code: 'ACT-13020', name: 'PRENSA ESCRITA' },
+    { code: 'ACT-13030', name: 'RADIO' },
+    { code: 'ACT-13040', name: 'TELEVISIÓN' },
+    { code: 'ACT-13050', name: 'AUDIOVISUAL' },
+    { code: 'ACT-13060', name: 'PROTOCOLO' }
+]
+
+const ACTIVIDADES_DEPORTIVAS = [
+    { code: 'ACT-14010', name: 'EDUCACIÓN FÍSICA Y DEPORTE' },
+    { code: 'ACT-14020', name: 'EDUCACIÓN FÍSICA Y SALUD' },
+    { code: 'ACT-14030', name: 'EDUCACIÓN FÍSICA Y RECREACIÓN' }
+]
 
 export default function PensumPage() {
     const [userData, setUserData] = useState(null)
@@ -17,13 +72,26 @@ export default function PensumPage() {
     const [actionMessage, setActionMessage] = useState(null)
     const [docentes, setDocentes] = useState([])
     const [selectedDocenteId, setSelectedDocenteId] = useState('')
-    const [selectedSeccion, setSelectedSeccion] = useState('D1')
+    const [selectedSeccion, setSelectedSeccion] = useState('D1') // Will hold D1.. or Option Code
     const [subjectsMap, setSubjectsMap] = useState({}) // code -> backend data
 
 
     const navigate = useNavigate()
     const fileInputRef = useRef(null)
     const [token] = useState(localStorage.getItem('apiToken') || '')
+
+    // ... (rest of effects)
+
+    // Helper to get formatted name for section/option
+    const getOptionLabel = (code) => {
+        // Search in all lists
+        const allOptions = [...ELECTIVAS_TECNICAS, ...ELECTIVAS_NO_TECNICAS, ...ACTIVIDADES_CULTURALES, ...ACTIVIDADES_DEPORTIVAS]
+        const found = allOptions.find(opt => opt.code === code)
+        if (found) return found.name
+        // Default to Standard Section
+        return `Sección ${code}`
+    }
+
 
     useEffect(() => {
         const storedUser = localStorage.getItem('userData')
@@ -150,7 +218,13 @@ export default function PensumPage() {
         setIsModalOpen(true)
         setActionMessage(null)
         setSelectedDocenteId('')
-        setSelectedSeccion('D1')
+
+        // precise default selection
+        if (subject.code.startsWith('ELE-TEC')) setSelectedSeccion(ELECTIVAS_TECNICAS[0].code)
+        else if (subject.code.startsWith('ELE-NOTEC')) setSelectedSeccion(ELECTIVAS_NO_TECNICAS[0].code)
+        else if (subject.code.startsWith('ACT-CULT')) setSelectedSeccion(ACTIVIDADES_CULTURALES[0].code)
+        else if (subject.code.startsWith('ACT-DEP')) setSelectedSeccion(ACTIVIDADES_DEPORTIVAS[0].code)
+        else setSelectedSeccion('D1')
     }
 
     const closeModal = () => {
@@ -402,9 +476,18 @@ export default function PensumPage() {
     const renderModalActions = () => {
         const isAdmin = isAdminUser()
         const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
-        const isEstudiante = !isAdmin && !isDocente
 
         const backendSubject = subjectsMap[selectedSubject?.code]
+        const subjectCode = selectedSubject?.code || ''
+
+        // Determine if special type
+        let optionsList = null
+        let isActivity = false
+
+        if (subjectCode.startsWith('ELE-TEC')) optionsList = ELECTIVAS_TECNICAS
+        else if (subjectCode.startsWith('ELE-NOTEC')) optionsList = ELECTIVAS_NO_TECNICAS
+        else if (subjectCode.startsWith('ACT-CULT')) { optionsList = ACTIVIDADES_CULTURALES; isActivity = true; }
+        else if (subjectCode.startsWith('ACT-DEP')) { optionsList = ACTIVIDADES_DEPORTIVAS; isActivity = true; }
 
         return (
             <div className="space-y-3 mt-6">
@@ -415,6 +498,15 @@ export default function PensumPage() {
                     accept=".pdf,.doc,.docx,.xls,.xlsx"
                     onChange={handleFileChange}
                 />
+
+                {/* NOTE FOR ACTIVITIES */}
+                {isActivity && (
+                    <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 text-xs rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+                        <strong>Nota Importante:</strong>
+                        <p className="mt-1">Los códigos de las actividades complementarias deben ser diferentes para evitar que las notas se sobreescriban entre sí. Se deben ver obligatoriamente dos actividades deportivas y dos actividades culturales durante la carrera para poder graduarse.</p>
+                    </div>
+                )}
+
 
                 {/* Special Logic for PSI-30010 (Thesis) */}
                 {backendSubject?.codigo === 'PSI-30010' ? (
@@ -489,14 +581,18 @@ export default function PensumPage() {
                     null
                 ) : (
                     <>
-                        {/* Display Current Assignments (Standard Subjects) */}
+                        {/* Display Assignments */}
                         {backendSubject?.secciones?.length > 0 && (
                             <div className="mb-4">
-                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">Docentes Asignados</label>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
+                                    {optionsList ? 'Asignaturas Ofertadas' : 'Docentes Asignados'}
+                                </label>
                                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
                                     {backendSubject.secciones.map(sec => (
                                         <div key={sec.id} className="flex justify-between items-center text-sm">
-                                            <span className="font-semibold text-gray-600 dark:text-gray-300">Sección {sec.codigo_seccion}</span>
+                                            <span className="font-semibold text-gray-600 dark:text-gray-300">
+                                                {getOptionLabel(sec.codigo_seccion)}
+                                            </span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
                                                 {isAdmin && sec.docente_nombre && (
@@ -515,33 +611,47 @@ export default function PensumPage() {
                             </div>
                         )}
 
-                        {/* Admin Assign Controls (Standard) */}
+                        {/* Admin Assign Controls */}
                         {isAdmin && (
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
-                                <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">Asignar Docente a Sección</label>
+                                <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">
+                                    {optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección'}
+                                </label>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex gap-2">
-                                        <select
-                                            className="w-20 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                            value={selectedSeccion}
-                                            onChange={e => setSelectedSeccion(e.target.value)}
-                                        >
-                                            {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
-                                        </select>
+                                        {/* Dynamic Dropdown: Options vs Sections */}
+                                        {optionsList ? (
+                                            <select
+                                                className="flex-[2] text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                value={selectedSeccion}
+                                                onChange={e => setSelectedSeccion(e.target.value)}
+                                            >
+                                                {optionsList.map(opt => <option key={opt.code} value={opt.code}>{opt.name}</option>)}
+                                            </select>
+                                        ) : (
+                                            <select
+                                                className="w-20 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                value={selectedSeccion}
+                                                onChange={e => setSelectedSeccion(e.target.value)}
+                                            >
+                                                {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        )}
+
                                         <select
                                             value={selectedDocenteId}
                                             onChange={(e) => setSelectedDocenteId(e.target.value)}
                                             className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         >
-                                            <option value="">Seleccione docente...</option>
+                                            <option value="">Docente...</option>
                                             {docentes.map(d => (
-                                                <option key={d.id} value={d.id}>{d.first_name} {d.last_name} ({d.username})</option>
+                                                <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
                                             ))}
                                         </select>
                                     </div>
                                     <button
                                         onClick={handleAssignDocente}
-                                        disabled={!selectedDocenteId || actionLoading}
+                                        disabled={!selectedDocenteId || !selectedSeccion || actionLoading}
                                         className="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
                                     >
                                         {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
@@ -779,7 +889,7 @@ export default function PensumPage() {
                     onClick={closeModal}
                 >
                     <div
-                        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 dark:border-gray-800"
+                        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 dark:border-gray-800"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
