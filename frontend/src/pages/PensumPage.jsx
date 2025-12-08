@@ -106,7 +106,7 @@ export default function PensumPage() {
                 const semesters = {}
                 data.forEach(sub => {
                     if (!semesters[sub.semestre]) {
-                        semesters[sub.semestre] = { semester: `SEMESTRE ${toRoman(sub.semestre)}`, uc: 0, subjects: [] }
+                        semesters[sub.semestre] = { semester: `${toRoman(sub.semestre)} SEMESTRE`, uc: 0, subjects: [] }
                     }
                     semesters[sub.semestre].subjects.push({
                         code: sub.codigo,
