@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Menu } from 'lucide-react'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function AdminLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
-        <div className="flex min-h-screen bg-gray-100 relative">
+        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950 transition-colors duration-200 relative">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
@@ -20,14 +21,17 @@ export default function AdminLayout({ children }) {
 
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Mobile Header */}
-                <div className="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center gap-3">
-                    <button
-                        onClick={() => setIsSidebarOpen(true)}
-                        className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                    >
-                        <Menu size={24} />
-                    </button>
-                    <span className="font-bold text-gray-800">SISMEPA</span>
+                <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between gap-3 transition-colors duration-200">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <span className="font-bold text-gray-800 dark:text-white">SISMEPA</span>
+                    </div>
+                    <ThemeToggle />
                 </div>
 
                 <div className="flex-1 p-4 md:p-8 overflow-y-auto">

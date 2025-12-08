@@ -6,12 +6,12 @@ from django.http import HttpResponse
 import openpyxl
 
 from gestion.models import (
-    Estudiante, Asignatura, DetalleInscripcion, Pensum, Planificacion, DocumentoCalificaciones
+    Estudiante, Asignatura, DetalleInscripcion, Pensum, Planificacion, DocumentoCalificaciones, Seccion
 )
 from gestion.api.serializers import (
     EstudianteSerializer, AsignaturaSerializer, PensumSerializer,
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
-    ProgramaSerializer,
+    ProgramaSerializer, SeccionSerializer
 )
 from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner
 from django.contrib.auth.models import User
@@ -93,6 +93,31 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['programa', 'semestre']
     search_fields = ['nombre_asignatura', 'codigo']
 
+    @action(detail=True, methods=['post'], url_path='assign-docente')
+    def assign_docente(self, request, pk=None):
+        asignatura = self.get_object()
+        codigo_seccion = request.data.get('codigo_seccion')
+        docente_id = request.data.get('docente') # User ID
+
+        if not codigo_seccion:
+            return Response({'error': 'Código de sección requerido'}, status=400)
+        
+        # Validate docente exists if provided
+        docente = None
+        if docente_id:
+            try:
+                docente = User.objects.get(pk=docente_id)
+            except User.DoesNotExist:
+                return Response({'error': 'Docente no encontrado'}, status=404)
+
+        seccion, created = Seccion.objects.update_or_create(
+            asignatura=asignatura,
+            codigo_seccion=codigo_seccion,
+            defaults={'docente': docente}
+        )
+
+        return Response(SeccionSerializer(seccion).data)
+
 
 class ProgramaViewSet(viewsets.ModelViewSet):
     from gestion.models import Programa
@@ -135,7 +160,7 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
     queryset = Planificacion.objects.all()
     serializer_class = PlanificacionSerializer
     parser_classes = [MultiPartParser, FormParser]
-    filterset_fields = ['asignatura']
+    filterset_fields = ['asignatura', 'asignatura__codigo']
     search_fields = ['asignatura__nombre_asignatura', 'asignatura__codigo']
 
     def perform_create(self, serializer):

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X } from 'lucide-react'
+import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
@@ -22,7 +23,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
     return (
         <div className={`
-            fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
+            fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 text-white flex flex-col transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
             ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
             <div className="p-6 border-b border-gray-800 flex justify-between items-center">
@@ -34,7 +35,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 </div>
                 {/* Close button for mobile */}
                 <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">
-                    <LogOut size={20} className="rotate-180" /> {/* Reusing icon as placeholder or use X */}
+                    <X size={20} />
                 </button>
             </div>
 
@@ -58,7 +59,12 @@ export default function Sidebar({ isOpen, onClose }) {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-gray-800">
+            <div className="p-4 border-t border-gray-800 space-y-4">
+                <div className="flex items-center justify-between px-4 py-2 bg-gray-800 rounded-lg">
+                    <span className="text-sm font-medium text-gray-300">Modo Oscuro</span>
+                    <ThemeToggle />
+                </div>
+
                 <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from gestion.models import Estudiante, Asignatura, Pensum, Planificacion, DocumentoCalificaciones, Programa
+from gestion.models import Estudiante, Asignatura, Pensum, Planificacion, DocumentoCalificaciones, Programa, Seccion
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,10 +57,33 @@ class ProgramaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_programa', 'titulo_otorgado', 'duracion_anios']
 
 
+class SeccionSerializer(serializers.ModelSerializer):
+    docente_nombre = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Seccion
+        fields = ['id', 'asignatura', 'codigo_seccion', 'docente', 'docente_nombre']
+
+    def get_docente_nombre(self, obj):
+        if obj.docente:
+            return f"{obj.docente.first_name} {obj.docente.last_name}"
+        return None
+
 class AsignaturaSerializer(serializers.ModelSerializer):
+    secciones = SeccionSerializer(many=True, read_only=True)
+    has_assignments = serializers.SerializerMethodField()
+    has_plan = serializers.SerializerMethodField()
+
     class Meta:
         model = Asignatura
-        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente']
+        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan']
+
+    def get_has_assignments(self, obj):
+        # Return true if any section has a teacher assigned
+        return obj.secciones.filter(docente__isnull=False).exists()
+
+    def get_has_plan(self, obj):
+        return obj.planificaciones.exists()
 
 
 class EstudianteSerializer(serializers.ModelSerializer):
@@ -76,7 +99,6 @@ class EstudianteSerializer(serializers.ModelSerializer):
             return obj.usuario.get_full_name()
         except Exception:
             return str(obj.usuario)
-
 
 
 class PensumSerializer(serializers.ModelSerializer):

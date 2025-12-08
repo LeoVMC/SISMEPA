@@ -66,18 +66,18 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Monitoreo de Avance Educativo</h1>
+    <div className="p-4 md:p-6 transition-colors duration-200">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">Monitoreo de Avance Educativo</h1>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Seleccionar Estudiante (ID)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Seleccionar Estudiante (ID)</label>
           <input
             type="number"
             value={studentId}
             min={1}
             onChange={(e) => setStudentId(Number(e.target.value))}
-            className="mt-1 block w-full md:w-32 rounded-md border-gray-300 shadow-sm p-2 border"
+            className="mt-1 block w-full md:w-32 rounded-md border-gray-300 shadow-sm p-2 border dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors"
           />
         </div>
         <div>
@@ -91,25 +91,25 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Progreso de Carrera</h2>
+        <div className="bg-white dark:bg-gray-900 dark:border dark:border-gray-800 p-6 rounded-lg shadow-md transition-colors">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Progreso de Carrera</h2>
           {loading ? (
-            <p>Cargando...</p>
+            <p className="dark:text-gray-300">Cargando...</p>
           ) : dataEstudiante ? (
             <div className="text-center">
-              <div className="mb-2 text-sm text-gray-600">{dataEstudiante.nombre} — {dataEstudiante.programa}</div>
-              <span className="text-5xl font-bold text-blue-600">
+              <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">{dataEstudiante.nombre} — {dataEstudiante.programa}</div>
+              <span className="text-5xl font-bold text-blue-600 dark:text-blue-400">
                 {parseFloat(dataEstudiante.porcentaje_avance).toFixed(2)}%
               </span>
-              <p className="text-gray-500 mt-2">Porcentaje completado</p>
+              <p className="text-gray-500 dark:text-gray-500 mt-2">Porcentaje completado</p>
               <div className="mt-4 flex justify-center gap-4">
                 <div className="text-center">
-                  <div className="text-xl font-semibold">{dataEstudiante.aprobadas}</div>
-                  <div className="text-sm text-gray-500">Asignaturas aprobadas</div>
+                  <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">{dataEstudiante.aprobadas}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-500">Asignaturas aprobadas</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl font-semibold">{dataEstudiante.total_asignaturas}</div>
-                  <div className="text-sm text-gray-500">Total asignaturas</div>
+                  <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">{dataEstudiante.total_asignaturas}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-500">Total asignaturas</div>
                 </div>
               </div>
             </div>
@@ -118,14 +118,19 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Rendimiento por Semestre</h2>
-          <Radar data={chartData} />
+        <div className="bg-white dark:bg-gray-900 dark:border dark:border-gray-800 p-6 rounded-lg shadow-md transition-colors">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Rendimiento por Semestre</h2>
+          <Radar data={chartData} options={{
+            scales: {
+              r: {
+                grid: { color: 'rgba(128, 128, 128, 0.2)' },
+                angleLines: { color: 'rgba(128, 128, 128, 0.2)' },
+                pointLabels: { color: 'rgba(128, 128, 128, 0.7)' }
+              }
+            }
+          }} />
         </div>
       </div>
-
-
-
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import requests
 
 url = "http://localhost:8000/api/auth/login/"
-data = {"username": "admin", "password": "admin123"}
+data = {"username": "admin", "password": "master123456"}
 response = requests.post(url, json=data)
 token = response.json().get("key")
 
