@@ -16,12 +16,13 @@ class CreateUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
-    role = serializers.ChoiceField(choices=['Estudiante', 'Docente'], default='Estudiante')
+    role = serializers.ChoiceField(choices=['Estudiante', 'Docente', 'Administrador'], default='Estudiante')
 
     # Estudiante specific fields
     cedula = serializers.CharField(required=False, allow_blank=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
     programa = serializers.PrimaryKeyRelatedField(queryset=Programa.objects.all(), required=False, allow_null=True)
+    tipo_contratacion = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def create(self, validated_data):
         role = validated_data.pop('role', 'Estudiante')
@@ -29,6 +30,7 @@ class CreateUserSerializer(serializers.Serializer):
         cedula = validated_data.pop('cedula', None)
         telefono = validated_data.pop('telefono', '')
         programa = validated_data.pop('programa', None)
+        tipo_contratacion = validated_data.pop('tipo_contratacion', 'Tiempo Completo')
 
         user = User.objects.create(
             username=cedula,
@@ -49,7 +51,7 @@ class CreateUserSerializer(serializers.Serializer):
             Estudiante.objects.create(usuario=user, programa=programa, cedula=cedula, telefono=telefono)
         elif role == 'Docente':
             from gestion.models import Docente
-            Docente.objects.create(usuario=user, cedula=cedula, telefono=telefono)
+            Docente.objects.create(usuario=user, cedula=cedula, telefono=telefono, tipo_contratacion=tipo_contratacion)
         elif role == 'Administrador':
             from gestion.models import Administrador
             Administrador.objects.create(usuario=user, cedula=cedula, telefono=telefono)
@@ -74,7 +76,9 @@ class SeccionSerializer(serializers.ModelSerializer):
 
     def get_docente_nombre(self, obj):
         if obj.docente:
-            return f"{obj.docente.first_name} {obj.docente.last_name}"
+            # obj.docente is a User instance
+            name = obj.docente.get_full_name()
+            return name if name else obj.docente.username
         return None
 
 class AsignaturaSerializer(serializers.ModelSerializer):
@@ -147,7 +151,7 @@ class DocenteSerializer(serializers.ModelSerializer):
     class Meta:
         from gestion.models import Docente
         model = Docente
-        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'first_name', 'last_name', 'email']
+        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'tipo_contratacion', 'first_name', 'last_name', 'email']
         read_only_fields = ['nombre_completo']
 
     def get_nombre_completo(self, obj):
@@ -166,6 +170,8 @@ class DocenteSerializer(serializers.ModelSerializer):
             user.email = validated_data.pop('email')
             user_changed = True
         if user_changed: user.save()
+        
+        # tipo_contratacion is handled by super().update automatically if in validated_data
         return super().update(instance, validated_data)
 
 

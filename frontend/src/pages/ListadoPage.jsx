@@ -28,6 +28,7 @@ export default function ListadoPage() {
     // Edit State
     const [editingItem, setEditingItem] = useState(null)
     const [editForm, setEditForm] = useState({})
+    const [cedulaPrefix, setCedulaPrefix] = useState('V')
     const [saving, setSaving] = useState(false)
 
     const TABS = [
@@ -103,17 +104,37 @@ export default function ListadoPage() {
         }
     }
 
+    const handleNumericInput = (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '')
+    }
+
     const handleEditClick = (item) => {
         setEditingItem(item)
         const userData = item.usuario ? item.usuario : item
+
+        let cedulaVal = item.cedula || item.username || ''
+        let prefix = 'V'
+        let number = cedulaVal
+
+        if (cedulaVal.includes('-')) {
+            const parts = cedulaVal.split('-')
+            // Assuming format Prefix-Number
+            if (['V', 'E', 'J'].includes(parts[0])) {
+                prefix = parts[0]
+                number = parts[1]
+            }
+        }
+
+        setCedulaPrefix(prefix)
 
         setEditForm({
             first_name: userData.first_name || item.first_name || '',
             last_name: userData.last_name || item.last_name || '',
             email: userData.email || item.email || '',
             telefono: item.telefono || '',
-            cedula: item.cedula || item.username || '',
+            cedula: number, // Only the number part
             programa: typeof item.programa === 'object' ? item.programa?.id : item.programa,
+            tipo_contratacion: item.tipo_contratacion || 'Tiempo Completo',
         })
     }
 
@@ -123,16 +144,19 @@ export default function ListadoPage() {
 
         try {
             const isStudent = activeTab === 'Estudiantes'
+            const isDocente = activeTab === 'Docentes'
+
             const payload = { ...editForm }
 
-            // Clean up payload based on role
-            // We kept standard fields in editForm, need to ensure we don't send extra if backend is strict?
-            // Actually new serializers accept all these fields.
-            // Except 'programa' which is only for Estudiante.
+            // Format Cedula
+            payload.cedula = `${cedulaPrefix}-${editForm.cedula}`
+
             if (!isStudent) {
                 delete payload.programa
             }
-            // username we don't send as we deleted it from form.
+            if (!isDocente) {
+                delete payload.tipo_contratacion
+            }
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/${editingItem.id}/`, {
                 method: 'PATCH',
@@ -145,7 +169,6 @@ export default function ListadoPage() {
 
             if (res.ok) {
                 const updatedItem = await res.json()
-                // Update local data
                 setData(data.map(d => d.id === editingItem.id ? updatedItem : d))
                 setEditingItem(null)
             } else {
@@ -189,6 +212,9 @@ export default function ListadoPage() {
         if (loading) return <div className="p-8 text-center text-gray-500">Cargando...</div>
         if (!data || data.length === 0) return <div className="p-8 text-center text-gray-500">No hay registros encontrados.</div>
 
+        const isStudent = activeTab === 'Estudiantes'
+        const isDocente = activeTab === 'Docentes'
+
         return (
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -199,7 +225,8 @@ export default function ListadoPage() {
                             <SortableHeader label="Cédula" sortKey="cedula" />
                             <SortableHeader label="Teléfono" sortKey="telefono" />
                             <SortableHeader label="Correo" sortKey="usuario.email" />
-                            <SortableHeader label="Carrera" sortKey="programa.nombre_programa" />
+                            {isStudent && <SortableHeader label="Carrera" sortKey="programa.nombre_programa" />}
+                            {isDocente && <SortableHeader label="Contratación" sortKey="tipo_contratacion" />}
                             <th className="p-4 border-b border-gray-200 dark:border-gray-700">Acciones</th>
                         </tr>
                     </thead>
@@ -210,7 +237,19 @@ export default function ListadoPage() {
                             const email = item.usuario?.email || item.email || '-'
                             const cedula = item.cedula || item.username || '-'
                             const telefono = item.telefono || '-'
-                            const programa_nombre = typeof item.programa === 'object' ? item.programa?.nombre_programa : (item.programa || '-')
+
+                            let programa_nombre = '-'
+                            if (item.programa) {
+                                if (typeof item.programa === 'object') {
+                                    programa_nombre = item.programa.nombre_programa
+                                } else {
+                                    // It's an ID, find it in programs list
+                                    const prog = programas.find(p => p.id === item.programa)
+                                    programa_nombre = prog ? prog.nombre_programa : item.programa
+                                }
+                            }
+
+                            const contratacion = item.tipo_contratacion || '-'
 
                             return (
                                 <tr key={item.id || idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800">
@@ -219,7 +258,8 @@ export default function ListadoPage() {
                                     <td className="p-4">{cedula}</td>
                                     <td className="p-4">{telefono}</td>
                                     <td className="p-4">{email}</td>
-                                    <td className="p-4">{programa_nombre}</td>
+                                    {isStudent && <td className="p-4">{programa_nombre}</td>}
+                                    {isDocente && <td className="p-4">{contratacion}</td>}
                                     <td className="p-4 flex gap-2">
                                         <button onClick={() => handleEditClick(item)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Editar">
                                             <Edit size={18} />
@@ -240,6 +280,7 @@ export default function ListadoPage() {
     const renderEditModal = () => {
         if (!editingItem) return null
         const isStudent = activeTab === 'Estudiantes'
+        const isDocente = activeTab === 'Docentes'
 
         return (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -274,18 +315,32 @@ export default function ListadoPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cédula</label>
-                                <input
-                                    type="text"
-                                    value={editForm.cedula}
-                                    onChange={e => setEditForm({ ...editForm, cedula: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                                />
+                                <div className="flex">
+                                    <select
+                                        value={cedulaPrefix}
+                                        onChange={(e) => setCedulaPrefix(e.target.value)}
+                                        className="px-3 py-2 rounded-l-lg border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    >
+                                        <option value="V">V</option>
+                                        <option value="E">E</option>
+                                        <option value="J">J</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        maxLength="15"
+                                        value={editForm.cedula}
+                                        onInput={handleNumericInput}
+                                        onChange={e => setEditForm({ ...editForm, cedula: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-r-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
                                 <input
                                     type="text"
                                     value={editForm.telefono}
+                                    onInput={handleNumericInput}
                                     onChange={e => setEditForm({ ...editForm, telefono: e.target.value })}
                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
@@ -313,6 +368,21 @@ export default function ListadoPage() {
                                         {programas.map(p => (
                                             <option key={p.id} value={p.id}>{p.nombre_programa}</option>
                                         ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {isDocente && (
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contratación</label>
+                                    <select
+                                        value={editForm.tipo_contratacion || ''}
+                                        onChange={e => setEditForm({ ...editForm, tipo_contratacion: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                    >
+                                        <option value="">Seleccione el tipo de contratación</option>
+                                        <option value="Tiempo Completo">Tiempo Completo</option>
+                                        <option value="Tiempo Parcial">Tiempo Parcial</option>
                                     </select>
                                 </div>
                             )}
@@ -361,8 +431,8 @@ export default function ListadoPage() {
                                 key={tab.id}
                                 onClick={() => { setActiveTab(tab.id); setSearch('') }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                                     }`}
                             >
                                 <Icon size={18} />

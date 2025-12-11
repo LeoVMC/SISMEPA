@@ -1362,3 +1362,22 @@ AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
 [2025-12-11 08:19:50,239] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
 [2025-12-11 08:19:50,249] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
 [2025-12-11 08:19:50,259] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 08:45:30,263] WARNING django.request: Bad Request: /api/admin-users/
+[2025-12-11 08:45:36,653] WARNING django.request: Bad Request: /api/admin-users/
+[2025-12-11 08:50:26,719] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 08:50:27,440] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 08:51:02,158] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 08:51:02,833] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 08:51:17,255] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 08:51:17,938] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 08:53:20,389] WARNING django.request: Bad Request: /api/admin-users/
+[2025-12-11 08:57:59,136] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 08:57:59,805] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 09:28:15,991] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 09:28:16,708] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 09:32:51,020] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 09:32:51,662] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 09:36:17,890] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 09:36:18,584] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 09:39:52,932] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 09:39:53,614] INFO django.utils.autoreload: Watching for file changes with StatReloader

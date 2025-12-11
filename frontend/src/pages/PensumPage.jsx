@@ -215,7 +215,7 @@ export default function PensumPage() {
             })
             if (res.ok) {
                 const data = await res.json()
-                setDocentes(data)
+                setDocentes(data.results || data)
             }
         } catch (e) {
             console.error("Error fetching docentes", e)
@@ -567,7 +567,7 @@ export default function PensumPage() {
                                     >
                                         <option value="">Seleccione tutor...</option>
                                         {docentes.map(d => (
-                                            <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
+                                            <option key={d.id} value={d.id}>{d.nombre_completo}</option>
                                         ))}
                                     </select>
                                     <button
@@ -633,20 +633,20 @@ export default function PensumPage() {
                                 <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">
                                     {optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección'}
                                 </label>
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex flex-col sm:flex-row gap-2">
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex flex-col gap-3">
                                         {/* Dynamic Dropdown: Options vs Sections */}
                                         {optionsList ? (
                                             <select
-                                                className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm truncate pr-8"
+                                                className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm truncate"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
                                             >
-                                                {optionsList.map(opt => <option key={opt.code} value={opt.code} className="truncate">{opt.name}</option>)}
+                                                {optionsList.map(opt => <option key={opt.code} value={opt.code}>{opt.name}</option>)}
                                             </select>
                                         ) : (
                                             <select
-                                                className="w-full sm:w-24 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
                                             >
@@ -657,11 +657,11 @@ export default function PensumPage() {
                                         <select
                                             value={selectedDocenteId}
                                             onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                            className="w-full sm:flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 truncate"
+                                            className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         >
-                                            <option value="">Docente...</option>
+                                            <option value="">Seleccione docente...</option>
                                             {docentes.map(d => (
-                                                <option key={d.id} value={d.id}>{d.first_name} {d.last_name}</option>
+                                                <option key={d.id} value={d.id}>{d.nombre_completo}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -714,7 +714,7 @@ export default function PensumPage() {
 
                 {actionMessage && (
                     <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${actionMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'}`}>
-                        {actionMessage.type === 'error' ? <AlertCircle size={16} /> : <Loader2 size={16} />}
+                        {actionMessage.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
                         {actionMessage.text}
                     </div>
                 )}

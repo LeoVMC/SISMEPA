@@ -65,6 +65,11 @@ class Docente(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
+    TIPO_CONTRATACION_CHOICES = [
+        ('Tiempo Completo', 'Tiempo Completo'),
+        ('Tiempo Parcial', 'Tiempo Parcial'),
+    ]
+    tipo_contratacion = models.CharField(max_length=50, choices=TIPO_CONTRATACION_CHOICES, default='Tiempo Completo')
 
     def __str__(self):
         return f"{self.usuario.username} - {self.cedula}"

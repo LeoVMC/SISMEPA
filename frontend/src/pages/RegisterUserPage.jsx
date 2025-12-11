@@ -23,22 +23,33 @@ export default function RegisterUserPage() {
         fetchProgramas()
     }, [token])
 
+    const [selectedRole, setSelectedRole] = useState('Estudiante')
+    const [cedulaPrefix, setCedulaPrefix] = useState('V')
+
+    const handleNumericInput = (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '')
+    }
+
     const createUser = async (e) => {
         e.preventDefault()
         setLoading(true)
         setUserResp(null)
 
         const form = e.target
+        const rawCedula = form.cedula.value
+        const formattedCedula = `${cedulaPrefix}-${rawCedula}`
+
         const data = {
-            username: form.cedula.value,
+            username: formattedCedula, // Use full cedula as username
             password: form.password.value,
             email: form.email.value,
             first_name: form.first_name.value,
             last_name: form.last_name.value,
             role: form.role.value,
-            cedula: form.cedula.value,
+            cedula: formattedCedula,
             telefono: form.telefono.value,
-            programa: form.programa.value || null
+            programa: form.programa?.value || null,
+            tipo_contratacion: form.tipo_contratacion?.value || null
         }
 
         try {
@@ -52,7 +63,11 @@ export default function RegisterUserPage() {
             })
             const json = await res.json()
             setUserResp({ status: res.status, body: json })
-            if (res.ok) form.reset()
+            if (res.ok) {
+                form.reset()
+                setSelectedRole('Estudiante')
+                setCedulaPrefix('V')
+            }
         } catch (err) {
             setUserResp({ error: String(err) })
         } finally {
@@ -77,13 +92,42 @@ export default function RegisterUserPage() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apellidos</label>
                         <input name="last_name" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cédula</label>
-                        <input name="cedula" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                        <div className="flex">
+                            <select
+                                value={cedulaPrefix}
+                                onChange={(e) => setCedulaPrefix(e.target.value)}
+                                className="px-3 py-2 rounded-l-lg border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            >
+                                <option value="V">V</option>
+                                <option value="E">E</option>
+                                <option value="J">J</option>
+                            </select>
+                            <input
+                                name="cedula"
+                                required
+                                type="text"
+                                maxLength="15"
+                                onInput={handleNumericInput}
+                                placeholder="12345678"
+                                className="w-full px-4 py-2 rounded-r-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white"
+                            />
+                        </div>
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
-                        <input name="telefono" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                        <input
+                            name="telefono"
+                            required
+                            type="text"
+                            maxLength="15"
+                            onInput={handleNumericInput}
+                            placeholder="04141234567"
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white"
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
@@ -95,45 +139,40 @@ export default function RegisterUserPage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rol</label>
-                        <select name="role" className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white">
+                        <select
+                            name="role"
+                            value={selectedRole}
+                            onChange={(e) => setSelectedRole(e.target.value)}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white"
+                        >
                             <option value="Estudiante">Estudiante</option>
                             <option value="Docente">Docente</option>
                             <option value="Administrador">Administrador</option>
                         </select>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Carrera</label>
-                        <select name="programa" className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white">
-                            <option value="">Seleccione una carrera</option>
-                            {programas.map(p => (
-                                <option key={p.id} value={p.id}>{p.nombre_programa}</option>
-                            ))}
-                        </select>
-                    </div>
-                    {/* Username Hidden/Generated or kept? 
-                        Screenshot shows "Nombre de Usuario" input. 
-                        User prompt didn't say to remove "Nombre de Usuario". 
-                        It said "El orden sea Nombres...". It didn't mention Username.
-                        Usually Username is separate. 
-                        Validating prompt: "Que el orden sea Nombres, Apellidos, Cédula, Teléfono, Correo, Contraseña, Rol, Carrera".
-                        It does NOT list Username.
-                        Maybe I should remove Username and auto-generate it from Cédula or Email?
-                        Or maybe the user forgot to mention it.
-                        "make sure that data is saved... order should be...".
-                        If I remove username input, `createUser` needs to generate it.
-                        The backend requires `username`.
-                        I'll KEEP `username` but put it somewhere or auto-generate?
-                        Given the strict order list: "Nombres... Carrera". It lists 8 items.
-                        If I must follow the list strictly, where does `username` go?
-                        I'll Auto-set username to be `cedula` or `email`?
-                        Or I'll just append it to the end or beginning if not specified?
-                        Wait, usually systems use email or cedula as username.
-                        I'll risk removing the `username` input and set `username` = `cedula` or `email` in the payload.
-                        Let's check `CreateUserSerializer`. It expects `username`.
-                        I'll use `cedula` as username, or `email`. `cedula` is unique in `Estudiante` model but `User.username` must be unique.
-                        I'll modify `createUser` to default username to `cedula` if not present.
-                        Actually, I'll keep it simple: I will use `cedula` as the username in the payload.
-                    */}
+
+                    {selectedRole === 'Estudiante' && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Carrera</label>
+                            <select name="programa" className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white">
+                                <option value="">Seleccione una carrera</option>
+                                {programas.map(p => (
+                                    <option key={p.id} value={p.id}>{p.nombre_programa}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {selectedRole === 'Docente' && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contratación</label>
+                            <select name="tipo_contratacion" className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white">
+                                <option value="">Seleccione el tipo de contratación</option>
+                                <option value="Tiempo Completo">Tiempo Completo</option>
+                                <option value="Tiempo Parcial">Tiempo Parcial</option>
+                            </select>
+                        </div>
+                    )}
                 </div>
 
                 <div className="pt-4">

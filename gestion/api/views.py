@@ -103,17 +103,26 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Código de sección requerido'}, status=400)
         
         # Validate docente exists if provided
-        docente = None
+        docente_user = None
         if docente_id:
+            from gestion.models import Docente
             try:
-                docente = User.objects.get(pk=docente_id)
-            except User.DoesNotExist:
+                # docente_id comes from frontend selecting a Docente object
+                # so we must fetch the Docente model, then get its usuario
+                docente_obj = Docente.objects.get(pk=docente_id)
+                docente_user = docente_obj.usuario
+            except Docente.DoesNotExist:
                 return Response({'error': 'Docente no encontrado'}, status=404)
+
+        if not docente_user:
+            # If removing docente (docente_id is empty), delete the section so it disappears from the list
+            Seccion.objects.filter(asignatura=asignatura, codigo_seccion=codigo_seccion).delete()
+            return Response({'status': 'deleted'})
 
         seccion, created = Seccion.objects.update_or_create(
             asignatura=asignatura,
             codigo_seccion=codigo_seccion,
-            defaults={'docente': docente}
+            defaults={'docente': docente_user}
         )
 
         return Response(SeccionSerializer(seccion).data)
