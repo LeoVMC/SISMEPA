@@ -789,9 +789,9 @@ export default function PensumPage() {
                                 </div>
 
                                 {/* Diagonal Stripe Decoration */}
-                                <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-gray-50 dark:bg-gray-800 rotate-45 flex items-center justify-center opacity-50 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-100 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20">
-                                    <div className="transform -rotate-45 -translate-x-7 -translate-y-0 opacity-30 group-hover:opacity-100 transition-opacity duration-300">
-                                        {React.cloneElement(getProgramIcon(prog.nombre_programa), { size: 24, className: "text-gray-300 group-hover:text-blue-200" })}
+                                <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-gray-200 dark:bg-gray-800 rotate-45 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20">
+                                    <div className="transform -rotate-45 -translate-x-7 -translate-y-0 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                        {React.cloneElement(getProgramIcon(prog.nombre_programa), { size: 24, className: "text-gray-600 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" })}
                                     </div>
                                 </div>
                             </div>

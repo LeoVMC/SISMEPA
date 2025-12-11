@@ -1148,3 +1148,19 @@ Traceback (most recent call last):
 AssertionError: The field 'tutores' was declared on serializer AsignaturaSerializer, but has not been included in the 'fields' option.
 [2025-12-11 03:09:03,529] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
 [2025-12-11 03:09:04,278] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 05:45:42,796] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 05:45:42,809] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 05:45:42,820] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 05:45:42,832] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:04:08,719] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:04:08,731] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:04:08,741] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:04:08,752] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:46,663] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:46,680] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:46,691] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:46,702] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:48,406] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:48,431] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:48,444] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 06:30:48,455] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/

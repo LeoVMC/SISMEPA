@@ -87,7 +87,7 @@ def run():
             ("TLC-31514", "INSTRUMENTACIÓN DE LAS COMUNICACIONES", 4, 6, ["TLC-35215"]),
             ("TLC-35225", "COMUNICACIONES II", 5, 6, ["TLC-35215"]),
             ("ELN-35325", "MICROONDAS", 5, 6, ["TLC-35314"]),
-            ("SYC-32315", "COMPUTACIÓN AVANZADA", 6, 6, ["TLC-32125"]), 
+            ("SYC-32315", "COMPUTACIÓN AVANZADA", 5, 6, ["TLC-32125"]), 
             ("ADG-10821", "CÁTEDRA BOLIVARIANA II", 0, 6, []),
             ("ACT-COM04", "ACTIVIDAD COMPLEMENTARIA (CULTURAL)", 0, 6, []),
             ("DIN-31163", "DEFENSA INTEGRAL DE LA NACIÓN VI", 3, 6, ["DIN-31153"]),
