@@ -1381,3 +1381,596 @@ AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
 [2025-12-11 09:36:18,584] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2025-12-11 09:39:52,932] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2025-12-11 09:39:53,614] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 09:57:02,490] ERROR django.request: Internal Server Error: /api/estudiantes/reporte_excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 81, in reporte_excel
+    f"{est.calcular_avance()}"
+       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
+[2025-12-11 09:57:47,836] ERROR django.request: Internal Server Error: /api/estudiantes/reporte_excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 81, in reporte_excel
+    f"{est.calcular_avance()}"
+       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Estudiante' object has no attribute 'calcular_avance'
+[2025-12-11 10:01:09,867] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 10:01:10,574] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:03:24,750] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 10:03:25,416] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:05:18,885] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 10:05:18,900] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 10:05:18,912] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 10:05:18,924] WARNING django.request: Unauthorized: /api/estudiantes/1/progreso/
+[2025-12-11 10:08:05,837] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 10:08:06,523] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:08:08,788] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 10:08:09,500] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:24:05,123] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 10:24:05,789] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:24:30,374] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 10:24:31,034] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:24:32,248] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 10:24:32,910] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:28:49,016] INFO django.utils.autoreload: /app/gestion/admin.py changed, reloading.
+[2025-12-11 10:28:49,746] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 10:34:56,046] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:34:56,056] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:34:56,068] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:34:56,076] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:35:05,454] WARNING django.request: Unauthorized: /api/estudiantes/2/progreso/
+[2025-12-11 10:35:05,845] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:35:06,576] WARNING django.request: Unauthorized: /api/estudiantes/2/progreso/
+[2025-12-11 10:35:06,759] WARNING django.request: Not Found: /api/estudiantes/3/progreso/
+[2025-12-11 10:35:06,925] WARNING django.request: Not Found: /api/estudiantes/4/progreso/
+[2025-12-11 10:35:07,583] WARNING django.request: Not Found: /api/estudiantes/3/progreso/
+[2025-12-11 10:35:07,782] WARNING django.request: Unauthorized: /api/estudiantes/2/progreso/
+[2025-12-11 10:35:07,962] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:04,821] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:04,832] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:04,843] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:04,853] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:47,058] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:47,070] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:47,081] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:51:47,090] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:52:50,017] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:52:50,027] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:52:50,037] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:52:50,047] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:06,700] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:06,711] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:06,721] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:06,731] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:15,639] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:15,651] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:15,661] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:53:15,671] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:28,631] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:28,641] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:28,651] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:28,660] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:30,622] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:30,635] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:30,646] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 10:58:30,655] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:00:56,882] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 11:00:57,610] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:01:38,102] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:38,112] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:38,122] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:38,132] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:39,908] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:39,919] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:39,929] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:01:39,938] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:02:14,503] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:02:14,518] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:02:14,528] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:02:14,537] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:03:10,891] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 11:03:11,570] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:04:46,321] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:46,335] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:46,346] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:46,356] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:48,139] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:48,150] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:48,161] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:04:48,171] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:05:46,419] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:05:46,431] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:05:46,440] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:05:46,450] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:06:04,819] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:06:04,831] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:06:04,841] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:06:04,851] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:11:10,372] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:11:10,383] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:11:10,394] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:11:10,403] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:11:18,053] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-11 11:11:18,748] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:12:21,157] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:21,167] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:21,180] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:21,190] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:30,447] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:30,459] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:30,469] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:12:30,479] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:17,606] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:17,617] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:17,628] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:17,638] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:19,224] WARNING django.request: Forbidden: /api/programas/
+[2025-12-11 11:13:19,238] WARNING django.request: Forbidden: /api/programas/
+[2025-12-11 11:13:27,326] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:27,341] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:27,351] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:27,360] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:13:28,064] WARNING django.request: Forbidden: /api/programas/
+[2025-12-11 11:13:28,076] WARNING django.request: Forbidden: /api/programas/
+[2025-12-11 11:14:35,049] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:14:35,060] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:14:35,070] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:14:35,079] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:16:32,632] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:16:33,323] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:17:17,582] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:17:17,592] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:17:17,604] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:17:17,613] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:20:19,978] INFO django.utils.autoreload: /app/gestion/permissions.py changed, reloading.
+[2025-12-11 11:20:20,703] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:20:34,084] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:20:34,727] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:20:35,940] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:20:36,579] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:22:47,453] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:22:47,464] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:22:47,474] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:22:47,484] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:27:23,910] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 11:27:24,588] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:27:32,939] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:27:33,618] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:27:55,368] ERROR django.request: Internal Server Error: /api/asignaturas/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 46, in list
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 715, in to_representation
+    return [
+           ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 716, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/gestion/api/serializers.py", line 104, in get_is_assigned_to_current_user
+    return obj.secciones.filter(docente__usuario=request.user).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1409, in build_lookup
+    lhs = self.try_transform(lhs, lookup_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey or join on the field not permitted.
+[2025-12-11 11:27:55,427] ERROR django.request: Internal Server Error: /api/asignaturas/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 46, in list
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 715, in to_representation
+    return [
+           ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 716, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/gestion/api/serializers.py", line 104, in get_is_assigned_to_current_user
+    return obj.secciones.filter(docente__usuario=request.user).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1409, in build_lookup
+    lhs = self.try_transform(lhs, lookup_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey or join on the field not permitted.
+[2025-12-11 11:31:17,887] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:31:17,897] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:31:17,907] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:31:17,917] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:31:18,961] ERROR django.request: Internal Server Error: /api/asignaturas/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 46, in list
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 715, in to_representation
+    return [
+           ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 716, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/gestion/api/serializers.py", line 104, in get_is_assigned_to_current_user
+    return obj.secciones.filter(docente__usuario=request.user).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1409, in build_lookup
+    lhs = self.try_transform(lhs, lookup_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey or join on the field not permitted.
+[2025-12-11 11:31:29,443] ERROR django.request: Internal Server Error: /api/asignaturas/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 46, in list
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 715, in to_representation
+    return [
+           ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 716, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/gestion/api/serializers.py", line 104, in get_is_assigned_to_current_user
+    return obj.secciones.filter(docente__usuario=request.user).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1409, in build_lookup
+    lhs = self.try_transform(lhs, lookup_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey or join on the field not permitted.
+[2025-12-11 11:31:31,296] ERROR django.request: Internal Server Error: /api/asignaturas/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 46, in list
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 797, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 715, in to_representation
+    return [
+           ^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 716, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/fields.py", line 1870, in to_representation
+    return method(value)
+           ^^^^^^^^^^^^^
+  File "/app/gestion/api/serializers.py", line 104, in get_is_assigned_to_current_user
+    return obj.secciones.filter(docente__usuario=request.user).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1409, in build_lookup
+    lhs = self.try_transform(lhs, lookup_name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey or join on the field not permitted.
+[2025-12-11 11:32:54,531] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 11:32:55,217] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:33:12,688] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:33:13,376] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:36:53,838] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 11:36:54,535] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 11:38:32,339] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:38:32,349] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:38:32,359] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:38:32,368] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:36,988] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:36,998] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:37,008] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:37,017] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:38,571] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:38,587] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:38,597] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 11:40:38,607] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:34:55,452] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:34:55,463] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:34:55,472] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:34:55,482] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:35:15,892] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:35:15,903] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:35:15,913] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:35:15,923] WARNING django.request: Not Found: /api/estudiantes/1/progreso/

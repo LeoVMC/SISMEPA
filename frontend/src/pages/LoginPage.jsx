@@ -3,16 +3,26 @@ import { useNavigate } from 'react-router-dom'
 import ThemeToggle from '../components/ThemeToggle'
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('')
+    const [cedulaPrefix, setCedulaPrefix] = useState('V')
+    const [cedulaNumber, setCedulaNumber] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
+    const handleNumericInput = (e) => {
+        const val = e.target.value
+        if (/^\d*$/.test(val)) {
+            setCedulaNumber(val)
+        }
+    }
+
     const doLogin = async (e) => {
         e.preventDefault()
         setError(null)
         setLoading(true)
+
+        const username = `${cedulaPrefix}-${cedulaNumber}`
 
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login/`, {
@@ -85,18 +95,29 @@ export default function LoginPage() {
 
                 <form onSubmit={doLogin} className="space-y-4">
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="username">
-                            Usuario
+                        <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="cedula">
+                            Cédula
                         </label>
-                        <input
-                            id="username"
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline transition-colors"
-                            placeholder="Ingresa tu usuario"
-                            required
-                        />
+                        <div className="flex gap-2">
+                            <select
+                                value={cedulaPrefix}
+                                onChange={(e) => setCedulaPrefix(e.target.value)}
+                                className="shadow border rounded py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline transition-colors w-24"
+                            >
+                                <option value="V">V</option>
+                                <option value="E">E</option>
+                                <option value="J">J</option>
+                            </select>
+                            <input
+                                id="cedula"
+                                type="text"
+                                value={cedulaNumber}
+                                onChange={handleNumericInput}
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-gray-700 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline transition-colors"
+                                placeholder="Número de Cédula"
+                                required
+                            />
+                        </div>
                     </div>
                     <div>
                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">

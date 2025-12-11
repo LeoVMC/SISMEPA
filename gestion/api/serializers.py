@@ -6,7 +6,7 @@ from gestion.models import Estudiante, Asignatura, Pensum, Planificacion, Docume
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups', 'is_staff', 'is_superuser']
         depth = 1
 
 
@@ -53,6 +53,9 @@ class CreateUserSerializer(serializers.Serializer):
             from gestion.models import Docente
             Docente.objects.create(usuario=user, cedula=cedula, telefono=telefono, tipo_contratacion=tipo_contratacion)
         elif role == 'Administrador':
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
             from gestion.models import Administrador
             Administrador.objects.create(usuario=user, cedula=cedula, telefono=telefono)
 
@@ -83,6 +86,7 @@ class SeccionSerializer(serializers.ModelSerializer):
 
 class AsignaturaSerializer(serializers.ModelSerializer):
     secciones = SeccionSerializer(many=True, read_only=True)
+    is_assigned_to_current_user = serializers.SerializerMethodField()
     has_assignments = serializers.SerializerMethodField()
     has_plan = serializers.SerializerMethodField()
     prelaciones = serializers.SlugRelatedField(slug_field='codigo', many=True, read_only=True)
@@ -90,7 +94,14 @@ class AsignaturaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asignatura
-        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan', 'prelaciones', 'orden', 'tutores']
+        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan', 'prelaciones', 'orden', 'tutores', 'is_assigned_to_current_user']
+
+    def get_is_assigned_to_current_user(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        # Teacher is assigned if their User ID matches the docente field of any section
+        return obj.secciones.filter(docente=request.user).exists()
 
     def get_has_assignments(self, obj):
         # Return true if any section has a teacher assigned

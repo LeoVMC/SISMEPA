@@ -13,7 +13,7 @@ from gestion.api.serializers import (
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
     ProgramaSerializer, SeccionSerializer, DocenteSerializer, AdministradorSerializer
 )
-from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner
+from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner, IsDocenteOrAdmin
 from django.contrib.auth.models import User
 
 
@@ -65,18 +65,15 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Estudiantes"
-        ws.append(['Cédula', 'Nombre', 'Programa', 'Avance (%)'])
+        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Carrera', 'Avance (%)'])
 
         for est in Estudiante.objects.select_related('usuario', 'programa').all():
-            nombre = ''
-            try:
-                nombre = est.usuario.get_full_name()
-            except Exception:
-                nombre = str(est.usuario)
-
             ws.append([
+                est.usuario.first_name,
+                est.usuario.last_name,
                 est.cedula,
-                nombre,
+                est.telefono,
+                est.usuario.email,
                 est.programa.nombre_programa if est.programa else '',
                 f"{est.calcular_avance()}"
             ])
@@ -169,7 +166,13 @@ class ProgramaViewSet(viewsets.ModelViewSet):
     from gestion.models import Programa
     queryset = Programa.objects.all()
     serializer_class = ProgramaSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = []
+    
+    def get_permissions(self):
+        from rest_framework.permissions import IsAuthenticated
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
+        return [IsAdmin()]
 
 
 class UserManagementViewSet(viewsets.ViewSet):
@@ -195,15 +198,16 @@ class DocenteViewSet(viewsets.ModelViewSet):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Docentes"
-        ws.append(['Cédula', 'Nombres', 'Apellidos', 'Teléfono', 'Email'])
+        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Contratación'])
 
         for docente in self.filter_queryset(self.get_queryset()):
             ws.append([
-                docente.cedula,
                 docente.usuario.first_name,
                 docente.usuario.last_name,
+                docente.cedula,
                 docente.telefono,
-                docente.usuario.email
+                docente.usuario.email,
+                docente.tipo_contratacion
             ])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -224,13 +228,13 @@ class AdminViewSet(viewsets.ModelViewSet):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Administradores"
-        ws.append(['Cédula', 'Nombres', 'Apellidos', 'Teléfono', 'Email'])
+        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo'])
 
         for admin in self.filter_queryset(self.get_queryset()):
             ws.append([
-                admin.cedula,
                 admin.usuario.first_name,
                 admin.usuario.last_name,
+                admin.cedula,
                 admin.telefono,
                 admin.usuario.email
             ])
@@ -262,11 +266,32 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
     search_fields = ['asignatura__nombre_asignatura', 'asignatura__codigo']
 
     def perform_create(self, serializer):
+        asignatura = serializer.validated_data.get('asignatura')
+        user = self.request.user
+        
+        # If user is Docente (and not admin/superuser), ensure they are assigned to this subject
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if not Seccion.objects.filter(asignatura=asignatura, docente=user).exists():
+                 from rest_framework.exceptions import PermissionDenied
+                 raise PermissionDenied("No estás asignado a esta asignatura.")
+
         serializer.save(uploaded_by=self.request.user)
 
+    def perform_destroy(self, instance):
+        user = self.request.user
+        # If user is Docente (and not admin/superuser), ensure they are assigned to this subject
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if not Seccion.objects.filter(asignatura=instance.asignatura, docente=user).exists():
+                 from rest_framework.exceptions import PermissionDenied
+                 raise PermissionDenied("No estás asignado a esta asignatura.")
+        instance.delete()
+
     def get_permissions(self):
+        from rest_framework.permissions import IsAuthenticated
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsDocenteOrAdminOrOwner()]
+            return [IsDocenteOrAdmin()]
         return []
 
 

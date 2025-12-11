@@ -46,7 +46,8 @@ class Seccion(models.Model):
         unique_together = ('asignatura', 'codigo_seccion')
 
     def __str__(self):
-        return f"{self.asignatura.codigo} - {self.codigo_seccion}"
+        docente_name = self.docente.get_full_name() if self.docente else "Sin asignar"
+        return f"{self.asignatura.nombre_asignatura} - {self.codigo_seccion} ({docente_name})"
 
 class Estudiante(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -59,7 +60,27 @@ class Estudiante(models.Model):
     email = models.EmailField(blank=True)
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.cedula}"
+        name = self.usuario.get_full_name()
+        return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
+
+    def calcular_avance(self):
+        from django.apps import apps
+        DetalleInscripcion = apps.get_model('gestion', 'DetalleInscripcion')
+        
+        total_asignaturas = 0
+        if self.programa:
+            total_asignaturas = self.programa.asignatura_set.count()
+            
+        if total_asignaturas == 0:
+            return 0
+            
+        # Passing grade >= 10 (Scale 1-20)
+        aprobadas = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=self,
+            nota_final__gte=10
+        ).count()
+        
+        return round((aprobadas / total_asignaturas) * 100, 2)
 
 class Docente(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -72,7 +93,8 @@ class Docente(models.Model):
     tipo_contratacion = models.CharField(max_length=50, choices=TIPO_CONTRATACION_CHOICES, default='Tiempo Completo')
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.cedula}"
+        name = self.usuario.get_full_name()
+        return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
 
 class Administrador(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -80,7 +102,8 @@ class Administrador(models.Model):
     telefono = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.cedula}"
+        name = self.usuario.get_full_name()
+        return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
 
 class Inscripcion(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)

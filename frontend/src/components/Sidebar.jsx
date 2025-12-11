@@ -20,12 +20,14 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { path: '/admin/register', icon: UserPlus, label: 'Registrar Usuario' },
         { path: '/admin/pensum', icon: FileText, label: 'Visualizar Pensum' },
     ]
 
     if (isAdmin) {
-        menuItems.splice(1, 0, { path: '/admin/listado', icon: Users, label: 'Listado' })
+        menuItems.push(
+            { path: '/admin/register', icon: UserPlus, label: 'Registrar Usuario' },
+            { path: '/admin/listado', icon: Users, label: 'Listado' }
+        )
     }
 
     return (

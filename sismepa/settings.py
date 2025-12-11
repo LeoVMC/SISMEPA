@@ -110,8 +110,15 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_USERNAME_REQUIRED = True
 
+# Legacy setting
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'gestion.api.serializers.UserSerializer',
+}
+
+# Modern setting (dj-rest-auth >= 2.1.0)
+REST_AUTH = {
+    'USER_DETAILS_SERIALIZER': 'gestion.api.serializers.UserSerializer',
+    'USE_JWT': False,
 }
 
 # En desarrollo, si prefieres permitir todos los orígenes usa:

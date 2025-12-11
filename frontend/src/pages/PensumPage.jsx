@@ -144,6 +144,14 @@ export default function PensumPage() {
             if (res.ok) {
                 const data = await res.json()
                 setAvailablePrograms(data)
+
+                // Auto-select program for students if applicable
+                if (userData?.programa) {
+                    const studentProg = data.find(p => p.nombre_programa === userData.programa)
+                    if (studentProg) {
+                        handleSelectProgram(studentProg)
+                    }
+                }
             }
         } catch (e) {
             console.error("Error fetching programs", e)
@@ -343,7 +351,7 @@ export default function PensumPage() {
             })
 
             if (uploadRes.ok) {
-                setActionMessage({ type: 'success', text: 'Plan de evaluación cargado exitosamente.' })
+                setActionMessage({ type: 'success', text: 'Planificación cargada exitosamente.' })
                 if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
                 throw new Error('Error al cargar archivo.')
@@ -378,7 +386,7 @@ export default function PensumPage() {
                 window.open(url, '_blank')
                 setActionMessage({ type: 'success', text: 'Descarga iniciada.' })
             } else {
-                setActionMessage({ type: 'error', text: 'No hay plan de evaluación cargado.' })
+                setActionMessage({ type: 'error', text: 'No hay planificación cargada.' })
             }
         } catch (err) {
             setActionMessage({ type: 'error', text: 'Error al descargar el plan.' })
@@ -390,7 +398,7 @@ export default function PensumPage() {
 
     const handleDeletePlan = async () => {
         if (!selectedSubject) return
-        if (!confirm('¿Estás seguro de eliminar el plan de evaluación?')) return
+        if (!confirm('¿Estás seguro de eliminar la planificación?')) return
 
         setActionLoading(true)
         setActionMessage(null)
@@ -410,7 +418,7 @@ export default function PensumPage() {
                 })
 
                 if (delRes.ok) {
-                    setActionMessage({ type: 'success', text: 'Plan eliminado exitosamente.' })
+                    setActionMessage({ type: 'success', text: 'Planificación eliminada exitosamente.' })
                     if (selectedProgram) fetchSubjects(selectedProgram.id)
                 } else {
                     throw new Error('Error al eliminar plan.')
@@ -680,35 +688,41 @@ export default function PensumPage() {
                 )}
 
                 {/* Upload/Download Controls (Shared) */}
-                {isAdmin && (
+                {(isAdmin || isDocente || true) && (
                     <div className="flex gap-2">
-                        <button
-                            onClick={handleUploadClick}
-                            disabled={actionLoading}
-                            className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                        >
-                            {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
-                            Cargar Plan
-                        </button>
+                        {/* Upload: Admin or Docente (Assigned) Only */}
+                        {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
+                            <button
+                                onClick={handleUploadClick}
+                                disabled={actionLoading}
+                                className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                            >
+                                {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
+                                Cargar Planificación
+                            </button>
+                        )}
+
+                        {/* Download: Everyone (if exists, handled by button logic but visible to all) */}
                         <button
                             onClick={handleDownloadPlan}
                             disabled={actionLoading}
                             className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                         >
                             {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
-                            Descargar Plan
+                            Descargar Planificación
                         </button>
-                        {/* Delete Plan Button */}
-                        {getSubjectStatus(selectedSubject?.code).hasPlan && (
-                            <button
-                                onClick={handleDeletePlan}
-                                disabled={actionLoading}
-                                className="flex items-center justify-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-2 px-3 text-sm rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
-                                title="Eliminar Plan"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        )}
+                        {/* Delete Plan Button: Admin or Docente (Assigned) */}
+                        {getSubjectStatus(selectedSubject?.code).hasPlan &&
+                            (isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
+                                <button
+                                    onClick={handleDeletePlan}
+                                    disabled={actionLoading}
+                                    className="flex items-center justify-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-2 px-3 text-sm rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                                    title="Eliminar Planificación"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            )}
                     </div>
                 )}
 
@@ -727,7 +741,8 @@ export default function PensumPage() {
         const backendData = subjectsMap[code]
         return {
             assigned: backendData?.has_assignments || false,
-            hasPlan: backendData?.has_plan || false
+            hasPlan: backendData?.has_plan || false,
+            isAssignedToMe: backendData?.is_assigned_to_current_user || false
         }
     }
 
@@ -829,6 +844,34 @@ export default function PensumPage() {
             </div>
 
             <div className="flex-1 overflow-x-auto pb-4">
+                {/* Visual Legend */}
+                {(() => {
+                    const isAdmin = isAdminUser()
+                    const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
+
+                    return (
+                        <div className="flex flex-wrap gap-4 px-1 mb-4 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            {/* Green Border Legend (Admin/Docente Only) */}
+                            {(isAdmin || isDocente) && (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded border-2 border-green-500 bg-white dark:bg-gray-800"></div>
+                                    <span>{isAdmin ? 'Asignatura con Docente Asignado' : 'Asignatura Asignada a Mí'}</span>
+                                </div>
+                            )}
+
+                            {/* Green Check Legend (All Users) */}
+                            <div className="flex items-center gap-2">
+                                <div className="relative w-4 h-4 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                                    <div className="absolute -bottom-1 -right-1 text-green-500 bg-green-50 dark:bg-green-900/50 rounded-full p-[1px]">
+                                        <CheckCircle size={10} strokeWidth={3} />
+                                    </div>
+                                </div>
+                                <span>Planificación Cargada</span>
+                            </div>
+                        </div>
+                    )
+                })()}
+
                 <div className="flex gap-6 min-w-max">
                     {pensumData.length > 0 ? (
                         pensumData.map((semester, sIndex) => (
@@ -841,10 +884,13 @@ export default function PensumPage() {
                                 </div>
 
                                 {semester.subjects.map((subject, subIndex) => {
+                                    // Admins see all assignments, Teachers see only theirs
                                     const status = getSubjectStatus(subject.code)
-                                    // Only admins see the green border for assignment
                                     const isAdmin = isAdminUser()
-                                    const showAssignedBorder = isAdmin && status.assigned
+                                    // Admins see all assignments, Teachers see only theirs
+                                    const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
+
+                                    const showAssignedBorder = (isAdmin && status.assigned) || (isDocente && status.isAssignedToMe)
 
                                     return (
                                         <div

@@ -37,3 +37,10 @@ class IsDocenteOrAdminOrOwner(permissions.BasePermission):
             return hasattr(obj, 'usuario') and obj.usuario == request.user
         except Exception:
             return False
+
+
+class IsDocenteOrAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_superuser or request.user.groups.filter(name='Docente').exists() or request.user.groups.filter(name='Administrador').exists()
