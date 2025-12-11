@@ -27,7 +27,7 @@ class Asignatura(models.Model):
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE)
     prelaciones = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='es_requisito_de')
     orden = models.IntegerField(default=0)
-    # Keeping docente for backward compatibility, though specific assignments will move to Seccion
+    # Manteniendo docente por compatibilidad, aunque las asignaciones específicas se moverán a Sección
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
     tutores = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_asignadas')
 
@@ -39,7 +39,7 @@ class Asignatura(models.Model):
 
 class Seccion(models.Model):
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE, related_name='secciones')
-    codigo_seccion = models.CharField(max_length=10) # e.g., D1, D2...
+    codigo_seccion = models.CharField(max_length=10) # ej., D1, D2...
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='secciones_asignadas')
 
     class Meta:
@@ -74,7 +74,7 @@ class Estudiante(models.Model):
         if total_asignaturas == 0:
             return 0
             
-        # Passing grade >= 10 (Scale 1-20)
+        # Nota aprobatoria >= 10 (Escala 1-20)
         aprobadas = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=self,
             nota_final__gte=10

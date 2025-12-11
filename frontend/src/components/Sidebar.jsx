@@ -42,7 +42,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     </h1>
                     <p className="text-xs text-gray-400 mt-1">Panel Administrativo</p>
                 </div>
-                {/* Close button for mobile */}
+                {/* Botón cerrar para móvil */}
                 <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">
                     <X size={20} />
                 </button>
@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose }) {
                         <Link
                             key={item.path}
                             to={item.path}
-                            onClick={() => window.innerWidth < 1024 && onClose()} // Close on click on mobile
+                            onClick={() => window.innerWidth < 1024 && onClose()} // Cerrar al hacer click en móvil
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive(item.path)
                                 ? 'bg-blue-600 text-white'
                                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'

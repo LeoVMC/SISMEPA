@@ -1974,3 +1974,31 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-11 12:35:15,903] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-11 12:35:15,913] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-11 12:35:15,923] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:40:42,467] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:40:42,478] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:40:42,488] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:40:42,497] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:47:47,952] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 12:47:48,611] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 12:48:10,126] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-11 12:48:10,781] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 12:48:35,358] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 12:48:36,016] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 12:48:37,239] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-11 12:48:37,893] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 12:51:59,403] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:51:59,413] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:51:59,424] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:51:59,433] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 12:57:26,003] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 12:57:26,656] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 13:14:52,956] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:14:52,966] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:14:52,976] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:14:52,985] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:15:41,925] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-11 13:15:42,741] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-11 13:16:49,408] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:16:49,418] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:16:49,428] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-11 13:16:49,437] WARNING django.request: Not Found: /api/estudiantes/1/progreso/

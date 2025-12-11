@@ -74,15 +74,15 @@ export default function PensumPage() {
     const [availablePrograms, setAvailablePrograms] = useState([])
     const [isProgramLoading, setIsProgramLoading] = useState(true)
 
-    const [pensumData, setPensumData] = useState([]) // Dynamic semesters
+    const [pensumData, setPensumData] = useState([]) // Semestres dinámicos
     const [selectedSubject, setSelectedSubject] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [actionLoading, setActionLoading] = useState(false)
     const [actionMessage, setActionMessage] = useState(null)
     const [docentes, setDocentes] = useState([])
     const [selectedDocenteId, setSelectedDocenteId] = useState('')
-    const [selectedSeccion, setSelectedSeccion] = useState('D1') // Will hold D1.. or Option Code
-    const [subjectsMap, setSubjectsMap] = useState({}) // code -> backend data
+    const [selectedSeccion, setSelectedSeccion] = useState('D1') // Mantendrá D1.. o Código de Opción
+    const [subjectsMap, setSubjectsMap] = useState({}) // código -> datos del backend
 
 
     const navigate = useNavigate()
@@ -91,13 +91,13 @@ export default function PensumPage() {
 
     // ... (rest of effects)
 
-    // Helper to get formatted name for section/option
+    // Ayudante para obtener nombre formateado para sección/opción
     const getOptionLabel = (code) => {
-        // Search in all lists
+        // Buscar en todas las listas
         const allOptions = [...ELECTIVAS_TECNICAS_SISTEMAS, ...ELECTIVAS_TECNICAS_TELECOM, ...ELECTIVAS_NO_TECNICAS, ...ACTIVIDADES_CULTURALES, ...ACTIVIDADES_DEPORTIVAS]
         const found = allOptions.find(opt => opt.code === code)
         if (found) return found.name
-        // Default to Standard Section
+        // Por defecto Sección Estándar
         return `Sección ${code}`
     }
 
@@ -108,7 +108,7 @@ export default function PensumPage() {
             setUserData(JSON.parse(storedUser))
         }
 
-        // Check session storage for program
+        // Verificar session storage para el programa
         const sessionProgram = sessionStorage.getItem('selectedProgram')
         if (sessionProgram) {
             setSelectedProgram(JSON.parse(sessionProgram))
@@ -123,7 +123,7 @@ export default function PensumPage() {
         }
     }, [selectedProgram, token])
 
-    // Fetch teachers when modal opens if user is admin
+    // Obtener docentes al abrir modal si es administrador
     useEffect(() => {
         const isAdmin = isAdminUser()
         if (isModalOpen && isAdmin) {
@@ -145,7 +145,7 @@ export default function PensumPage() {
                 const data = await res.json()
                 setAvailablePrograms(data)
 
-                // Auto-select program for students if applicable
+                // Auto-seleccionar programa para estudiantes si aplica
                 if (userData?.programa) {
                     const studentProg = data.find(p => p.nombre_programa === userData.programa)
                     if (studentProg) {
@@ -180,14 +180,14 @@ export default function PensumPage() {
             if (res.ok) {
                 const data = await res.json()
 
-                // Map for lookups
+                // Mapa para búsquedas
                 const map = {}
                 data.forEach(sub => {
                     map[sub.codigo] = sub
                 })
                 setSubjectsMap(map)
 
-                // Group by semester for the view
+                // Agrupar por semestre para la vista
                 const semesters = {}
                 data.forEach(sub => {
                     if (!semesters[sub.semestre]) {
@@ -202,7 +202,7 @@ export default function PensumPage() {
                     semesters[sub.semestre].uc += sub.creditos
                 })
 
-                // Convert to array and sort
+                // Convertir a array y ordenar
                 const sortedSemesters = Object.keys(semesters).sort((a, b) => a - b).map(k => semesters[k])
                 setPensumData(sortedSemesters)
             }
@@ -236,7 +236,7 @@ export default function PensumPage() {
         setActionMessage(null)
         setSelectedDocenteId('')
 
-        // precise default selection
+        // selección por defecto precisa
         if (subject.code.startsWith('ELE-TEC')) {
             const isTelecom = selectedProgram?.nombre_programa?.toLowerCase().includes('telecom')
             const list = isTelecom ? ELECTIVAS_TECNICAS_TELECOM : ELECTIVAS_TECNICAS_SISTEMAS
@@ -252,7 +252,7 @@ export default function PensumPage() {
         setIsModalOpen(false)
         setSelectedSubject(null)
         setActionMessage(null)
-        if (selectedProgram) fetchSubjects(selectedProgram.id) // Refresh data
+        if (selectedProgram) fetchSubjects(selectedProgram.id) // Refrescar datos
     }
 
     const handleAssignDocente = async () => {
@@ -477,7 +477,7 @@ export default function PensumPage() {
                 },
                 body: JSON.stringify({
                     codigo_seccion: seccionCode,
-                    docente: '' // Clear assignment
+                    docente: '' // Limpiar asignación
                 })
             })
 
@@ -501,7 +501,7 @@ export default function PensumPage() {
         const backendSubject = subjectsMap[selectedSubject?.code]
         const subjectCode = selectedSubject?.code || ''
 
-        // Determine if special type
+        // Determinar si es tipo especial
         let optionsList = null
         let isActivity = false
 
@@ -523,7 +523,7 @@ export default function PensumPage() {
                     onChange={handleFileChange}
                 />
 
-                {/* NOTE FOR ACTIVITIES */}
+                {/* NOTA PARA ACTIVIDADES */}
                 {isActivity && (
                     <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 text-xs rounded-lg border border-yellow-100 dark:border-yellow-800/30">
                         <strong>Nota Importante:</strong>
@@ -532,7 +532,7 @@ export default function PensumPage() {
                 )}
 
 
-                {/* Special Logic for PSI-30010 (Thesis) */}
+                {/* Lógica Especial para PSI-30010 (Tesis) */}
                 {backendSubject?.codigo === 'PSI-30010' ? (
                     <>
                         <div className="mb-4">
@@ -592,7 +592,7 @@ export default function PensumPage() {
                         )}
                     </>
                 ) : backendSubject?.codigo === 'TAI-01' ? (
-                    /* Logic for TAI-01: Workshop */
+                    /* Lógica para TAI-01: Taller */
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-lg border border-blue-100 dark:border-blue-800/30 flex items-start gap-3">
                         <AlertCircle className="shrink-0 mt-0.5" size={18} />
                         <div>
@@ -601,11 +601,11 @@ export default function PensumPage() {
                         </div>
                     </div>
                 ) : backendSubject?.codigo === 'PRO-01' ? (
-                    /* Logic for PRO-01: Service Project - No Specific Controls */
+                    /* Lógica para PRO-01: Proyecto de Servicio - Sin Controles Específicos */
                     null
                 ) : (
                     <>
-                        {/* Display Assignments */}
+                        {/* Mostrar Asignaciones */}
                         {backendSubject?.secciones?.length > 0 && (
                             <div className="mb-4">
                                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
@@ -635,7 +635,7 @@ export default function PensumPage() {
                             </div>
                         )}
 
-                        {/* Admin Assign Controls */}
+                        {/* Controles de Asignación de Admin */}
                         {isAdmin && (
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
                                 <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">
@@ -643,7 +643,7 @@ export default function PensumPage() {
                                 </label>
                                 <div className="flex flex-col gap-3">
                                     <div className="flex flex-col gap-3">
-                                        {/* Dynamic Dropdown: Options vs Sections */}
+                                        {/* Desplegable Dinámico: Opciones vs Secciones */}
                                         {optionsList ? (
                                             <select
                                                 className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm truncate"
@@ -687,10 +687,10 @@ export default function PensumPage() {
                     </>
                 )}
 
-                {/* Upload/Download Controls (Shared) */}
+                {/* Controles de Carga/Descarga (Compartido) */}
                 {(isAdmin || isDocente || true) && (
                     <div className="flex gap-2">
-                        {/* Upload: Admin or Docente (Assigned) Only */}
+                        {/* Carga: Solo Admin o Docente (Asignado) */}
                         {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
                             <button
                                 onClick={handleUploadClick}
@@ -702,7 +702,7 @@ export default function PensumPage() {
                             </button>
                         )}
 
-                        {/* Download: Everyone (if exists, handled by button logic but visible to all) */}
+                        {/* Descarga: Todos (si existe, manejado por lógica de botón pero visible a todos) */}
                         <button
                             onClick={handleDownloadPlan}
                             disabled={actionLoading}
@@ -711,7 +711,7 @@ export default function PensumPage() {
                             {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
                             Descargar Planificación
                         </button>
-                        {/* Delete Plan Button: Admin or Docente (Assigned) */}
+                        {/* Botón Eliminar Plan: Admin o Docente (Asignado) */}
                         {getSubjectStatus(selectedSubject?.code).hasPlan &&
                             (isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
                                 <button
@@ -736,7 +736,7 @@ export default function PensumPage() {
         )
     }
 
-    // Checking status for card styling
+    // Verificando estado para estilo de tarjeta
     const getSubjectStatus = (code) => {
         const backendData = subjectsMap[code]
         return {
@@ -746,7 +746,7 @@ export default function PensumPage() {
         }
     }
 
-    // Helper to get icon based on program name
+    // Ayudante para obtener ícono basado en nombre del programa
     const getProgramIcon = (name) => {
         if (!name) return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
 
@@ -763,7 +763,7 @@ export default function PensumPage() {
         return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
     }
 
-    // --- PROGRAM SELECTOR VIEW ---
+    // --- VISTA SELECTOR DE PROGRAMA ---
     if (!selectedProgram) {
         return (
             <div className="h-full flex flex-col items-center justify-center p-8">
@@ -820,7 +820,7 @@ export default function PensumPage() {
     // Lock body scroll when modal is open
 
 
-    // --- PENSUM FLOWCHART VIEW ---
+    // --- VISTA DIAGRAMA DE FLUJO PENSUM ---
     return (
         <div className="h-full flex flex-col">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

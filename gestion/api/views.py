@@ -24,7 +24,7 @@ class EstudianteViewSet(viewsets.ModelViewSet):
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     def get_permissions(self):
-        # admin: full; listing/creation restricted to admin
+        # admin: acceso total; listado/creación restringido a admin
         if self.action in ['list', 'create', 'destroy']:
             return [IsAdmin()]
         if self.action in ['retrieve', 'progreso']:
@@ -104,15 +104,15 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         if docente_id:
             from gestion.models import Docente
             try:
-                # docente_id comes from frontend selecting a Docente object
-                # so we must fetch the Docente model, then get its usuario
+                # docente_id viene del frontend seleccionando un objeto Docente
+                # así que debemos buscar el modelo Docente, y luego obtener su usuario
                 docente_obj = Docente.objects.get(pk=docente_id)
                 docente_user = docente_obj.usuario
             except Docente.DoesNotExist:
                 return Response({'error': 'Docente no encontrado'}, status=404)
 
         if not docente_user:
-            # If removing docente (docente_id is empty), delete the section so it disappears from the list
+            # Si se está eliminando el docente (docente_id vacío), eliminar la sección para que desaparezca de la lista
             Seccion.objects.filter(asignatura=asignatura, codigo_seccion=codigo_seccion).delete()
             return Response({'status': 'deleted'})
 
@@ -176,7 +176,7 @@ class ProgramaViewSet(viewsets.ModelViewSet):
 
 
 class UserManagementViewSet(viewsets.ViewSet):
-    """Endpoints for admin to create users (docente/estudiante)."""
+    """Endpoints para que el administrador cree usuarios (docente/estudiante)."""
     permission_classes = [IsAdmin]
 
     def create(self, request):
@@ -269,7 +269,7 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
         asignatura = serializer.validated_data.get('asignatura')
         user = self.request.user
         
-        # If user is Docente (and not admin/superuser), ensure they are assigned to this subject
+        # Si el usuario es Docente (y no admin/superuser), asegurar que esté asignado a esta asignatura
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if not Seccion.objects.filter(asignatura=asignatura, docente=user).exists():
                  from rest_framework.exceptions import PermissionDenied
@@ -279,7 +279,7 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         user = self.request.user
-        # If user is Docente (and not admin/superuser), ensure they are assigned to this subject
+        # Si el usuario es Docente (y no admin/superuser), asegurar que esté asignado a esta asignatura
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if not Seccion.objects.filter(asignatura=instance.asignatura, docente=user).exists():
                  from rest_framework.exceptions import PermissionDenied
