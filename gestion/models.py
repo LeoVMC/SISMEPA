@@ -61,6 +61,22 @@ class Estudiante(models.Model):
     def __str__(self):
         return f"{self.usuario.username} - {self.cedula}"
 
+class Docente(models.Model):
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    cedula = models.CharField(max_length=20, unique=True)
+    telefono = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.cedula}"
+
+class Administrador(models.Model):
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    cedula = models.CharField(max_length=20, unique=True)
+    telefono = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.cedula}"
+
 class Inscripcion(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
     periodo = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE)

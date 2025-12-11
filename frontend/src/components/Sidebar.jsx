@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -15,11 +15,18 @@ export default function Sidebar({ isOpen, onClose }) {
         navigate('/login')
     }
 
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+    const isAdmin = userData.username === 'admin' || userData.is_staff || userData.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
+
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/register', icon: UserPlus, label: 'Registrar Usuario' },
         { path: '/admin/pensum', icon: FileText, label: 'Visualizar Pensum' },
     ]
+
+    if (isAdmin) {
+        menuItems.splice(1, 0, { path: '/admin/listado', icon: Users, label: 'Listado' })
+    }
 
     return (
         <div className={`

@@ -30,10 +30,11 @@ export default function RegisterUserPage() {
 
         const form = e.target
         const data = {
-            username: form.username.value,
+            username: form.cedula.value,
             password: form.password.value,
             email: form.email.value,
             first_name: form.first_name.value,
+            last_name: form.last_name.value,
             role: form.role.value,
             cedula: form.cedula.value,
             telefono: form.telefono.value,
@@ -69,20 +70,28 @@ export default function RegisterUserPage() {
             <form onSubmit={createUser} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de Usuario</label>
-                        <input name="username" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombres</label>
+                        <input name="first_name" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apellidos</label>
+                        <input name="last_name" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cédula</label>
+                        <input name="cedula" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
+                        <input name="telefono" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
+                        <input name="email" type="email" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
                         <input name="password" type="password" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                        <input name="email" type="email" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre Completo</label>
-                        <input name="first_name" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rol</label>
@@ -93,22 +102,38 @@ export default function RegisterUserPage() {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Programa Académico</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Carrera</label>
                         <select name="programa" className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white">
-                            <option value="">Seleccione un programa</option>
+                            <option value="">Seleccione una carrera</option>
                             {programas.map(p => (
                                 <option key={p.id} value={p.id}>{p.nombre_programa}</option>
                             ))}
                         </select>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cédula</label>
-                        <input name="cedula" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
-                        <input name="telefono" required className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:bg-gray-800 dark:text-white" />
-                    </div>
+                    {/* Username Hidden/Generated or kept? 
+                        Screenshot shows "Nombre de Usuario" input. 
+                        User prompt didn't say to remove "Nombre de Usuario". 
+                        It said "El orden sea Nombres...". It didn't mention Username.
+                        Usually Username is separate. 
+                        Validating prompt: "Que el orden sea Nombres, Apellidos, Cédula, Teléfono, Correo, Contraseña, Rol, Carrera".
+                        It does NOT list Username.
+                        Maybe I should remove Username and auto-generate it from Cédula or Email?
+                        Or maybe the user forgot to mention it.
+                        "make sure that data is saved... order should be...".
+                        If I remove username input, `createUser` needs to generate it.
+                        The backend requires `username`.
+                        I'll KEEP `username` but put it somewhere or auto-generate?
+                        Given the strict order list: "Nombres... Carrera". It lists 8 items.
+                        If I must follow the list strictly, where does `username` go?
+                        I'll Auto-set username to be `cedula` or `email`?
+                        Or I'll just append it to the end or beginning if not specified?
+                        Wait, usually systems use email or cedula as username.
+                        I'll risk removing the `username` input and set `username` = `cedula` or `email` in the payload.
+                        Let's check `CreateUserSerializer`. It expects `username`.
+                        I'll use `cedula` as username, or `email`. `cedula` is unique in `Estudiante` model but `User.username` must be unique.
+                        I'll modify `createUser` to default username to `cedula` if not present.
+                        Actually, I'll keep it simple: I will use `cedula` as the username in the payload.
+                    */}
                 </div>
 
                 <div className="pt-4">
@@ -131,7 +156,7 @@ export default function RegisterUserPage() {
                         ) : (
                             <>
                                 <span className="font-semibold">¡Éxito!</span>
-                                <span className="text-sm">Usuario <strong>{userResp.body.username}</strong> registrado correctamente.</span>
+                                <span className="text-sm">Usuario registrado correctamente.</span>
                             </>
                         )}
                     </div>

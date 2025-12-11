@@ -11,7 +11,7 @@ from gestion.models import (
 from gestion.api.serializers import (
     EstudianteSerializer, AsignaturaSerializer, PensumSerializer,
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
-    ProgramaSerializer, SeccionSerializer
+    ProgramaSerializer, SeccionSerializer, DocenteSerializer, AdministradorSerializer
 )
 from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner
 from django.contrib.auth.models import User
@@ -174,10 +174,62 @@ class UserManagementViewSet(viewsets.ViewSet):
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
-class DocenteViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.filter(groups__name='Docente')
-    serializer_class = UserSerializer
+class DocenteViewSet(viewsets.ModelViewSet):
+    from gestion.models import Docente
+    queryset = Docente.objects.all()
+    serializer_class = DocenteSerializer
     permission_classes = [IsAdmin]
+    search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
+
+    @action(detail=False, methods=['get'])
+    def reporte_excel(self, request):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Listado Docentes"
+        ws.append(['Cédula', 'Nombres', 'Apellidos', 'Teléfono', 'Email'])
+
+        for docente in self.filter_queryset(self.get_queryset()):
+            ws.append([
+                docente.cedula,
+                docente.usuario.first_name,
+                docente.usuario.last_name,
+                docente.telefono,
+                docente.usuario.email
+            ])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=reporte_docentes.xlsx'
+        wb.save(response)
+        return response
+
+
+class AdminViewSet(viewsets.ModelViewSet):
+    from gestion.models import Administrador
+    queryset = Administrador.objects.all()
+    serializer_class = AdministradorSerializer
+    permission_classes = [IsAdmin]
+    search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
+
+    @action(detail=False, methods=['get'])
+    def reporte_excel(self, request):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Listado Administradores"
+        ws.append(['Cédula', 'Nombres', 'Apellidos', 'Teléfono', 'Email'])
+
+        for admin in self.filter_queryset(self.get_queryset()):
+            ws.append([
+                admin.cedula,
+                admin.usuario.first_name,
+                admin.usuario.last_name,
+                admin.telefono,
+                admin.usuario.email
+            ])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=reporte_administradores.xlsx'
+        wb.save(response)
+        return response
 
 
 class PensumViewSet(viewsets.ModelViewSet):

@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard'
 import LoginPage from './pages/LoginPage'
 import RegisterUserPage from './pages/RegisterUserPage'
 import PensumPage from './pages/PensumPage'
+import ListadoPage from './pages/ListadoPage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -26,6 +27,16 @@ export default function App() {
               <PrivateRoute>
                 <AdminLayout>
                   <Dashboard />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/listado"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <ListadoPage />
                 </AdminLayout>
               </PrivateRoute>
             }

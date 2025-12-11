@@ -31,7 +31,7 @@ class CreateUserSerializer(serializers.Serializer):
         programa = validated_data.pop('programa', None)
 
         user = User.objects.create(
-            username=validated_data.get('username'),
+            username=cedula,
             email=validated_data.get('email',''),
             first_name=validated_data.get('first_name',''),
             last_name=validated_data.get('last_name',''),
@@ -46,7 +46,15 @@ class CreateUserSerializer(serializers.Serializer):
 
         if role == 'Estudiante':
             # create Estudiante record
-            Estudiante.objects.create(usuario=user, programa=programa, cedula=cedula or f"V-{user.id}", telefono=telefono)
+            Estudiante.objects.create(usuario=user, programa=programa, cedula=cedula, telefono=telefono)
+        elif role == 'Docente':
+            from gestion.models import Docente
+            Docente.objects.create(usuario=user, cedula=cedula, telefono=telefono)
+        elif role == 'Administrador':
+            from gestion.models import Administrador
+            Administrador.objects.create(usuario=user, cedula=cedula, telefono=telefono)
+
+        return user
 
         return user
 
@@ -89,11 +97,17 @@ class AsignaturaSerializer(serializers.ModelSerializer):
 
 
 class EstudianteSerializer(serializers.ModelSerializer):
+    usuario = UserSerializer(read_only=True)
     nombre_completo = serializers.SerializerMethodField()
+
+    # Writable fields for updating user info
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(write_only=True, required=False)
 
     class Meta:
         model = Estudiante
-        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'programa', 'fecha_ingreso']
+        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'programa', 'fecha_ingreso', 'first_name', 'last_name', 'email']
         read_only_fields = ['fecha_ingreso', 'nombre_completo']
 
     def get_nombre_completo(self, obj):
@@ -101,6 +115,90 @@ class EstudianteSerializer(serializers.ModelSerializer):
             return obj.usuario.get_full_name()
         except Exception:
             return str(obj.usuario)
+
+    def update(self, instance, validated_data):
+        # Update User fields if provided
+        user = instance.usuario
+        user_changed = False
+        if 'first_name' in validated_data:
+            user.first_name = validated_data.pop('first_name')
+            user_changed = True
+        if 'last_name' in validated_data:
+            user.last_name = validated_data.pop('last_name')
+            user_changed = True
+        if 'email' in validated_data:
+            user.email = validated_data.pop('email')
+            user_changed = True
+        
+        if user_changed:
+            user.save()
+
+        # Update Estudiante fields
+        return super().update(instance, validated_data)
+
+
+class DocenteSerializer(serializers.ModelSerializer):
+    usuario = UserSerializer(read_only=True)
+    nombre_completo = serializers.SerializerMethodField()
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(write_only=True, required=False)
+
+    class Meta:
+        from gestion.models import Docente
+        model = Docente
+        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'first_name', 'last_name', 'email']
+        read_only_fields = ['nombre_completo']
+
+    def get_nombre_completo(self, obj):
+        return obj.usuario.get_full_name()
+
+    def update(self, instance, validated_data):
+        user = instance.usuario
+        user_changed = False
+        if 'first_name' in validated_data:
+            user.first_name = validated_data.pop('first_name')
+            user_changed = True
+        if 'last_name' in validated_data:
+            user.last_name = validated_data.pop('last_name')
+            user_changed = True
+        if 'email' in validated_data:
+            user.email = validated_data.pop('email')
+            user_changed = True
+        if user_changed: user.save()
+        return super().update(instance, validated_data)
+
+
+class AdministradorSerializer(serializers.ModelSerializer):
+    usuario = UserSerializer(read_only=True)
+    nombre_completo = serializers.SerializerMethodField()
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(write_only=True, required=False)
+
+    class Meta:
+        from gestion.models import Administrador
+        model = Administrador
+        fields = ['id', 'usuario', 'nombre_completo', 'cedula', 'telefono', 'first_name', 'last_name', 'email']
+        read_only_fields = ['nombre_completo']
+
+    def get_nombre_completo(self, obj):
+        return obj.usuario.get_full_name()
+
+    def update(self, instance, validated_data):
+        user = instance.usuario
+        user_changed = False
+        if 'first_name' in validated_data:
+            user.first_name = validated_data.pop('first_name')
+            user_changed = True
+        if 'last_name' in validated_data:
+            user.last_name = validated_data.pop('last_name')
+            user_changed = True
+        if 'email' in validated_data:
+            user.email = validated_data.pop('email')
+            user_changed = True
+        if user_changed: user.save()
+        return super().update(instance, validated_data)
 
 
 class PensumSerializer(serializers.ModelSerializer):
