@@ -106,16 +106,7 @@ def run():
             ("DIN-31183", "DEFENSA INTEGRAL DE LA NACIÓN VIII", 3, 8, ["DIN-31173"]),
 
             # SEMESTRE IX
-            ("PSI-30010", "PASANTÍA || TRABAJO ESPECIAL DE GRADO", 10, 9, [
-                "MAT-21215", "MAT-21524", "ADG-25123", "MAT-21212", "ADG-25132", "IDM-24113", "ACT-CULT01", "ADG-25131", "DIN-21113",
-                "MAT-21225", "QUF-23015", "ACT-DEP01", "MAT-21114", "QUF-22014", "IDM-24123", "ACT-CULT02", "ADG-25141", "DIN-21123",
-                "MAT-21235", "QUF-23025", "MAT-21414", "SYC-22113", "AGG-22313", "DIN-21133",
-                "MAT-31714", "SYC-32114", "MAT-31214", "ACT-DEP02", "SYC-32225", "SYC-32414", "AGL-30214", "DIN-31143",
-                "MAT-30925", "MAT-31104", "SYC-32514", "ELN-30514", "SYC-32614", "SYC-32235", "CAT-BOL01", "DIN-31153",
-                "MAT-30935", "MAT-31414", "SYC-32524", "SYC-30525", "SYC-30834", "SYC-32245", "CAT-BOL02", "DIN-31163",
-                "MAT-30945", "ADG-30214", "SYC-32714", "ADG-30224", "SYC-31644", "TAI-01", "ELE-TEC01", "ELE-NOTEC01", "DIN-31173",
-                "MAT-31314", "CJU-37314", "SYC-32814", "TTC-31154", "PRO-01", "ELE-TEC02", "ELE-NOTEC02", "DIN-31183"
-            ]), 
+            ("PSI-30010", "PASANTÍA || TRABAJO ESPECIAL DE GRADO", 10, 9, []), # Requires all previous credits
         ]
 
         # 4. Insert Subjects

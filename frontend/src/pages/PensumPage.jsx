@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2 } from 'lucide-react'
+import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 
 const SECCIONES = Array.from({ length: 10 }, (_, i) => `D${i + 1}`)
 
-const ELECTIVAS_TECNICAS = [
+const ELECTIVAS_TECNICAS_SISTEMAS = [
     { code: 'ESI-31116', name: 'PLATAFORMA CLIENTE SERVIDOR' },
     { code: 'ESI-31123', name: 'TECNOLOGÍA DE REDES' },
     { code: 'ESI-31133', name: 'ARQUITECTURA DE SOFTWARE' },
     { code: 'ESI-31153', name: 'INTELIGENCIA ARTIFICIAL' },
     { code: 'ESI-31173', name: 'REDES DE ÁREA LOCAL' },
     { code: 'ESI-31193', name: 'SISTEMAS AVANZADOS DE BASES DE DATOS' }
+]
+
+const ELECTIVAS_TECNICAS_TELECOM = [
+    { code: 'ETE-31113', name: 'ANTENAS II' },
+    { code: 'ETE-31123', name: 'CONVERSIÓN ELECTROMECÁNICA' },
+    { code: 'ETE-31133', name: 'RADIOENLACES DIGITALES' },
+    { code: 'ETE-31143', name: 'TELEFONÍA' },
+    { code: 'ETE-31153', name: 'TELEVISIÓN' },
+    { code: 'ETE-31173', name: 'DIFUSIÓN Y MULTIMEDIA' }
 ]
 
 const ELECTIVAS_NO_TECNICAS = [
@@ -85,7 +94,7 @@ export default function PensumPage() {
     // Helper to get formatted name for section/option
     const getOptionLabel = (code) => {
         // Search in all lists
-        const allOptions = [...ELECTIVAS_TECNICAS, ...ELECTIVAS_NO_TECNICAS, ...ACTIVIDADES_CULTURALES, ...ACTIVIDADES_DEPORTIVAS]
+        const allOptions = [...ELECTIVAS_TECNICAS_SISTEMAS, ...ELECTIVAS_TECNICAS_TELECOM, ...ELECTIVAS_NO_TECNICAS, ...ACTIVIDADES_CULTURALES, ...ACTIVIDADES_DEPORTIVAS]
         const found = allOptions.find(opt => opt.code === code)
         if (found) return found.name
         // Default to Standard Section
@@ -220,7 +229,11 @@ export default function PensumPage() {
         setSelectedDocenteId('')
 
         // precise default selection
-        if (subject.code.startsWith('ELE-TEC')) setSelectedSeccion(ELECTIVAS_TECNICAS[0].code)
+        if (subject.code.startsWith('ELE-TEC')) {
+            const isTelecom = selectedProgram?.nombre_programa?.toLowerCase().includes('telecom')
+            const list = isTelecom ? ELECTIVAS_TECNICAS_TELECOM : ELECTIVAS_TECNICAS_SISTEMAS
+            setSelectedSeccion(list[0].code)
+        }
         else if (subject.code.startsWith('ELE-NOTEC')) setSelectedSeccion(ELECTIVAS_NO_TECNICAS[0].code)
         else if (subject.code.startsWith('ACT-CULT')) setSelectedSeccion(ACTIVIDADES_CULTURALES[0].code)
         else if (subject.code.startsWith('ACT-DEP')) setSelectedSeccion(ACTIVIDADES_DEPORTIVAS[0].code)
@@ -484,7 +497,10 @@ export default function PensumPage() {
         let optionsList = null
         let isActivity = false
 
-        if (subjectCode.startsWith('ELE-TEC')) optionsList = ELECTIVAS_TECNICAS
+        if (subjectCode.startsWith('ELE-TEC')) {
+            const isTelecom = selectedProgram?.nombre_programa?.toLowerCase().includes('telecom')
+            optionsList = isTelecom ? ELECTIVAS_TECNICAS_TELECOM : ELECTIVAS_TECNICAS_SISTEMAS
+        }
         else if (subjectCode.startsWith('ELE-NOTEC')) optionsList = ELECTIVAS_NO_TECNICAS
         else if (subjectCode.startsWith('ACT-CULT')) { optionsList = ACTIVIDADES_CULTURALES; isActivity = true; }
         else if (subjectCode.startsWith('ACT-DEP')) { optionsList = ACTIVIDADES_DEPORTIVAS; isActivity = true; }
@@ -618,19 +634,19 @@ export default function PensumPage() {
                                     {optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección'}
                                 </label>
                                 <div className="flex flex-col gap-2">
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         {/* Dynamic Dropdown: Options vs Sections */}
                                         {optionsList ? (
                                             <select
-                                                className="flex-[2] text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm truncate pr-8"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
                                             >
-                                                {optionsList.map(opt => <option key={opt.code} value={opt.code}>{opt.name}</option>)}
+                                                {optionsList.map(opt => <option key={opt.code} value={opt.code} className="truncate">{opt.name}</option>)}
                                             </select>
                                         ) : (
                                             <select
-                                                className="w-20 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                className="w-full sm:w-24 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
                                             >
@@ -641,7 +657,7 @@ export default function PensumPage() {
                                         <select
                                             value={selectedDocenteId}
                                             onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                            className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            className="w-full sm:flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 truncate"
                                         >
                                             <option value="">Docente...</option>
                                             {docentes.map(d => (
@@ -727,6 +743,7 @@ export default function PensumPage() {
         if (n.includes('administra') || n.includes('gerencia')) return <Briefcase className="text-emerald-600 dark:text-emerald-400" size={28} />
         if (n.includes('electric') || n.includes('electron')) return <Zap className="text-yellow-500 dark:text-yellow-300" size={28} />
         if (n.includes('contad') || n.includes('econom')) return <Calculator className="text-cyan-600 dark:text-cyan-400" size={28} />
+        if (n.includes('telecom')) return <RadioTower className="text-blue-600 dark:text-blue-400" size={28} />
 
         return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
     }
@@ -756,9 +773,9 @@ export default function PensumPage() {
                             <div
                                 key={prog.id}
                                 onClick={() => handleSelectProgram(prog)}
-                                className="group bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                                className="group relative overflow-hidden bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
                             >
-                                <div className="flex justify-between items-start mb-4">
+                                <div className="flex justify-between items-start mb-4 relative z-10">
                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 pr-2">
                                         {prog.nombre_programa}
                                     </h3>
@@ -766,9 +783,16 @@ export default function PensumPage() {
                                         <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" />
                                     </div>
                                 </div>
-                                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 pl-1">
+                                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 pl-1 relative z-10">
                                     <p>Duración: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.duracion_anios} años</span></p>
                                     <p>Título: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.titulo_otorgado}</span></p>
+                                </div>
+
+                                {/* Diagonal Stripe Decoration */}
+                                <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-gray-50 dark:bg-gray-800 rotate-45 flex items-center justify-center opacity-50 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-100 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20">
+                                    <div className="transform -rotate-45 -translate-x-7 -translate-y-0 opacity-30 group-hover:opacity-100 transition-opacity duration-300">
+                                        {React.cloneElement(getProgramIcon(prog.nombre_programa), { size: 24, className: "text-gray-300 group-hover:text-blue-200" })}
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -844,13 +868,19 @@ export default function PensumPage() {
                                             </h4>
 
                                             {/* Prereq Indicators */}
-                                            {subject.prereqs.length > 0 && (
+                                            {(subject.prereqs.length > 0 || subject.code === 'PSI-30010') && (
                                                 <div className="mt-2 pt-2 border-t border-gray-50 dark:border-gray-800 flex flex-wrap gap-1">
-                                                    {subject.prereqs.map(pre => (
-                                                        <span key={typeof pre === 'object' ? pre.codigo : pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
-                                                            {typeof pre === 'object' ? pre.codigo : pre} #
+                                                    {subject.code === 'PSI-30010' ? (
+                                                        <span className="text-[9px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-1 rounded font-bold">
+                                                            TODO EL PENSUM
                                                         </span>
-                                                    ))}
+                                                    ) : (
+                                                        subject.prereqs.map(pre => (
+                                                            <span key={typeof pre === 'object' ? pre.codigo : pre} className="text-[9px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-1 rounded">
+                                                                {typeof pre === 'object' ? pre.codigo : pre} #
+                                                            </span>
+                                                        ))
+                                                    )}
                                                 </div>
                                             )}
 
@@ -911,7 +941,7 @@ export default function PensumPage() {
                                 </div>
                             </div>
 
-                            {selectedSubject.prereqs.length > 0 ? (
+                            {(selectedSubject.prereqs.length > 0 || selectedSubject.code === 'PSI-30010') ? (
                                 <div className="mb-6">
                                     <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2 block">Prelaciones</span>
 

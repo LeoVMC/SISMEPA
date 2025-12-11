@@ -21,7 +21,7 @@ class Programa(models.Model):
 
 class Asignatura(models.Model):
     nombre_asignatura = models.CharField(max_length=200)
-    codigo = models.CharField(max_length=20, unique=True)
+    codigo = models.CharField(max_length=20)
     creditos = models.IntegerField()
     semestre = models.IntegerField()
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE)
@@ -30,11 +30,12 @@ class Asignatura(models.Model):
     # Keeping docente for backward compatibility, though specific assignments will move to Seccion
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
     tutores = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_asignadas')
-    tutores_academicos = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_academicas_asignadas')
-    tutores_comunitarios = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_comunitarias_asignadas')
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_asignatura}"
+
+    class Meta:
+        unique_together = ('codigo', 'programa')
 
 class Seccion(models.Model):
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE, related_name='secciones')

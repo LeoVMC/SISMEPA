@@ -132,21 +132,10 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({'error': 'Docente no encontrado'}, status=404)
 
-        # Determine target relation and limit
-        if tutor_type == 'academic':
-            target_relation = asignatura.tutores_academicos
-            limit_msg = "Límite de tutores académicos alcanzado (10)"
-        elif tutor_type == 'community':
-            target_relation = asignatura.tutores_comunitarios
-            limit_msg = "Límite de tutores comunitarios alcanzado (10)"
-        else:
-            target_relation = asignatura.tutores
-            limit_msg = "Límite de tutores alcanzado (10)"
+        if asignatura.tutores.count() >= 10:
+             return Response({'error': "Límite de tutores alcanzado (10)"}, status=400)
 
-        if target_relation.count() >= 10:
-             return Response({'error': limit_msg}, status=400)
-
-        target_relation.add(docente)
+        asignatura.tutores.add(docente)
         return Response({'status': 'Tutor assigned'})
 
     @action(detail=True, methods=['post'], url_path='remove-tutor')
@@ -163,14 +152,7 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({'error': 'Docente no encontrado'}, status=404)
 
-        if tutor_type == 'academic':
-            target_relation = asignatura.tutores_academicos
-        elif tutor_type == 'community':
-            target_relation = asignatura.tutores_comunitarios
-        else:
-            target_relation = asignatura.tutores
-
-        target_relation.remove(docente)
+        asignatura.tutores.remove(docente)
         return Response({'status': 'Tutor removed'})
 
 
