@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Sparkles } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Sparkles, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -81,6 +81,18 @@ export default function Sidebar({ isOpen, onClose }) {
                     <span className="text-sm font-medium text-gray-300">Modo Oscuro</span>
                     <ThemeToggle />
                 </div>
+
+                <Link
+                    to="/profile"
+                    onClick={() => window.innerWidth < 1024 && onClose()}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive('/profile')
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                        }`}
+                >
+                    <User size={20} />
+                    <span className="font-medium">Mi Perfil</span>
+                </Link>
 
                 <button
                     onClick={handleLogout}

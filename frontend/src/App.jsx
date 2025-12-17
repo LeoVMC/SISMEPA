@@ -6,6 +6,7 @@ import RegisterUserPage from './pages/RegisterUserPage'
 import PensumPage from './pages/PensumPage'
 import ListadoPage from './pages/ListadoPage'
 import FakerPage from './pages/FakerPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -68,6 +69,16 @@ export default function App() {
               <PrivateRoute>
                 <AdminLayout>
                   <FakerPage />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <ProfilePage />
                 </AdminLayout>
               </PrivateRoute>
             }
