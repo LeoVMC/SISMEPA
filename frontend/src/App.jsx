@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterUserPage from './pages/RegisterUserPage'
 import PensumPage from './pages/PensumPage'
 import ListadoPage from './pages/ListadoPage'
-import FakerPage from './pages/FakerPage'
+import ActiveUsersPage from './pages/ActiveUsersPage' // Importación Nueva
 import ProfilePage from './pages/ProfilePage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
@@ -65,11 +65,11 @@ export default function App() {
             }
           />
           <Route
-            path="/faker-demo"
+            path="/active-users"
             element={
               <PrivateRoute>
                 <AdminLayout>
-                  <FakerPage />
+                  <ActiveUsersPage />
                 </AdminLayout>
               </PrivateRoute>
             }

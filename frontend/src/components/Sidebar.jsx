@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Sparkles, User } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -27,9 +27,13 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: dashboardLabel },
-        { path: '/faker-demo', icon: Sparkles, label: 'Demo Generador' },
         { path: '/admin/pensum', icon: FileText, label: 'Visualizar Pensum' },
     ]
+
+    // Mostrar opción de Usuarios en Línea solo a Admin y Docentes
+    if (showMonitoring) {
+        menuItems.splice(1, 0, { path: '/active-users', icon: Wifi, label: 'Usuarios en Línea' })
+    }
 
     if (isAdmin) {
         menuItems.push(
