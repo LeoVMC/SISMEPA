@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
-import { ChevronDown, ChevronRight, Users, TrendingUp, TrendingDown, Award, Download } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users, Award, Download } from 'lucide-react'
 
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
@@ -20,10 +20,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [studentId, setStudentId] = useState(1)
 
-  // Admin/Profesor State
+  // Estado de Admin/Profesor
   const [programs, setPrograms] = useState([])
   const [selectedProgram, setSelectedProgram] = useState('')
-  const [adminData, setAdminData] = useState(null) // Data for the accordion
+  const [adminData, setAdminData] = useState(null) // Datos para el acordeón
   const [expandedSemester, setExpandedSemester] = useState(null)
   const [expandedSubject, setExpandedSubject] = useState(null)
 
@@ -34,7 +34,7 @@ const Dashboard = () => {
   const showMonitoring = isAdmin || isTeacher
   const dashboardTitle = showMonitoring ? 'Monitoreo de Avance Educativo' : 'Mi Progreso Educativo'
 
-  // Fetch data for Student View
+  // Obtener datos para Vista Estudiante
   useEffect(() => {
     if (!showMonitoring) {
       const fetchData = async (id = studentId) => {
@@ -51,7 +51,7 @@ const Dashboard = () => {
     }
   }, [showMonitoring])
 
-  // Fetch data for Student View (Update on ID change)
+  // Obtener datos para Vista Estudiante (Actualizar al cambiar ID)
   useEffect(() => {
     if (!showMonitoring) {
       setLoading(true)
@@ -70,7 +70,7 @@ const Dashboard = () => {
     }
   }, [studentId, showMonitoring])
 
-  // Fetch Programs for Admin View
+  // Obtener Programas para Vista Admin
   useEffect(() => {
     if (showMonitoring) {
       const fetchPrograms = async () => {
@@ -89,7 +89,7 @@ const Dashboard = () => {
     }
   }, [showMonitoring])
 
-  // Fetch and Process Pensum Data (Admin View)
+  // Obtener y Procesar Datos del Pensum (Vista Admin)
   useEffect(() => {
     if (showMonitoring && selectedProgram) {
       fetchAndProcessPensum()
@@ -112,7 +112,7 @@ const Dashboard = () => {
       const subjects = res.data
       const semestersMap = {}
 
-      // Group by semester
+      // Agrupar por semestre
       subjects.forEach(sub => {
         const semNum = sub.semestre
         if (semNum > 8) return // Omitir semestre 9 en adelante (Tesis/Pasantía)
@@ -125,9 +125,9 @@ const Dashboard = () => {
           }
         }
 
-        // Generate Mock Sections for this subject
+        // Generar Secciones Simuladas para esta asignatura
         const sections = []
-        const numSections = 1 + Math.floor(Math.random() * 3) // 1-3 sections
+        const numSections = 1 + Math.floor(Math.random() * 3) // 1-3 secciones
         for (let k = 1; k <= numSections; k++) {
           sections.push({
             id: `sec-${sub.id}-${k}`,
@@ -147,7 +147,7 @@ const Dashboard = () => {
         })
       })
 
-      // Convert to array and sort
+      // Convertir a array y ordenar
       const sortedSemesters = Object.keys(semestersMap)
         .sort((a, b) => Number(a) - Number(b))
         .map(k => semestersMap[k])
@@ -169,7 +169,7 @@ const Dashboard = () => {
       {
         label: 'Promedio de Notas',
         data: showMonitoring
-          ? [14, 15, 12, 16, 18, 15, 17, 19] // Mock data for Admin demo
+          ? [14, 15, 12, 16, 18, 15, 17, 19] // Datos simulados para demo Admin
           : [14, 15, 12, 16, 18],
         backgroundColor: 'rgba(34, 197, 94, 0.2)',
         borderColor: 'rgba(34, 197, 94, 1)',

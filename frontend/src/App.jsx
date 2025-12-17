@@ -10,6 +10,7 @@ import ProfilePage from './pages/ProfilePage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
+// Componente de Ruta Privada: Verifica si existe un token
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('apiToken')
   return token ? children : <Navigate to="/login" />
@@ -22,7 +23,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Admin Routes wrapped in Layout */}
+          {/* Rutas de Administrador envueltas en el Layout */}
           <Route
             path="/dashboard"
             element={

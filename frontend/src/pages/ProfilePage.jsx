@@ -7,7 +7,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
 
-    // Form States
+    // Estados del Formulario
     const [personalForm, setPersonalForm] = useState({
         first_name: '',
         last_name: '',
@@ -23,7 +23,7 @@ export default function ProfilePage() {
     })
 
     useEffect(() => {
-        // Load initial data from localStorage
+        // Cargar datos iniciales de localStorage
         const storedUser = localStorage.getItem('userData')
         if (storedUser) {
             const parsed = JSON.parse(storedUser)
@@ -32,7 +32,7 @@ export default function ProfilePage() {
                 first_name: parsed.first_name || '',
                 last_name: parsed.last_name || '',
                 email: parsed.email || '',
-                phone: parsed.telefono || '', // Assuming 'telefono' field
+                phone: parsed.telefono || '', // Asumiendo campo 'telefono'
                 username: parsed.username || ''
             })
         }
@@ -43,14 +43,14 @@ export default function ProfilePage() {
         setLoading(true)
         setMessage(null)
 
-        // Validate
+        // Validar
         if (!personalForm.first_name || !personalForm.last_name || !personalForm.email) {
             setMessage({ type: 'error', text: 'Por favor complete los campos obligatorios.' })
             setLoading(false)
             return
         }
 
-        // Simulate API Call
+        // Simular llamada API
         setTimeout(() => {
             const updatedUser = { ...userData, ...personalForm }
             localStorage.setItem('userData', JSON.stringify(updatedUser))
@@ -77,7 +77,7 @@ export default function ProfilePage() {
             return
         }
 
-        // Simulate API Call
+        // Simular llamada API
         setTimeout(() => {
             setMessage({ type: 'success', text: 'Contraseña actualizada exitosamente.' })
             setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -97,7 +97,7 @@ export default function ProfilePage() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* ID Card / Sidebar */}
+                {/* Tarjeta de ID / Barra lateral */}
                 <div className="md:col-span-1 space-y-6">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20"></div>
@@ -105,7 +105,7 @@ export default function ProfilePage() {
                         <div className="relative relative z-10 flex flex-col items-center">
                             <div className="w-24 h-24 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg mb-4 text-gray-400">
                                 <User size={48} />
-                                {/* Optional: Add camera button overlay */}
+                                {/* Opcional: Agregar botón de cámara */}
                                 {/* <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700 transition-colors">
                                      <Camera size={14} />
                                  </button> */}
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                     </nav>
                 </div>
 
-                {/* Main Content Area */}
+                {/* Área de Contenido Principal */}
                 <div className="md:col-span-2">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8">
                         {message && (

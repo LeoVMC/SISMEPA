@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Download, Search, User, GraduationCap, Shield, Edit, Trash2, ArrowUpDown, X, Save } from 'lucide-react'
 
-// Simple helper to sort
+// Función auxiliar para ordenar
 const sortData = (data, key, direction) => {
     return [...data].sort((a, b) => {
         let valA = key.split('.').reduce((o, i) => o?.[i], a)
@@ -25,7 +25,7 @@ export default function ListadoPage() {
     const [search, setSearch] = useState('')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
-    // Edit State
+    // Estado de Edición
     const [editingItem, setEditingItem] = useState(null)
     const [editForm, setEditForm] = useState({})
     const [cedulaPrefix, setCedulaPrefix] = useState('V')
@@ -41,7 +41,7 @@ export default function ListadoPage() {
 
     useEffect(() => {
         fetchProgramas()
-    }, [token]) // Fetch programs once
+    }, [token]) // Obtener programas una vez
 
     useEffect(() => {
         if (programas.length > 0 || activeTab === 'Administradores') {
@@ -66,7 +66,7 @@ export default function ListadoPage() {
     const fetchData = async () => {
         setLoading(true)
         try {
-            // 1. Fetch Real Data
+            // 1. Obtener Datos Reales
             let url = `${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/`
             const params = new URLSearchParams()
             if (search) params.append('search', search)
@@ -76,8 +76,8 @@ export default function ListadoPage() {
                 headers: { Authorization: token ? `Token ${token}` : undefined }
             }).then(r => r.ok ? r.json() : [])
 
-            // 2. Fetch Fake Data (only if no search or simplistic search simulation)
-            // We fetch always to mix, unless search is specific, but let's fetch to demo
+            // 2. Obtener Datos Falsos (solo si no hay búsqueda o simulación simple)
+            // Obtenemos siempre para mezclar, a menos que la búsqueda sea específica
             const fakeReq = fetch(`https://fakerapi.it/api/v2/persons?_quantity=10&_locale=es_ES`)
                 .then(r => r.ok ? r.json() : { data: [] })
 
@@ -85,29 +85,29 @@ export default function ListadoPage() {
 
             const realResults = Array.isArray(realJson) ? realJson : (realJson.results || [])
 
-            // Normalize Fake Data
+            // Normalizar Datos Falsos
             const fakeResults = (fakeJson.data || []).map((p, idx) => {
                 const randomProg = programas.length > 0 ? programas[Math.floor(Math.random() * programas.length)] : null
                 return {
                     id: `fake-${idx}-${p.id}`,
                     isFake: true,
-                    // Flatten structure to match UI expectation or mimic backend serializer
+                    // Aplanar estructura para coincidir con la UI
                     usuario: {
                         first_name: p.firstname,
                         last_name: p.lastname,
                         email: p.email,
                     },
-                    first_name: p.firstname, // Direct access fallback
+                    first_name: p.firstname, // Acceso directo de respaldo
                     last_name: p.lastname,
                     email: p.email,
                     telefono: p.phone,
                     cedula: `V-${Math.floor(Math.random() * 10000000)}`,
-                    programa: randomProg ? randomProg : 'Ingeniería Demo', // Object or ID, UI handles both usually
+                    programa: randomProg ? randomProg : 'Ingeniería Demo', // Objeto o ID, la UI maneja ambos
                     tipo_contratacion: Math.random() > 0.5 ? 'Tiempo Completo' : 'Tiempo Parcial'
                 }
             })
 
-            // Filter fake results if there is a search term (client side)
+            // Filtrar resultados falsos si hay término de búsqueda (lado cliente)
             let filteredFake = fakeResults
             if (search) {
                 const s = search.toLowerCase()
@@ -158,7 +158,7 @@ export default function ListadoPage() {
         const isFake = String(id).startsWith('fake-')
 
         if (isFake) {
-            // Local deletion simulation
+            // Simulación de eliminación local
             setData(data.filter(item => item.id !== id))
             alert('Usuario (Simulado) eliminado solo de la vista.')
             return
@@ -194,7 +194,7 @@ export default function ListadoPage() {
 
         if (cedulaVal.includes('-')) {
             const parts = cedulaVal.split('-')
-            // Assuming format Prefix-Number
+            // Asumiendo formato Prefijo-Número
             if (['V', 'E', 'J'].includes(parts[0])) {
                 prefix = parts[0]
                 number = parts[1]
@@ -208,7 +208,7 @@ export default function ListadoPage() {
             last_name: userData.last_name || item.last_name || '',
             email: userData.email || item.email || '',
             telefono: item.telefono || '',
-            cedula: number, // Only the number part
+            cedula: number, // Solo la parte numérica
             programa: typeof item.programa === 'object' ? item.programa?.id : item.programa,
             tipo_contratacion: item.tipo_contratacion || 'Tiempo Completo',
         })
@@ -219,7 +219,7 @@ export default function ListadoPage() {
         setSaving(true)
 
         if (editingItem.isFake) {
-            // Simulate Save
+            // Simular Guardado
             setTimeout(() => {
                 setData(data.map(d => {
                     if (d.id === editingItem.id) {
@@ -230,14 +230,14 @@ export default function ListadoPage() {
                         updated.telefono = editForm.telefono
                         updated.cedula = `${cedulaPrefix}-${editForm.cedula}`
 
-                        // Update simple fields
+                        // Actualizar campos simples
                         updated.first_name = editForm.first_name
                         updated.email = editForm.email
                         updated.tipo_contratacion = editForm.tipo_contratacion
 
-                        // Programa update visual
+                        // Actualización visual de Programa
                         if (editForm.programa) {
-                            const prog = programas.find(p => p.id == editForm.programa) // strict check might fail types
+                            const prog = programas.find(p => p.id == editForm.programa) // verificación estricta podría fallar por tipos
                             if (prog) updated.programa = prog
                         }
                         return updated
@@ -257,7 +257,7 @@ export default function ListadoPage() {
 
             const payload = { ...editForm }
 
-            // Format Cedula
+            // Formatear Cédula
             payload.cedula = `${cedulaPrefix}-${editForm.cedula}`
 
             if (!isStudent) {
