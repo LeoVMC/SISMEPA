@@ -150,22 +150,22 @@ export default function ActiveUsersPage() {
                         onClick={() => setFilter('all')}
                         className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'all' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
                     >Todos</button>
-                    {isAdmin && (
-                        <>
-                            <button
-                                onClick={() => setFilter('admins')}
-                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'admins' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                            >Administradores</button>
-                            <button
-                                onClick={() => setFilter('teachers')}
-                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'teachers' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                            >Docentes</button>
-                        </>
-                    )}
                     <button
                         onClick={() => setFilter('students')}
                         className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'students' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
                     >Estudiantes</button>
+                    {isAdmin && (
+                        <>
+                            <button
+                                onClick={() => setFilter('teachers')}
+                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'teachers' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                            >Docentes</button>
+                            <button
+                                onClick={() => setFilter('admins')}
+                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'admins' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                            >Administradores</button>
+                        </>
+                    )}
                 </div>
 
                 <div className="relative w-full md:w-64">
