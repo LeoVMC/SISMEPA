@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterUserPage from './pages/RegisterUserPage'
 import PensumPage from './pages/PensumPage'
 import ListadoPage from './pages/ListadoPage'
+import FakerPage from './pages/FakerPage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -57,6 +58,16 @@ export default function App() {
               <PrivateRoute>
                 <AdminLayout>
                   <PensumPage />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/faker-demo"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <FakerPage />
                 </AdminLayout>
               </PrivateRoute>
             }

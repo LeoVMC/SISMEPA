@@ -40,9 +40,14 @@ export default function ListadoPage() {
     const activeConfig = TABS.find(t => t.id === activeTab)
 
     useEffect(() => {
-        fetchData()
         fetchProgramas()
-    }, [activeTab, token, search])
+    }, [token]) // Fetch programs once
+
+    useEffect(() => {
+        if (programas.length > 0 || activeTab === 'Administradores') {
+            fetchData()
+        }
+    }, [activeTab, token, search, programas])
 
     const fetchProgramas = async () => {
         try {
@@ -61,18 +66,60 @@ export default function ListadoPage() {
     const fetchData = async () => {
         setLoading(true)
         try {
+            // 1. Fetch Real Data
             let url = `${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/`
             const params = new URLSearchParams()
             if (search) params.append('search', search)
             if (search) url += `?${params.toString()}`
 
-            const res = await fetch(url, {
+            const realReq = fetch(url, {
                 headers: { Authorization: token ? `Token ${token}` : undefined }
+            }).then(r => r.ok ? r.json() : [])
+
+            // 2. Fetch Fake Data (only if no search or simplistic search simulation)
+            // We fetch always to mix, unless search is specific, but let's fetch to demo
+            const fakeReq = fetch(`https://fakerapi.it/api/v2/persons?_quantity=10&_locale=es_ES`)
+                .then(r => r.ok ? r.json() : { data: [] })
+
+            const [realJson, fakeJson] = await Promise.all([realReq, fakeReq])
+
+            const realResults = Array.isArray(realJson) ? realJson : (realJson.results || [])
+
+            // Normalize Fake Data
+            const fakeResults = (fakeJson.data || []).map((p, idx) => {
+                const randomProg = programas.length > 0 ? programas[Math.floor(Math.random() * programas.length)] : null
+                return {
+                    id: `fake-${idx}-${p.id}`,
+                    isFake: true,
+                    // Flatten structure to match UI expectation or mimic backend serializer
+                    usuario: {
+                        first_name: p.firstname,
+                        last_name: p.lastname,
+                        email: p.email,
+                    },
+                    first_name: p.firstname, // Direct access fallback
+                    last_name: p.lastname,
+                    email: p.email,
+                    telefono: p.phone,
+                    cedula: `V-${Math.floor(Math.random() * 10000000)}`,
+                    programa: randomProg ? randomProg : 'Ingeniería Demo', // Object or ID, UI handles both usually
+                    tipo_contratacion: Math.random() > 0.5 ? 'Tiempo Completo' : 'Tiempo Parcial'
+                }
             })
-            if (res.ok) {
-                const json = await res.json()
-                setData(json.results || json)
+
+            // Filter fake results if there is a search term (client side)
+            let filteredFake = fakeResults
+            if (search) {
+                const s = search.toLowerCase()
+                filteredFake = fakeResults.filter(item =>
+                    item.usuario.first_name.toLowerCase().includes(s) ||
+                    item.usuario.last_name.toLowerCase().includes(s) ||
+                    item.usuario.email.toLowerCase().includes(s)
+                )
             }
+
+            setData([...realResults, ...filteredFake])
+
         } catch (error) {
             console.error(error)
         } finally {
@@ -87,6 +134,15 @@ export default function ListadoPage() {
 
     const handleDelete = async (id) => {
         if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return
+
+        const isFake = String(id).startsWith('fake-')
+
+        if (isFake) {
+            // Local deletion simulation
+            setData(data.filter(item => item.id !== id))
+            alert('Usuario (Simulado) eliminado solo de la vista.')
+            return
+        }
 
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/${id}/`, {
@@ -142,6 +198,39 @@ export default function ListadoPage() {
         e.preventDefault()
         setSaving(true)
 
+        if (editingItem.isFake) {
+            // Simulate Save
+            setTimeout(() => {
+                setData(data.map(d => {
+                    if (d.id === editingItem.id) {
+                        const updated = { ...d }
+                        updated.usuario.first_name = editForm.first_name
+                        updated.usuario.last_name = editForm.last_name
+                        updated.usuario.email = editForm.email
+                        updated.telefono = editForm.telefono
+                        updated.cedula = `${cedulaPrefix}-${editForm.cedula}`
+
+                        // Update simple fields
+                        updated.first_name = editForm.first_name
+                        updated.email = editForm.email
+                        updated.tipo_contratacion = editForm.tipo_contratacion
+
+                        // Programa update visual
+                        if (editForm.programa) {
+                            const prog = programas.find(p => p.id == editForm.programa) // strict check might fail types
+                            if (prog) updated.programa = prog
+                        }
+                        return updated
+                    }
+                    return d
+                }))
+                setSaving(false)
+                setEditingItem(null)
+                alert('Cambios guardados localmente (Simulación Faker)')
+            }, 800)
+            return
+        }
+
         try {
             const isStudent = activeTab === 'Estudiantes'
             const isDocente = activeTab === 'Docentes'
@@ -179,7 +268,7 @@ export default function ListadoPage() {
             console.error(e)
             alert('Error de conexión')
         } finally {
-            setSaving(false)
+            if (!editingItem.isFake) setSaving(false)
         }
     }
 
@@ -220,6 +309,7 @@ export default function ListadoPage() {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm uppercase">
+
                             <SortableHeader label="Nombres" sortKey="usuario.first_name" />
                             <SortableHeader label="Apellidos" sortKey="usuario.last_name" />
                             <SortableHeader label="Cédula" sortKey="cedula" />
@@ -252,10 +342,11 @@ export default function ListadoPage() {
                             const contratacion = item.tipo_contratacion || '-'
 
                             return (
-                                <tr key={item.id || idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800">
+                                <tr key={item.id || idx} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800 ${item.isFake ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}>
+
                                     <td className="p-4">{firstName}</td>
                                     <td className="p-4">{lastName}</td>
-                                    <td className="p-4">{cedula}</td>
+                                    <td className="p-4 font-mono text-sm">{cedula}</td>
                                     <td className="p-4">{telefono}</td>
                                     <td className="p-4">{email}</td>
                                     {isStudent && <td className="p-4">{programa_nombre}</td>}
@@ -286,7 +377,10 @@ export default function ListadoPage() {
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                     <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-white">Editar Usuario</h3>
+                        <div className='flex items-center gap-2'>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">Editar Usuario</h3>
+                            {editingItem.isFake && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-200">Simulado</span>}
+                        </div>
                         <button onClick={() => setEditingItem(null)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                             <X size={24} />
                         </button>
@@ -421,7 +515,7 @@ export default function ListadoPage() {
             <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Listados del Sistema</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Gestión y visualización de usuarios por rol.</p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Gestión y visualización de usuarios por rol (Integración Híbrida).</p>
                 </div>
                 <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                     {TABS.map(tab => {

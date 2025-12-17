@@ -2002,3 +2002,24 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-11 13:16:49,418] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-11 13:16:49,428] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-11 13:16:49,437] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-16 23:24:56,896] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-16 23:25:12,553] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-16 23:25:12,564] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-16 23:25:12,614] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-16 23:25:12,674] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:30:39,487] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:30:39,499] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:30:39,551] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:30:39,604] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:03,654] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:03,671] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:03,723] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:03,777] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:23,345] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:23,356] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:25,355] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:36:25,366] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:37:01,510] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:37:01,521] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:37:01,571] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 01:37:01,623] WARNING django.request: Not Found: /api/estudiantes/1/progreso/

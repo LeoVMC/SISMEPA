@@ -19,6 +19,12 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [studentId, setStudentId] = useState(1)
 
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+  const isAdmin = userData.username === 'admin' || userData.is_staff || userData.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
+  const isTeacher = userData.groups?.some(g => g.name === 'Docente' || g.name === 'Profesor')
+  const showMonitoring = isAdmin || isTeacher
+  const dashboardTitle = showMonitoring ? 'Monitoreo de Avance Educativo' : 'Mi Progreso Educativo'
+
   useEffect(() => {
     const fetchData = async (id = studentId) => {
       try {
@@ -67,7 +73,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 md:p-6 transition-colors duration-200">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">Monitoreo de Avance Educativo</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">{dashboardTitle}</h1>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>

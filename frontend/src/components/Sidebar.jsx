@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Sparkles } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -17,9 +17,13 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const userData = JSON.parse(localStorage.getItem('userData') || '{}')
     const isAdmin = userData.username === 'admin' || userData.is_staff || userData.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
+    const isTeacher = userData.groups?.some(g => g.name === 'Docente' || g.name === 'Profesor')
+    const showMonitoring = isAdmin || isTeacher
+    const dashboardLabel = showMonitoring ? 'Monitoreo' : 'Progreso'
 
     const menuItems = [
-        { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { path: '/dashboard', icon: LayoutDashboard, label: dashboardLabel },
+        { path: '/faker-demo', icon: Sparkles, label: 'Demo Generador' },
         { path: '/admin/pensum', icon: FileText, label: 'Visualizar Pensum' },
     ]
 
