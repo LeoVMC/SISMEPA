@@ -77,8 +77,12 @@ export default function ListadoPage() {
             }).then(r => r.ok ? r.json() : [])
 
             // 2. Obtener Datos Falsos (solo si no hay búsqueda o simulación simple)
-            // Obtenemos siempre para mezclar, a menos que la búsqueda sea específica
-            const fakeReq = fetch(`https://fakerapi.it/api/v2/persons?_quantity=10&_locale=es_ES`)
+            // Usar _seed para mantener datos fijos pero diferentes por pestaña
+            let seed = 12345
+            if (activeTab === 'Docentes') seed = 67890
+            if (activeTab === 'Administradores') seed = 11223
+
+            const fakeReq = fetch(`https://fakerapi.it/api/v2/persons?_quantity=10&_locale=es_ES&_seed=${seed}`)
                 .then(r => r.ok ? r.json() : { data: [] })
 
             const [realJson, fakeJson] = await Promise.all([realReq, fakeReq])
@@ -87,7 +91,13 @@ export default function ListadoPage() {
 
             // Normalizar Datos Falsos
             const fakeResults = (fakeJson.data || []).map((p, idx) => {
-                const randomProg = programas.length > 0 ? programas[Math.floor(Math.random() * programas.length)] : null
+                // Lógica determinista basada en semilla e índice para evitar variaciones al recargar
+                const uniqueVal = seed + idx
+
+                const randomProg = programas.length > 0 ? programas[uniqueVal % programas.length] : null
+                const cedulaNum = 10000000 + (uniqueVal * 3456) % 20000000
+                const esCompleto = uniqueVal % 2 === 0
+
                 return {
                     id: `fake-${idx}-${p.id}`,
                     isFake: true,
@@ -101,9 +111,9 @@ export default function ListadoPage() {
                     last_name: p.lastname,
                     email: p.email,
                     telefono: p.phone,
-                    cedula: `V-${Math.floor(Math.random() * 10000000)}`,
+                    cedula: `V-${cedulaNum}`,
                     programa: randomProg ? randomProg : 'Ingeniería Demo', // Objeto o ID, la UI maneja ambos
-                    tipo_contratacion: Math.random() > 0.5 ? 'Tiempo Completo' : 'Tiempo Parcial'
+                    tipo_contratacion: esCompleto ? 'Tiempo Completo' : 'Tiempo Parcial'
                 }
             })
 
@@ -535,7 +545,7 @@ export default function ListadoPage() {
             <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Listados del Sistema</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Gestión y visualización de usuarios por rol (Integración Híbrida).</p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Gestión y visualización de usuarios por rol.</p>
                 </div>
                 <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                     {TABS.map(tab => {
