@@ -21,6 +21,10 @@ export default function Sidebar({ isOpen, onClose }) {
     const showMonitoring = isAdmin || isTeacher
     const dashboardLabel = showMonitoring ? 'Monitoreo' : 'Progreso'
 
+    let panelLabel = 'Panel Estudiante'
+    if (isAdmin) panelLabel = 'Panel Administrador'
+    else if (isTeacher) panelLabel = 'Panel Docente'
+
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: dashboardLabel },
         { path: '/faker-demo', icon: Sparkles, label: 'Demo Generador' },
@@ -44,7 +48,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                         SISMEPA
                     </h1>
-                    <p className="text-xs text-gray-400 mt-1">Panel Administrativo</p>
+                    <p className="text-xs text-gray-400 mt-1">{panelLabel}</p>
                 </div>
                 {/* Botón cerrar para móvil */}
                 <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">

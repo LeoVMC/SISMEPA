@@ -32,9 +32,9 @@ export default function ListadoPage() {
     const [saving, setSaving] = useState(false)
 
     const TABS = [
-        { id: 'Estudiantes', label: 'Estudiantes', icon: GraduationCap, endpoint: 'estudiantes', download: 'reporte_academico.xlsx' },
-        { id: 'Docentes', label: 'Docentes', icon: User, endpoint: 'docentes', download: 'reporte_docentes.xlsx' },
-        { id: 'Administradores', label: 'Administradores', icon: Shield, endpoint: 'administradores', download: 'reporte_administradores.xlsx' },
+        { id: 'Estudiantes', label: 'Estudiantes', icon: GraduationCap, endpoint: 'estudiantes', download: 'listado_estudiantes.xlsx' },
+        { id: 'Docentes', label: 'Docentes', icon: User, endpoint: 'docentes', download: 'listado_docentes.xlsx' },
+        { id: 'Administradores', label: 'Administradores', icon: Shield, endpoint: 'administradores', download: 'listado_admins.xlsx' },
     ]
 
     const activeConfig = TABS.find(t => t.id === activeTab)
@@ -127,9 +127,29 @@ export default function ListadoPage() {
         }
     }
 
-    const handleDownload = () => {
-        const url = `${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/reporte_excel/`
-        window.open(url, '_blank')
+    const handleDownload = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/${activeConfig.endpoint}/reporte_excel/`, {
+                headers: { Authorization: token ? `Token ${token}` : undefined }
+            })
+
+            if (res.ok) {
+                const blob = await res.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = activeConfig.download
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+            } else {
+                alert('Error al descargar el listado')
+            }
+        } catch (e) {
+            console.error(e)
+            alert('Error de conexión al descargar')
+        }
     }
 
     const handleDelete = async (id) => {
