@@ -2036,3 +2036,20 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-17 04:08:17,187] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-17 04:08:17,237] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-17 21:06:20,371] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-17 21:20:22,880] WARNING django.request: Bad Request: /api/auth/login/
+[2025-12-17 21:20:27,469] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:27,520] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:27,581] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:27,642] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:35,595] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:35,605] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:35,658] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 21:20:35,709] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:04,325] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:04,375] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:04,434] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:04,488] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:42,898] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:42,912] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:42,963] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-17 23:23:43,021] WARNING django.request: Not Found: /api/estudiantes/1/progreso/

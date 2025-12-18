@@ -1,8 +1,16 @@
-version: '3.8'
+# ==============================================================================
+# SISMEPA - Docker Compose
+# ==============================================================================
+# Ejecutar: docker-compose up --build
+# ==============================================================================
 
 services:
+  # ----------------------------------------------------------------------------
+  # Base de Datos PostgreSQL
+  # ----------------------------------------------------------------------------
   db:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: sismepa-db
     environment:
       POSTGRES_DB: unefa_monitoring_db
       POSTGRES_USER: unefa_user
@@ -11,23 +19,49 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unefa_user -d unefa_monitoring_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
+  # ----------------------------------------------------------------------------
+  # Redis (Cola de Tareas)
+  # ----------------------------------------------------------------------------
   redis:
-    image: redis:7
+    image: redis:7-alpine
+    container_name: sismepa-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
+  # ----------------------------------------------------------------------------
+  # Backend Django
+  # ----------------------------------------------------------------------------
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sismepa-backend
     volumes:
       - .:/app
+      - ./media:/app/media
     ports:
       - "8000:8000"
-    restart: unless-stopped
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      - SECRET_KEY=docker-dev-secret-key-change-in-production
+      - DJANGO_DEBUG=True
       - POSTGRES_DB=unefa_monitoring_db
       - POSTGRES_USER=unefa_user
       - POSTGRES_PASSWORD=123456
@@ -35,26 +69,58 @@ services:
       - POSTGRES_PORT=5432
       - DATABASE_URL=postgres://unefa_user:123456@db:5432/unefa_monitoring_db
       - REDIS_URL=redis://redis:6379/0
+    restart: unless-stopped
 
+  # ----------------------------------------------------------------------------
+  # Frontend React (Vite)
+  # ----------------------------------------------------------------------------
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sismepa-frontend
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8000/api
-
-  huey:
-    build: .
-    command: >
-      sh -c "python -m pip install --no-deps huey redis && huey_consumer.py gestion.tasks.HUEY"
+      - VITE_API_URL=http://localhost:8000/api
     depends_on:
       - backend
-      - redis
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
+  # Huey Worker (Cola de Tareas Asíncronas)
+  # ----------------------------------------------------------------------------
+  huey:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sismepa-huey
+    command: python -m huey.bin.huey_consumer gestion.tasking.tasks.HUEY -w 2 -k thread
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - SECRET_KEY=docker-dev-secret-key-change-in-production
+      - DJANGO_DEBUG=True
+      - POSTGRES_DB=unefa_monitoring_db
+      - POSTGRES_USER=unefa_user
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgres://unefa_user:123456@db:5432/unefa_monitoring_db
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - .:/app
+    restart: unless-stopped
 
+# ------------------------------------------------------------------------------
+# Volúmenes Persistentes
+# ------------------------------------------------------------------------------
 volumes:
   postgres_data:
+    name: sismepa-postgres-data
