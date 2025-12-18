@@ -1,4 +1,4 @@
-# SISMEPA - Sistema de Monitoreo de Estudiantes de Programas Académicos
+# SISMEPA - Sistema de Monitoreo de Avance Educativo Universitario y Prelaciones Académicas
 
 Sistema web para el seguimiento y monitoreo del avance académico de estudiantes universitarios.
 
