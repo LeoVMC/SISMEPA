@@ -1,11 +1,16 @@
+"""
+Script para poblar el pensum de Ingeniería de Telecomunicaciones.
+Ejecutar desde la raíz del proyecto: python scripts/populate_telecom.py
+"""
 import os
 import sys
-import django
 
-# Setup Django Environment
-# Assuming script is in /app/scripts/ and project root is /app/
-# cwd in docker is /app/ usually.
-sys.path.append(os.getcwd()) 
+# Agregar directorio raíz del proyecto al path (funciona desde cualquier ubicación)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
+import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sismepa.settings")
 django.setup()
 

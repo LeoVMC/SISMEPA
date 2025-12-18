@@ -1,9 +1,16 @@
+"""
+Script para depurar planificaciones.
+Ejecutar desde la raíz del proyecto: python scripts/debug_plans.py
+"""
 import os
 import sys
-sys.path.append('/app')
-import django
-from django.conf import settings
 
+# Agregar directorio raíz del proyecto al path (funciona desde cualquier ubicación)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
+
+import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sismepa.settings')
 django.setup()
 
