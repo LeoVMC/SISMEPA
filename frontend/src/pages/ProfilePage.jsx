@@ -212,7 +212,7 @@ export default function ProfilePage() {
                                                 value={personalForm.phone}
                                                 onChange={e => setPersonalForm({ ...personalForm, phone: e.target.value })}
                                                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                                placeholder="+58 ..."
+                                                placeholder="04141234567"
                                             />
                                         </div>
                                     </div>
