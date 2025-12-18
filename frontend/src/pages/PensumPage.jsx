@@ -404,7 +404,7 @@ export default function PensumPage() {
         setActionMessage(null)
 
         try {
-            // first get the plan id
+            // primero obtener el id del plan
             const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?asignatura__codigo=${selectedSubject.code}`, {
                 headers: { Authorization: `Token ${token}` }
             })
@@ -817,7 +817,7 @@ export default function PensumPage() {
         )
     }
 
-    // Lock body scroll when modal is open
+    // Bloquear scroll del body cuando el modal está abierto
 
 
     // --- VISTA DIAGRAMA DE FLUJO PENSUM ---
@@ -885,10 +885,10 @@ export default function PensumPage() {
                                 </div>
 
                                 {semester.subjects.map((subject, subIndex) => {
-                                    // Admins see all assignments, Teachers see only theirs
+                                    // Admins ven todas las asignaciones, Docentes solo las suyas
                                     const status = getSubjectStatus(subject.code)
                                     const isAdmin = isAdminUser()
-                                    // Admins see all assignments, Teachers see only theirs
+                                    // Admins ven todas las asignaciones, Docentes solo las suyas
                                     const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
 
                                     const showAssignedBorder = (isAdmin && status.assigned) || (isDocente && status.isAssignedToMe)

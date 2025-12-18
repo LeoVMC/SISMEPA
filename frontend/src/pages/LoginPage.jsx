@@ -37,7 +37,7 @@ export default function LoginPage() {
                 if (token) {
                     localStorage.setItem('apiToken', token)
 
-                    // Fetch user details to determine role
+                    // Obtener detalles del usuario para determinar el rol
                     try {
                         const userRes = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/`, {
                             headers: { 'Authorization': `Token ${token}` }
@@ -46,11 +46,11 @@ export default function LoginPage() {
                             const userData = await userRes.json()
                             localStorage.setItem('userData', JSON.stringify(userData))
 
-                            // Role-based redirection logic
+                            // Lógica de redirección basada en rol
                             if (userData.username === 'admin' || userData.is_staff) {
                                 navigate('/dashboard')
                             } else {
-                                // Placeholder for student/teacher dashboard
+                                // Redirigir a dashboard para estudiante/docente
                                 navigate('/dashboard')
                             }
                         } else {
@@ -63,7 +63,7 @@ export default function LoginPage() {
                     setError('Error: No se recibió un token válido.')
                 }
             } else {
-                // Handle specific error messages
+                // Manejar mensajes de error específicos
                 if (json.non_field_errors) {
                     setError(json.non_field_errors.join(' '))
                 } else {

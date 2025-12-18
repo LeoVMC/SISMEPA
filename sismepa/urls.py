@@ -1,5 +1,5 @@
 """
-URL configuration for sismepa project.
+Configuración de URLs para el proyecto SISMEPA.
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -28,7 +28,7 @@ router.register(r'administradores', AdminViewSet, basename='administradores')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    # dj-rest-auth endpoints (login/logout/password reset)
+    # Endpoints de dj-rest-auth (login/logout/restablecimiento de contraseña)
     path('api/auth/', include('dj_rest_auth.urls')),
     path('', RedirectView.as_view(url='/api/', permanent=False)),
 ]

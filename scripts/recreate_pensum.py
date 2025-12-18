@@ -18,31 +18,31 @@ from gestion.models import Programa, Asignatura
 from django.db import transaction
 
 def run():
-    print("Starting Pensum Recreation for Ingeniería de Sistemas (Strict Order & Full Names)...")
+    print("Iniciando recreación del Pensum de Ingeniería de Sistemas (Orden Estricto y Nombres Completos)...")
 
     with transaction.atomic():
-        # 1. Get or Create Program
+        # 1. Obtener o Crear Programa
         programa, created = Programa.objects.get_or_create(
             nombre_programa="Ingeniería de Sistemas",
             defaults={"duracion_anios": 5, "titulo_otorgado": "Ingeniero de Sistemas"}
         )
         if created:
-            print("Created new program: Ingeniería de Sistemas")
+            print("Programa creado: Ingeniería de Sistemas")
         else:
-            print("Found existing program: Ingeniería de Sistemas")
+            print("Programa encontrado: Ingeniería de Sistemas")
 
-        # 2. Delete existing subjects
+        # 2. Eliminar asignaturas existentes
         deleted_count, _ = Asignatura.objects.filter(programa=programa).delete()
-        print(f"Deleted {deleted_count} existing subjects.")
+        print(f"Eliminadas {deleted_count} asignaturas existentes.")
 
-        # 3. Define Data
-        # Format: (Code, Name, UC, Semester, [Prereq_Codes])
-        # Order reflects the vertical position in the flowchart columns
+        # 3. Definir Datos
+        # Formato: (Código, Nombre, UC, Semestre, [Códigos_Prelaciones])
+        # El orden refleja la posición vertical en las columnas del flujograma
         subjects_data = [
             # SEMESTRE I
             ("MAT-21215", "MATEMÁTICA I", 5, 1, []),
             ("MAT-21524", "GEOMETRÍA ANALÍTICA", 4, 1, []),
-            ("ADG-25123", "HOMBRE, SOCIEDAD, CIENCIA Y TECNOLOGÍA", 3, 1, []), # Full Name Updated
+            ("ADG-25123", "HOMBRE, SOCIEDAD, CIENCIA Y TECNOLOGÍA", 3, 1, []), # Nombre completo actualizado
             ("MAT-21212", "DIBUJO", 2, 1, []),
             ("ADG-25132", "EDUCACIÓN AMBIENTAL", 2, 1, []),
             ("IDM-24113", "INGLÉS I", 3, 1, []),
@@ -81,10 +81,10 @@ def run():
 
             # SEMESTRE V
             ("MAT-30925", "INVESTIGACIÓN DE OPERACIONES", 5, 5, ["MAT-31714"]),
-            ("MAT-31104", "TEORÍA DE GRAFOS", 4, 5, ["MAT-31214", "MAT-21414"]), # Logic + Prob
-            ("SYC-32514", "ANÁLISIS DE SISTEMAS", 4, 5, ["SYC-32114"]), # Arrow from Teoria
+            ("MAT-31104", "TEORÍA DE GRAFOS", 4, 5, ["MAT-31214", "MAT-21414"]), # Lógica + Prob
+            ("SYC-32514", "ANÁLISIS DE SISTEMAS", 4, 5, ["SYC-32114"]), # Flecha desde Teoría
             ("ELN-30514", "CIRCUITOS LÓGICOS", 4, 5, ["MAT-31214"]),
-            ("SYC-32614", "BASES DE DATOS", 4, 5, ["SYC-32114", "SYC-32414"]), # Teoria + Procesamiento
+            ("SYC-32614", "BASES DE DATOS", 4, 5, ["SYC-32114", "SYC-32414"]), # Teoría + Procesamiento
             ("SYC-32235", "LENGUAJE DE PROGRAMACIÓN II", 5, 5, ["SYC-32225"]),
             ("CAT-BOL01", "CÁTEDRA BOLIVARIANA I", 0, 5, []),
             ("DIN-31153", "DEFENSA INTEGRAL DE LA NACIÓN V", 3, 5, ["DIN-31143"]),
@@ -112,7 +112,7 @@ def run():
 
             # SEMESTRE VIII
             ("MAT-31314", "TEORÍA DE DECISIONES", 4, 8, ["MAT-30945"]),
-            ("CJU-37314", "MARCO LEGAL PARA EL EJERCICIO DE LA INGENIERÍA", 4, 8, []), # Full Name Updated
+            ("CJU-37314", "MARCO LEGAL PARA EL EJERCICIO DE LA INGENIERÍA", 4, 8, []), # Nombre completo actualizado
             ("SYC-32814", "AUDITORÍA DE SISTEMAS", 4, 8, ["SYC-32714"]),
             ("TTC-31154", "TELEPROCESOS", 4, 8, ["SYC-31644"]),
             ("PRO-01", "PROYECTO DE SERVICIO COMUNITARIO", 0, 8, ["TAI-01"]),
@@ -121,10 +121,10 @@ def run():
             ("DIN-31183", "DEFENSA INTEGRAL DE LA NACIÓN VIII", 3, 8, ["DIN-31173"]),
 
             # SEMESTRE IX
-            ("PSI-30010", "PASANTÍA || TRABAJO ESPECIAL DE GRADO", 10, 9, []), # Requires all previous credits
+            ("PSI-30010", "PASANTÍA || TRABAJO ESPECIAL DE GRADO", 10, 9, []), # Requiere todos los créditos previos
         ]
 
-        # 4. Insert Subjects
+        # 4. Insertar Asignaturas
         created_subjects = {}
         for idx, (code, name, uc, sem, _) in enumerate(subjects_data, 1):
             subj = Asignatura.objects.create(
@@ -133,13 +133,13 @@ def run():
                 creditos=uc,
                 semestre=sem,
                 programa=programa,
-                orden=idx # Setting explicit order
+                orden=idx # Estableciendo orden explícito
             )
             created_subjects[code] = subj
-            print(f"Created {code}: {name} (Order: {idx})")
+            print(f"Creada {code}: {name} (Orden: {idx})")
 
-        # 5. Link Prerequisites
-        print("Linking prerequisites...")
+        # 5. Vincular Prelaciones
+        print("Vinculando prelaciones...")
         for code, _, _, _, prereqs in subjects_data:
             if prereqs:
                 target = created_subjects[code]
@@ -148,6 +148,6 @@ def run():
                     if p_code in created_subjects:
                         target.prelaciones.add(created_subjects[p_code])
                     else:
-                        print(f"WARNING: Prerequisite {p_code} not found for {code}")
+                        print(f"ADVERTENCIA: Prelación {p_code} no encontrada para {code}")
 
-    print("Success! Pensum recreated with correct names and order.")
+    print("¡Éxito! Pensum recreado con nombres y orden correctos.")

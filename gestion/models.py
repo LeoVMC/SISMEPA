@@ -1,7 +1,12 @@
+"""
+Modelos de datos para la aplicación de gestión académica SISMEPA.
+"""
 from django.db import models
 from django.conf import settings
 
+
 class PeriodoAcademico(models.Model):
+    """Representa un período académico (semestre/trimestre)."""
     nombre_periodo = models.CharField(max_length=50)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
@@ -11,7 +16,9 @@ class PeriodoAcademico(models.Model):
     def __str__(self):
         return self.nombre_periodo
 
+
 class Programa(models.Model):
+    """Representa un programa académico (carrera universitaria)."""
     nombre_programa = models.CharField(max_length=200)
     titulo_otorgado = models.CharField(max_length=200)
     duracion_anios = models.IntegerField()
@@ -19,7 +26,9 @@ class Programa(models.Model):
     def __str__(self):
         return self.nombre_programa
 
+
 class Asignatura(models.Model):
+    """Representa una asignatura/materia del pensum."""
     nombre_asignatura = models.CharField(max_length=200)
     codigo = models.CharField(max_length=20)
     creditos = models.IntegerField()
@@ -37,9 +46,11 @@ class Asignatura(models.Model):
     class Meta:
         unique_together = ('codigo', 'programa')
 
+
 class Seccion(models.Model):
+    """Representa una sección de una asignatura con su docente asignado."""
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE, related_name='secciones')
-    codigo_seccion = models.CharField(max_length=10) # ej., D1, D2...
+    codigo_seccion = models.CharField(max_length=10)  # ej., D1, D2...
     docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='secciones_asignadas')
 
     class Meta:
@@ -49,7 +60,9 @@ class Seccion(models.Model):
         docente_name = self.docente.get_full_name() if self.docente else "Sin asignar"
         return f"{self.asignatura.nombre_asignatura} - {self.codigo_seccion} ({docente_name})"
 
+
 class Estudiante(models.Model):
+    """Representa un estudiante inscrito en un programa académico."""
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE)
     cedula = models.CharField(max_length=20, unique=True)
@@ -64,6 +77,7 @@ class Estudiante(models.Model):
         return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
 
     def calcular_avance(self):
+        """Calcula el porcentaje de avance académico del estudiante."""
         from django.apps import apps
         DetalleInscripcion = apps.get_model('gestion', 'DetalleInscripcion')
         
@@ -82,7 +96,9 @@ class Estudiante(models.Model):
         
         return round((aprobadas / total_asignaturas) * 100, 2)
 
+
 class Docente(models.Model):
+    """Representa un docente/profesor."""
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
@@ -96,7 +112,9 @@ class Docente(models.Model):
         name = self.usuario.get_full_name()
         return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
 
+
 class Administrador(models.Model):
+    """Representa un administrador del sistema."""
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
@@ -105,28 +123,38 @@ class Administrador(models.Model):
         name = self.usuario.get_full_name()
         return f"{name} ({self.cedula})" if name else f"{self.usuario.username} - {self.cedula}"
 
+
 class Inscripcion(models.Model):
+    """Representa la inscripción de un estudiante en un período académico."""
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
     periodo = models.ForeignKey(PeriodoAcademico, on_delete=models.CASCADE)
     fecha_inscripcion = models.DateTimeField(auto_now_add=True)
 
+
 class DetalleInscripcion(models.Model):
+    """Detalle de inscripción: vincula estudiante con asignaturas y notas."""
     inscripcion = models.ForeignKey(Inscripcion, on_delete=models.CASCADE, related_name='detalles')
     asignatura = models.ForeignKey(Asignatura, on_delete=models.PROTECT)
     nota_final = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     estatus = models.CharField(max_length=20, default='CURSANDO')
 
+
 class DocumentoCalificaciones(models.Model):
+    """Documento de calificaciones subido por un estudiante."""
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, related_name='documentos_calificaciones')
     archivo = models.FileField(upload_to='calificaciones/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+
 class Pensum(models.Model):
+    """Documento del pensum de un programa académico."""
     programa = models.ForeignKey(Programa, on_delete=models.CASCADE, related_name='pensums')
     archivo = models.FileField(upload_to='pensums/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+
 class Planificacion(models.Model):
+    """Planificación de una asignatura subida por un docente."""
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE, related_name='planificaciones')
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     archivo = models.FileField(upload_to='planificaciones/')

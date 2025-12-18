@@ -2053,3 +2053,11 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-17 23:23:42,912] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-17 23:23:42,963] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-17 23:23:43,021] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
+[2025-12-18 21:53:38,364] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-18 17:53:39,106] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-18 17:54:37,263] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-18 17:54:37,974] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-18 17:54:39,198] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-18 17:54:39,869] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-18 17:55:00,422] INFO django.utils.autoreload: /app/gestion/permissions.py changed, reloading.
+[2025-12-18 17:55:01,091] INFO django.utils.autoreload: Watching for file changes with StatReloader

@@ -17,7 +17,7 @@ export default function RegisterUserPage() {
                     setProgramas(data)
                 }
             } catch (e) {
-                console.error("Error fetching programs", e)
+                console.error("Error al obtener programas", e)
             }
         }
         fetchProgramas()
@@ -40,7 +40,7 @@ export default function RegisterUserPage() {
         const formattedCedula = `${cedulaPrefix}-${rawCedula}`
 
         const data = {
-            username: formattedCedula, // Use full cedula as username
+            username: formattedCedula, // Usar cédula completa como nombre de usuario
             password: form.password.value,
             email: form.email.value,
             first_name: form.first_name.value,
