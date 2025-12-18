@@ -145,7 +145,7 @@ export default function ActiveUsersPage() {
 
             {/* Filtros y Búsqueda */}
             <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row gap-4 justify-between">
-                <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg self-start">
+                <div className="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full md:w-auto self-start">
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'all' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}

@@ -257,7 +257,7 @@ const Dashboard = () => {
                         <div key={subj.id}>
                           <button
                             onClick={() => setExpandedSubject(expandedSubject === subj.id ? null : subj.id)}
-                            className="w-full flex items-center justify-between p-2 pl-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                            className="w-full flex items-center justify-between p-2 pl-4 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
                           >
                             <span>{subj.name}</span>
                             {expandedSubject === subj.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}

@@ -843,34 +843,35 @@ export default function PensumPage() {
                 </button>
             </div>
 
-            <div className="flex-1 overflow-x-auto pb-4">
-                {/* Visual Legend */}
-                {(() => {
-                    const isAdmin = isAdminUser()
-                    const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
+            {/* Visual Legend */}
+            {(() => {
+                const isAdmin = isAdminUser()
+                const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
 
-                    return (
-                        <div className="flex flex-wrap gap-4 px-1 mb-4 text-xs font-medium text-gray-500 dark:text-gray-400">
-                            {/* Green Border Legend (Admin/Docente Only) */}
-                            {(isAdmin || isDocente) && (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded border-2 border-green-500 bg-white dark:bg-gray-800"></div>
-                                    <span>{isAdmin ? 'Asignatura con Docente Asignado' : 'Asignatura Asignada a Mí'}</span>
-                                </div>
-                            )}
-
-                            {/* Green Check Legend (All Users) */}
+                return (
+                    <div className="flex flex-wrap gap-4 px-1 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        {/* Green Border Legend (Admin/Docente Only) */}
+                        {(isAdmin || isDocente) && (
                             <div className="flex items-center gap-2">
-                                <div className="relative w-4 h-4 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                                    <div className="absolute -bottom-1 -right-1 text-green-500 bg-green-50 dark:bg-green-900/50 rounded-full p-[1px]">
-                                        <CheckCircle size={10} strokeWidth={3} />
-                                    </div>
-                                </div>
-                                <span>Planificación Cargada</span>
+                                <div className="w-4 h-4 rounded border-2 border-green-500 bg-white dark:bg-gray-800"></div>
+                                <span>{isAdmin ? 'Asignatura con Docente Asignado' : 'Asignatura Asignada a Mí'}</span>
                             </div>
+                        )}
+
+                        {/* Green Check Legend (All Users) */}
+                        <div className="flex items-center gap-2">
+                            <div className="relative w-4 h-4 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                                <div className="absolute -bottom-1 -right-1 text-green-500 bg-green-50 dark:bg-green-900/50 rounded-full p-[1px]">
+                                    <CheckCircle size={10} strokeWidth={3} />
+                                </div>
+                            </div>
+                            <span>Planificación Cargada</span>
                         </div>
-                    )
-                })()}
+                    </div>
+                )
+            })()}
+
+            <div className="flex-1 overflow-x-auto pb-4">
 
                 <div className="flex gap-6 min-w-max">
                     {pensumData.length > 0 ? (
