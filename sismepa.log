@@ -2247,3 +2247,95 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-20 04:18:48,214] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2025-12-20 04:19:06,345] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2025-12-20 04:19:06,359] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 04:32:35,517] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 04:32:36,201] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:40:24,120] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 04:40:24,913] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:42:01,922] WARNING django.request: Not Found: /api/estudiantes/mi-info/
+[2025-12-20 04:42:01,977] WARNING django.request: Not Found: /api/estudiantes/mi-info/
+[2025-12-20 04:42:22,576] WARNING django.request: Not Found: /api/estudiantes/mi-info/
+[2025-12-20 04:42:22,586] WARNING django.request: Not Found: /api/estudiantes/mi-info/
+[2025-12-20 04:43:19,377] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 04:43:19,394] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 04:47:22,179] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 04:47:22,849] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:47:43,383] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 04:47:44,058] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:48:44,760] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:48:44,820] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:20,555] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:20,610] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:23,367] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:23,426] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:24,900] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:24,967] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:30,151] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:49:30,207] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:03,242] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:50:05,544] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:05,599] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:17,559] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:17,614] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:23,326] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:50:23,385] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:53:21,781] WARNING django.request: Forbidden: /api/estadisticas/mi-progreso/
+[2025-12-20 04:53:57,255] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 04:53:57,927] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 04:55:32,918] ERROR django.request: Internal Server Error: /api/estadisticas/mi-progreso/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 969, in mi_progreso
+    inscripcion = Inscripcion.objects.filter(estudiante=estudiante).order_by('-periodo__fecha_inicio').first()
+                  ^^^^^^^^^^^
+NameError: name 'Inscripcion' is not defined
+[2025-12-20 04:55:32,977] ERROR django.request: Internal Server Error: /api/estadisticas/mi-progreso/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 969, in mi_progreso
+    inscripcion = Inscripcion.objects.filter(estudiante=estudiante).order_by('-periodo__fecha_inicio').first()
+                  ^^^^^^^^^^^
+NameError: name 'Inscripcion' is not defined
+[2025-12-20 05:05:07,245] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 05:05:07,909] INFO django.utils.autoreload: Watching for file changes with StatReloader

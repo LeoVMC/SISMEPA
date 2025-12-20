@@ -30,7 +30,7 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             return [IsAdmin()]
         if self.action in ['retrieve', 'progreso']:
             return [IsDocenteOrAdminOrOwner()]
-        if self.action in ['mis_inscripciones']:
+        if self.action in ['mis_inscripciones', 'mi_info']:
             return [IsEstudiante()]
         return []
 
@@ -98,6 +98,41 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             'estudiante_id': estudiante.id,
             'programa': estudiante.programa.nombre_programa if estudiante.programa else '',
             'inscripciones': inscripciones_map
+        })
+
+    @action(detail=False, methods=['get'], url_path='mi-info')
+    def mi_info(self, request):
+        """Devuelve información de progreso del estudiante autenticado."""
+        user = request.user
+        
+        try:
+            estudiante = Estudiante.objects.get(usuario=user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        avance = estudiante.calcular_avance()
+        
+        total_asignaturas = estudiante.programa.asignatura_set.count() if estudiante.programa else 0
+        aprobadas = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            nota_final__gte=10
+        ).count()
+
+        nombre = ''
+        try:
+            nombre = estudiante.usuario.get_full_name()
+        except Exception:
+            nombre = str(estudiante.usuario)
+
+        return Response({
+            'id': estudiante.id,
+            'cedula': estudiante.cedula,
+            'nombre': nombre,
+            'nombre_completo': nombre,
+            'programa': estudiante.programa.nombre_programa if estudiante.programa else '',
+            'porcentaje_avance': avance,
+            'total_asignaturas': total_asignaturas,
+            'aprobadas': aprobadas,
         })
 
 
@@ -797,6 +832,11 @@ class PeriodoAcademicoViewSet(viewsets.ModelViewSet):
 class EstadisticasViewSet(viewsets.ViewSet):
     """ViewSet para estadísticas académicas."""
     permission_classes = [IsDocenteOrAdmin]
+    
+    def get_permissions(self):
+        if self.action == 'mi_progreso':
+            return [IsEstudiante()]
+        return [IsDocenteOrAdmin()]
 
     @action(detail=False, methods=['get'], url_path='desglose')
     def desglose(self, request):
@@ -866,4 +906,152 @@ class EstadisticasViewSet(viewsets.ViewSet):
         result = [sem for sem in sorted(semestres.values(), key=lambda x: x['id']) if sem['subjects']]
         return Response(result)
 
+    @action(detail=False, methods=['get'], url_path='chart-data')
+    def chart_data(self, request):
+        """Devuelve datos para el gráfico radar según el rol del usuario."""
+        from django.db.models import Avg
+        
+        user = request.user
+        is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
+        is_docente = user.groups.filter(name='Docente').exists()
+        programa_id = request.query_params.get('programa')
+        
+        labels = []
+        data = []
+        
+        # Siempre mostrar 8 semestres
+        for sem_num in range(1, 9):
+            labels.append(f'Sem {sem_num}')
+            
+            if is_admin:
+                # Admin: promedio por semestre de todo el programa
+                detalles = DetalleInscripcion.objects.filter(
+                    asignatura__semestre=sem_num,
+                    nota_final__isnull=False
+                )
+                if programa_id:
+                    detalles = detalles.filter(asignatura__programa_id=programa_id)
+                
+                avg = detalles.aggregate(avg=Avg('nota_final'))['avg']
+                data.append(round(float(avg), 2) if avg else 0)
+            
+            elif is_docente:
+                # Docente: promedios solo de sus secciones para ese semestre
+                secciones_docente = Seccion.objects.filter(docente=user, asignatura__semestre=sem_num)
+                avg = DetalleInscripcion.objects.filter(
+                    seccion__in=secciones_docente,
+                    nota_final__isnull=False
+                ).aggregate(avg=Avg('nota_final'))['avg']
+                
+                data.append(round(float(avg), 2) if avg else 0)
+            else:
+                data.append(0)
+        
+        return Response({
+            'labels': labels,
+            'data': data
+        })
+
+    @action(detail=False, methods=['get'], url_path='mi-progreso')
+    def mi_progreso(self, request):
+        """Devuelve el progreso académico del estudiante autenticado."""
+        from django.db.models import Avg
+        
+        user = request.user
+        
+        # Verificar que sea estudiante
+        try:
+            estudiante = Estudiante.objects.get(usuario=user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'Usuario no es estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Calcular avance
+        avance = estudiante.calcular_avance()
+        total_asignaturas = estudiante.programa.asignatura_set.count() if estudiante.programa else 0
+        aprobadas = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            nota_final__gte=10
+        ).count()
+        
+        nombre = ''
+        try:
+            nombre = estudiante.usuario.get_full_name()
+        except Exception:
+            nombre = str(estudiante.usuario)
+        
+        # Datos para el gráfico radar (promedios por semestre)
+        labels = []
+        chart_data = []
+        
+        # Desglose académico (formato compatible con admin)
+        desglose = {}
+        
+        detalles = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante
+        ).select_related('asignatura', 'seccion')
+        
+        for detalle in detalles:
+            sem_key = detalle.asignatura.semestre
+            if sem_key not in desglose:
+                desglose[sem_key] = {
+                    'id': sem_key,
+                    'name': f'Semestre {sem_key}',
+                    'subjects': []
+                }
+            
+            # Buscar si ya existe la asignatura (para agrupar por sección)
+            existing_subject = None
+            for subj in desglose[sem_key]['subjects']:
+                if subj['id'] == detalle.asignatura.id:
+                    existing_subject = subj
+                    break
+            
+            section_data = {
+                'id': detalle.seccion.id if detalle.seccion else detalle.id,
+                'code': detalle.seccion.codigo_seccion if detalle.seccion else 'N/A',
+                'nota1': float(detalle.nota1) if detalle.nota1 else None,
+                'nota2': float(detalle.nota2) if detalle.nota2 else None,
+                'nota3': float(detalle.nota3) if detalle.nota3 else None,
+                'nota4': float(detalle.nota4) if detalle.nota4 else None,
+                'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
+                'estatus': detalle.estatus
+            }
+            
+            if existing_subject:
+                existing_subject['sections'].append(section_data)
+            else:
+                desglose[sem_key]['subjects'].append({
+                    'id': detalle.asignatura.id,
+                    'code': detalle.asignatura.codigo,
+                    'name': detalle.asignatura.nombre_asignatura,
+                    'sections': [section_data]
+                })
+        
+        # Calcular promedios por semestre para el gráfico (siempre 8 semestres)
+        for sem_num in range(1, 9):
+            labels.append(f'Sem {sem_num}')
+            if sem_num in desglose:
+                notas_sem = []
+                for subj in desglose[sem_num]['subjects']:
+                    for sec in subj['sections']:
+                        if sec['nota_final']:
+                            notas_sem.append(sec['nota_final'])
+                promedio = sum(notas_sem) / len(notas_sem) if notas_sem else 0
+                chart_data.append(round(promedio, 2))
+            else:
+                chart_data.append(0)
+        
+        return Response({
+            'labels': labels,
+            'data': chart_data,
+            'desglose': sorted(desglose.values(), key=lambda x: x['id']),
+            'estudiante': {
+                'id': estudiante.id,
+                'nombre': nombre,
+                'programa': estudiante.programa.nombre_programa if estudiante.programa else '',
+                'porcentaje_avance': avance,
+                'total_asignaturas': total_asignaturas,
+                'aprobadas': aprobadas
+            }
+        })
 

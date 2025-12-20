@@ -27,6 +27,13 @@ const Dashboard = () => {
   const [expandedSemester, setExpandedSemester] = useState(null)
   const [expandedSubject, setExpandedSubject] = useState(null)
 
+  // Estado para gráfico dinámico
+  const [chartLabels, setChartLabels] = useState([])
+  const [chartValues, setChartValues] = useState([])
+
+  // Estado para estudiante (desglose personal)
+  const [studentDesglose, setStudentDesglose] = useState(null)
+
   // Estado para Períodos Académicos
   const [periodos, setPeriodos] = useState([])
   const [periodosLoading, setPeriodosLoading] = useState(false)
@@ -42,38 +49,32 @@ const Dashboard = () => {
   // Obtener datos para Vista Estudiante
   useEffect(() => {
     if (!showMonitoring) {
-      const fetchData = async (id = studentId) => {
+      const fetchStudentData = async () => {
+        setLoading(true)
+        const token = localStorage.getItem('apiToken')
+
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/estudiantes/${id}/progreso/`)
-          setDataEstudiante(response.data)
+          const miProgresoRes = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/mi-progreso/`, {
+            headers: { Authorization: token ? `Token ${token}` : undefined }
+          })
+          if (miProgresoRes.data && !miProgresoRes.data.error) {
+            setChartLabels(miProgresoRes.data.labels || [])
+            setChartValues(miProgresoRes.data.data || [])
+            setStudentDesglose(miProgresoRes.data.desglose || [])
+            // Usar datos de estudiante del endpoint unificado
+            if (miProgresoRes.data.estudiante) {
+              setDataEstudiante(miProgresoRes.data.estudiante)
+            }
+          }
         } catch (error) {
-          console.error('Error cargando datos', error)
-        } finally {
-          setLoading(false)
+          console.error('Error cargando mi-progreso:', error)
         }
+
+        setLoading(false)
       }
-      fetchData()
+      fetchStudentData()
     }
   }, [showMonitoring])
-
-  // Obtener datos para Vista Estudiante (Actualizar al cambiar ID)
-  useEffect(() => {
-    if (!showMonitoring) {
-      setLoading(true)
-      const fetch = async () => {
-        try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/estudiantes/${studentId}/progreso/`)
-          setDataEstudiante(response.data)
-        } catch (err) {
-          console.error(err)
-          setDataEstudiante(null)
-        } finally {
-          setLoading(false)
-        }
-      }
-      fetch()
-    }
-  }, [studentId, showMonitoring])
 
   // Obtener Programas para Vista Admin
   useEffect(() => {
@@ -98,8 +99,22 @@ const Dashboard = () => {
   useEffect(() => {
     if (showMonitoring && selectedProgram) {
       fetchAndProcessPensum()
+      fetchChartData()
     }
   }, [selectedProgram, showMonitoring])
+
+  const fetchChartData = async () => {
+    try {
+      const token = localStorage.getItem('apiToken')
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/chart-data/?programa=${selectedProgram}`, {
+        headers: { Authorization: token ? `Token ${token}` : undefined }
+      })
+      setChartLabels(res.data.labels || [])
+      setChartValues(res.data.data || [])
+    } catch (e) {
+      console.error('Error fetching chart data', e)
+    }
+  }
 
   // Obtener Períodos Académicos (solo Admin)
   useEffect(() => {
@@ -203,17 +218,13 @@ const Dashboard = () => {
     }
   }
 
-  // Datos de ejemplo para radar
+  // Datos dinámicos para radar
   const chartData = {
-    labels: showMonitoring
-      ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6', 'Sem 7', 'Sem 8']
-      : ['Semestre 1', 'Semestre 2', 'Semestre 3', 'Semestre 4', 'Semestre 5'],
+    labels: chartLabels.length > 0 ? chartLabels : ['Sin datos'],
     datasets: [
       {
         label: 'Promedio de Notas',
-        data: showMonitoring
-          ? [14, 15, 12, 16, 18, 15, 17, 19] // Datos simulados para demo Admin
-          : [14, 15, 12, 16, 18],
+        data: chartValues.length > 0 ? chartValues : [0],
         backgroundColor: 'rgba(34, 197, 94, 0.2)',
         borderColor: 'rgba(34, 197, 94, 1)',
         borderWidth: 1,
@@ -346,27 +357,27 @@ const Dashboard = () => {
               </select>
             </div>
           ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Seleccionar Estudiante (ID)</label>
-              <input
-                type="number"
-                value={studentId}
-                min={1}
-                onChange={(e) => setStudentId(Number(e.target.value))}
-                className="mt-1 block w-full md:w-32 rounded-md border-gray-300 shadow-sm p-2 border dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors"
-              />
+            <div className="flex items-center gap-3">
+              {dataEstudiante && (
+                <div className="text-gray-800 dark:text-white">
+                  <span className="font-medium">{dataEstudiante.nombre || dataEstudiante.nombre_completo}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">— {dataEstudiante.programa}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
-        <div>
-          <button
-            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/estudiantes/reporte_excel/`)}
-            className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center"
-          >
-            <Download size={18} />
-            Descargar Reporte
-          </button>
-        </div>
+        {showMonitoring && (
+          <div>
+            <button
+              onClick={() => window.open(`${import.meta.env.VITE_API_URL}/estudiantes/reporte_excel/`)}
+              className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center"
+            >
+              <Download size={18} />
+              Descargar Reporte
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -404,7 +415,7 @@ const Dashboard = () => {
                               {subj.sections.map(sec => (
                                 <div key={sec.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-xs space-y-1">
                                   <div className="flex justify-between font-bold text-blue-600 dark:text-blue-400">
-                                    <span>{sec.code}</span>
+                                    <span>Sección {sec.code}</span>
                                     <span className="flex items-center gap-1"><Users size={12} /> {sec.count}</span>
                                   </div>
                                   <div className="grid grid-cols-3 gap-2 text-center text-gray-500 dark:text-gray-400">
@@ -433,22 +444,119 @@ const Dashboard = () => {
               ))}
             </div>
           ) : dataEstudiante ? (
-            <div className="text-center">
-              <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">{dataEstudiante.nombre} — {dataEstudiante.programa}</div>
-              <span className="text-5xl font-bold text-blue-600 dark:text-blue-400">
-                {parseFloat(dataEstudiante.porcentaje_avance).toFixed(2)}%
-              </span>
-              <p className="text-gray-500 dark:text-gray-500 mt-2">Porcentaje completado</p>
-              <div className="mt-4 flex justify-center gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">{dataEstudiante.aprobadas}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-500">Asignaturas aprobadas</div>
+            <div>
+              {/* Barra de progreso y resumen */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="font-medium text-gray-800 dark:text-white">{dataEstudiante.nombre}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">— {dataEstudiante.programa}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {parseFloat(dataEstudiante.porcentaje_avance || 0).toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">{dataEstudiante.total_asignaturas}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-500">Total asignaturas</div>
+                {/* Barra de progreso horizontal */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-green-500 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(dataEstudiante.porcentaje_avance || 0, 100)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <span>{dataEstudiante.aprobadas || 0} de {dataEstudiante.total_asignaturas || 0} asignaturas aprobadas</span>
+                  <span>Meta: 100%</span>
                 </div>
               </div>
+
+              {/* Desglose académico con formato acordeón igual a admin */}
+              {studentDesglose && studentDesglose.length > 0 && (
+                <div className="space-y-2">
+                  {studentDesglose.map(sem => (
+                    <div key={sem.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedSemester(expandedSemester === sem.id ? null : sem.id)}
+                        className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <span className="font-medium text-gray-700 dark:text-gray-200">{toRoman(sem.id)} SEMESTRE</span>
+                        {expandedSemester === sem.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </button>
+
+                      {expandedSemester === sem.id && (
+                        <div className="p-2 space-y-1 bg-white dark:bg-gray-900">
+                          {sem.subjects?.map(subj => (
+                            <div key={subj.id}>
+                              <button
+                                onClick={() => setExpandedSubject(expandedSubject === subj.id ? null : subj.id)}
+                                className="w-full flex items-center justify-between p-2 pl-4 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
+                              >
+                                <span>{subj.name}</span>
+                                {expandedSubject === subj.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                              </button>
+
+                              {expandedSubject === subj.id && (
+                                <div className="mt-1 mb-2 ml-4 space-y-2 border-l-2 border-blue-500 pl-2">
+                                  {subj.sections?.map(sec => (
+                                    <div key={sec.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-xs space-y-2">
+                                      <div className="flex justify-between items-center">
+                                        <span className="font-bold text-blue-600 dark:text-blue-400">Sección {sec.code}</span>
+                                        <span className={`px-2 py-1 rounded-full text-xs ${sec.estatus === 'APROBADO' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                                          sec.estatus === 'REPROBADO' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                                            'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                                          }`}>
+                                          {sec.estatus}
+                                        </span>
+                                      </div>
+                                      {/* Notas parciales */}
+                                      <div className="grid grid-cols-5 gap-2 text-center">
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-gray-500 dark:text-gray-400">N1</span>
+                                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                                            {sec.nota1?.toFixed(1) || '--'}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-gray-500 dark:text-gray-400">N2</span>
+                                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                                            {sec.nota2?.toFixed(1) || '--'}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-gray-500 dark:text-gray-400">N3</span>
+                                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                                            {sec.nota3?.toFixed(1) || '--'}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-gray-500 dark:text-gray-400">N4</span>
+                                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                                            {sec.nota4?.toFixed(1) || '--'}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                          <span className="text-gray-500 dark:text-gray-400">Final</span>
+                                          <span className={`font-bold ${sec.nota_final == null ? 'text-gray-400' :
+                                            sec.nota_final >= 10 ? 'text-green-600 dark:text-green-400' :
+                                              'text-red-500 dark:text-red-400'
+                                            }`}>
+                                            {sec.nota_final?.toFixed(1) || '--'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-red-500">No se encontraron datos del estudiante.</p>
