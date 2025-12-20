@@ -300,11 +300,11 @@ const Dashboard = () => {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    {/* Botón toggle inscripciones - deshabilitado si período pasado */}
+                    {/* Botón toggle inscripciones - deshabilitado si período pasado o futuro */}
                     <button
                       onClick={() => handleToggleInscripciones(periodo.id)}
-                      disabled={periodosLoading || periodo.es_pasado}
-                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${periodo.es_pasado
+                      disabled={periodosLoading || periodo.es_pasado || periodo.es_futuro}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${(periodo.es_pasado || periodo.es_futuro)
                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                         : periodo.inscripciones_activas
                           ? 'bg-green-600 hover:bg-green-700 text-white'
