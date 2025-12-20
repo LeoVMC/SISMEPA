@@ -905,7 +905,8 @@ export default function PensumPage() {
         return {
             assigned: backendData?.has_assignments || false,
             hasPlan: backendData?.has_plan || false,
-            isAssignedToMe: backendData?.is_assigned_to_current_user || false
+            isAssignedToMe: backendData?.is_assigned_to_current_user || false,
+            hasTutors: backendData?.tutores?.length > 0 || false
         }
     }
 
@@ -1075,7 +1076,7 @@ export default function PensumPage() {
                                     const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
                                     const isEstudiante = isEstudianteUser()
 
-                                    const showAssignedBorder = (isAdmin && status.assigned) || (isDocente && status.isAssignedToMe)
+                                    const showAssignedBorder = (isAdmin && (status.assigned || status.hasTutors)) || (isDocente && status.isAssignedToMe)
 
                                     // Para estudiantes, priorizar el estado de inscripción
                                     const enrollmentBorder = getEnrollmentBorderClass(subject.code)

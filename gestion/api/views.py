@@ -174,16 +174,22 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         if not docente_id:
             return Response({'error': 'Docente ID requerido'}, status=400)
         
+        # docente_id viene del frontend seleccionando un objeto Docente
+        # así que debemos buscar el modelo Docente, y luego obtener su usuario
+        from gestion.models import Docente
         try:
-            docente = User.objects.get(pk=docente_id)
-        except User.DoesNotExist:
+            docente_obj = Docente.objects.get(pk=docente_id)
+            docente_user = docente_obj.usuario
+        except Docente.DoesNotExist:
             return Response({'error': 'Docente no encontrado'}, status=404)
 
         if asignatura.tutores.count() >= 10:
              return Response({'error': "Límite de tutores alcanzado (10)"}, status=400)
 
-        asignatura.tutores.add(docente)
+        asignatura.tutores.add(docente_user)
         return Response({'status': 'Tutor assigned'})
+
+
 
     @action(detail=True, methods=['post'], url_path='remove-tutor')
     def remove_tutor(self, request, pk=None):

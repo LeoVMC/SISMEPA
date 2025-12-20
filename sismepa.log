@@ -2123,3 +2123,33 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-19 20:30:53,706] WARNING django.request: Not Found: /api/estudiantes/1/progreso/
 [2025-12-19 20:31:11,936] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2025-12-19 20:31:11,951] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 20:52:50,820] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 20:52:50,836] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:32:34,719] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:32:34,734] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:32:41,292] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:32:41,306] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:33:13,667] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:33:13,683] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:33:47,448] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:33:47,463] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:36:12,657] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:36:12,673] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:37:49,762] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:37:49,776] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:43:08,740] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-19 21:43:09,422] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-19 21:55:30,707] WARNING django.request: Bad Request: /api/asignaturas/337/assign-tutor/
+[2025-12-19 21:55:35,092] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:55:35,110] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:55:45,031] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:55:45,049] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 21:55:50,822] WARNING django.request: Bad Request: /api/asignaturas/337/assign-tutor/
+[2025-12-19 21:57:01,560] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-19 21:57:02,287] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-19 22:01:47,593] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 22:01:47,605] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 22:02:30,154] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 22:02:30,212] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 22:04:41,766] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-19 22:05:02,754] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
