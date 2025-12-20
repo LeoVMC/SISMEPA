@@ -6,15 +6,16 @@ from django.http import HttpResponse
 import openpyxl
 
 from gestion.models import (
-    Estudiante, Asignatura, DetalleInscripcion, Pensum, Planificacion, DocumentoCalificaciones, Seccion
+    Estudiante, Asignatura, DetalleInscripcion, Pensum, Planificacion, DocumentoCalificaciones, Seccion, PeriodoAcademico
 )
 from gestion.api.serializers import (
     EstudianteSerializer, AsignaturaSerializer, PensumSerializer,
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
-    ProgramaSerializer, SeccionSerializer, DocenteSerializer, AdministradorSerializer
+    ProgramaSerializer, SeccionSerializer, DocenteSerializer, AdministradorSerializer, PeriodoAcademicoSerializer
 )
 from gestion.permissions import IsAdmin, IsDocente, IsEstudiante, IsDocenteOrAdminOrOwner, IsDocenteOrAdmin
 from django.contrib.auth.models import User
+
 
 
 class EstudianteViewSet(viewsets.ModelViewSet):
@@ -29,6 +30,8 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             return [IsAdmin()]
         if self.action in ['retrieve', 'progreso']:
             return [IsDocenteOrAdminOrOwner()]
+        if self.action in ['mis_inscripciones']:
+            return [IsEstudiante()]
         return []
 
     @action(detail=True, methods=['get'])
@@ -59,6 +62,44 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             'aprobadas': aprobadas,
         }
         return Response(datos)
+
+    @action(detail=False, methods=['get'], url_path='mis-inscripciones')
+    def mis_inscripciones(self, request):
+        """Devuelve el estado de inscripción de cada asignatura para el estudiante autenticado."""
+        user = request.user
+        
+        try:
+            estudiante = Estudiante.objects.get(usuario=user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Obtener todos los detalles de inscripción del estudiante
+        detalles = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante
+        ).select_related('asignatura', 'seccion')
+        
+        # Mapear por código de asignatura
+        inscripciones_map = {}
+        for detalle in detalles:
+            codigo = detalle.asignatura.codigo
+            # Si hay múltiples inscripciones (por ejemplo, repitió), tomar la más reciente/relevante
+            if codigo not in inscripciones_map or detalle.id > inscripciones_map[codigo]['id']:
+                inscripciones_map[codigo] = {
+                    'id': detalle.id,
+                    'asignatura_id': detalle.asignatura.id,
+                    'codigo': codigo,
+                    'estatus': detalle.estatus,
+                    'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
+                    'seccion_id': detalle.seccion_id,
+                    'seccion_codigo': detalle.seccion.codigo_seccion if detalle.seccion else None,
+                }
+        
+        return Response({
+            'estudiante_id': estudiante.id,
+            'programa': estudiante.programa.nombre_programa if estudiante.programa else '',
+            'inscripciones': inscripciones_map
+        })
+
 
     @action(detail=False, methods=['get'])
     def reporte_excel(self, request):
@@ -319,3 +360,283 @@ class DocumentoCalificacionesViewSet(viewsets.ModelViewSet):
             doc.estudiante.calcular_avance()
         except Exception:
             pass
+
+
+class SeccionViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar secciones e inscripción de estudiantes."""
+    queryset = Seccion.objects.all()
+    serializer_class = SeccionSerializer
+    filterset_fields = ['asignatura', 'asignatura__programa', 'docente']
+
+    def get_permissions(self):
+        from rest_framework.permissions import IsAuthenticated
+        if self.action in ['list', 'retrieve', 'estudiantes']:
+            return [IsAuthenticated()]
+        if self.action in ['inscribir_estudiante']:
+            return [IsDocenteOrAdmin()]
+        if self.action in ['inscribirme', 'desinscribirme']:
+            return [IsEstudiante()]
+        return [IsAdmin()]
+
+    @action(detail=True, methods=['get'], url_path='estudiantes')
+    def estudiantes(self, request, pk=None):
+        """Lista los estudiantes inscritos en esta sección."""
+        seccion = self.get_object()
+        from gestion.api.serializers import DetalleInscripcionListSerializer
+        detalles = seccion.estudiantes_inscritos.filter(estatus='CURSANDO')
+        serializer = DetalleInscripcionListSerializer(detalles, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='inscribir-estudiante')
+    def inscribir_estudiante(self, request, pk=None):
+        """Permite a un docente inscribir un estudiante en su sección asignada."""
+        seccion = self.get_object()
+        user = request.user
+        
+        # Verificar que el docente esté asignado a esta sección (o sea admin)
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if seccion.docente != user:
+                return Response(
+                    {'error': 'No estás asignado a esta sección.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        estudiante_id = request.data.get('estudiante_id')
+        if not estudiante_id:
+            return Response({'error': 'Se requiere estudiante_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            estudiante = Estudiante.objects.get(pk=estudiante_id)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validar que el estudiante pertenece al mismo programa de la asignatura
+        if estudiante.programa_id != seccion.asignatura.programa_id:
+            return Response(
+                {'error': 'El estudiante no pertenece al programa de esta asignatura.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Realizar inscripción
+        result = self._inscribir_estudiante_en_seccion(estudiante, seccion)
+        if result.get('error'):
+            return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'status': 'Estudiante inscrito exitosamente.', 'detalle_id': result.get('detalle_id')})
+
+    @action(detail=True, methods=['post'], url_path='inscribirme')
+    def inscribirme(self, request, pk=None):
+        """Permite a un estudiante auto-inscribirse en una sección de su programa."""
+        seccion = self.get_object()
+        user = request.user
+
+        # Obtener el estudiante asociado al usuario
+        try:
+            estudiante = Estudiante.objects.get(usuario=user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar que la asignatura es del programa del estudiante
+        if estudiante.programa_id != seccion.asignatura.programa_id:
+            return Response(
+                {'error': 'Esta asignatura no pertenece a tu programa.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Realizar inscripción
+        result = self._inscribir_estudiante_en_seccion(estudiante, seccion)
+        if result.get('error'):
+            return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'status': 'Te has inscrito exitosamente.', 'detalle_id': result.get('detalle_id')})
+
+    @action(detail=True, methods=['post'], url_path='desinscribirme')
+    def desinscribirme(self, request, pk=None):
+        """Permite a un estudiante desinscribirse de una sección."""
+        seccion = self.get_object()
+        user = request.user
+
+        try:
+            estudiante = Estudiante.objects.get(usuario=user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar el detalle de inscripción
+        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico
+        
+        detalle = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            seccion=seccion,
+            estatus='CURSANDO'
+        ).first()
+
+        if not detalle:
+            return Response({'error': 'No estás inscrito en esta sección.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        detalle.delete()
+        return Response({'status': 'Te has desinscrito exitosamente.'})
+
+    @action(detail=True, methods=['post'], url_path='desinscribir-estudiante')
+    def desinscribir_estudiante(self, request, pk=None):
+        """Permite a un docente/admin desinscribir un estudiante de su sección."""
+        seccion = self.get_object()
+        user = request.user
+
+        # Verificar permisos
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if seccion.docente != user:
+                return Response(
+                    {'error': 'No estás asignado a esta sección.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        estudiante_id = request.data.get('estudiante_id')
+        if not estudiante_id:
+            return Response({'error': 'Se requiere estudiante_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from gestion.models import DetalleInscripcion
+        detalle = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante_id=estudiante_id,
+            seccion=seccion,
+            estatus='CURSANDO'
+        ).first()
+
+        if not detalle:
+            return Response({'error': 'Estudiante no encontrado en esta sección.'}, status=status.HTTP_404_NOT_FOUND)
+
+        detalle.delete()
+        return Response({'status': 'Estudiante desinscrito exitosamente.'})
+
+    def _inscribir_estudiante_en_seccion(self, estudiante, seccion):
+        """Método interno para realizar la inscripción con validaciones."""
+        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico
+        from django.core.exceptions import ValidationError
+
+        asignatura = seccion.asignatura
+
+        # Verificar si ya está inscrito en esta asignatura (cualquier sección)
+        ya_inscrito = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            asignatura=asignatura,
+            estatus='CURSANDO'
+        ).exists()
+
+        if ya_inscrito:
+            return {'error': 'El estudiante ya está inscrito en esta asignatura.'}
+
+        # Verificar si ya aprobó esta asignatura
+        ya_aprobo = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            asignatura=asignatura,
+            estatus='APROBADO'
+        ).exists()
+
+        if ya_aprobo:
+            return {'error': 'El estudiante ya aprobó esta asignatura.'}
+
+        # Verificar prelaciones
+        prelaciones = asignatura.prelaciones.all()
+        for prereq in prelaciones:
+            aprobada = DetalleInscripcion.objects.filter(
+                inscripcion__estudiante=estudiante,
+                asignatura=prereq,
+                nota_final__gte=10  # Nota aprobatoria >= 10
+            ).exists()
+            if not aprobada:
+                return {'error': f'Prelación no cumplida: {prereq.codigo} - {prereq.nombre_asignatura}'}
+
+        # Obtener período activo con inscripciones abiertas
+        periodo = PeriodoAcademico.objects.filter(activo=True, inscripciones_activas=True).first()
+        if not periodo:
+            # Verificar si hay período activo pero inscripciones cerradas
+            periodo_cerrado = PeriodoAcademico.objects.filter(activo=True).first()
+            if periodo_cerrado:
+                return {'error': 'Las inscripciones están cerradas para el período actual.'}
+            return {'error': 'No hay período académico activo.'}
+
+        # Obtener o crear inscripción del estudiante en el período
+        inscripcion, _ = Inscripcion.objects.get_or_create(
+            estudiante=estudiante,
+            periodo=periodo
+        )
+
+        # Crear detalle de inscripción
+        detalle = DetalleInscripcion.objects.create(
+            inscripcion=inscripcion,
+            asignatura=asignatura,
+            seccion=seccion,
+            estatus='CURSANDO'
+        )
+
+        return {'detalle_id': detalle.id}
+
+
+class PeriodoAcademicoViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar períodos académicos."""
+    queryset = PeriodoAcademico.objects.all().order_by('-anio', '-nombre_periodo')
+    serializer_class = PeriodoAcademicoSerializer
+
+    def get_permissions(self):
+        from rest_framework.permissions import IsAuthenticated
+        if self.action in ['list', 'retrieve', 'activo']:
+            return [IsAuthenticated()]
+        return [IsAdmin()]
+
+    @action(detail=False, methods=['get'], url_path='activo')
+    def activo(self, request):
+        """Retorna el período académico activo actual."""
+        periodo = PeriodoAcademico.objects.filter(activo=True).first()
+        if periodo:
+            return Response(PeriodoAcademicoSerializer(periodo).data)
+        return Response({'error': 'No hay período activo.'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'], url_path='toggle-inscripciones')
+    def toggle_inscripciones(self, request, pk=None):
+        """Activa o desactiva las inscripciones para un período."""
+        from datetime import date
+        periodo = self.get_object()
+        hoy = date.today()
+        
+        # No permitir modificar inscripciones de períodos pasados
+        if periodo.fecha_fin < hoy:
+            return Response({
+                'error': 'No se pueden modificar inscripciones de un período que ya finalizó.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Toggle del estado
+        periodo.inscripciones_activas = not periodo.inscripciones_activas
+        periodo.save()
+        return Response({
+            'status': 'success',
+            'inscripciones_activas': periodo.inscripciones_activas,
+            'mensaje': f'Inscripciones {"activadas" if periodo.inscripciones_activas else "desactivadas"} para {periodo.nombre_periodo}'
+        })
+
+    @action(detail=True, methods=['post'], url_path='activar')
+    def activar_periodo(self, request, pk=None):
+        """Establece este período como el activo (desactiva los demás)."""
+        from datetime import date
+        periodo = self.get_object()
+        hoy = date.today()
+        
+        # No permitir activar períodos pasados
+        if periodo.fecha_fin < hoy:
+            return Response({
+                'error': 'No se puede activar un período que ya finalizó.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # No permitir activar períodos futuros antes de su fecha de inicio
+        if periodo.fecha_inicio > hoy:
+            return Response({
+                'error': f'Este período no puede activarse hasta {periodo.fecha_inicio}.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Desactivar todos los períodos
+        PeriodoAcademico.objects.update(activo=False)
+        # Activar este período
+        periodo.activo = True
+        periodo.save()
+        return Response({
+            'status': 'success',
+            'mensaje': f'Período {periodo.nombre_periodo} activado correctamente.'
+        })

@@ -83,6 +83,8 @@ export default function PensumPage() {
     const [selectedDocenteId, setSelectedDocenteId] = useState('')
     const [selectedSeccion, setSelectedSeccion] = useState('D1') // Mantendrá D1.. o Código de Opción
     const [subjectsMap, setSubjectsMap] = useState({}) // código -> datos del backend
+    const [misInscripciones, setMisInscripciones] = useState({}) // código -> datos de inscripción del estudiante
+
 
 
     const navigate = useNavigate()
@@ -131,9 +133,53 @@ export default function PensumPage() {
         }
     }, [isModalOpen])
 
+    // Cargar inscripciones del estudiante
+    useEffect(() => {
+        fetchMisInscripciones()
+    }, [token])
+
+    const fetchMisInscripciones = async () => {
+        if (!token) return
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/estudiantes/mis-inscripciones/`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setMisInscripciones(data.inscripciones || {})
+            }
+        } catch (e) {
+            // Silently fail - not a student or no enrollments
+            console.log('No student enrollments found')
+        }
+    }
+
     const isAdminUser = () => {
         return userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
     }
+
+    // Obtener estado de inscripción para una asignatura
+    const getEnrollmentStatus = (subjectCode) => {
+        const inscripcion = misInscripciones[subjectCode]
+        if (!inscripcion) return null
+        return inscripcion.estatus // 'CURSANDO', 'APROBADO', 'REPROBADO'
+    }
+
+    // Obtener estilo de borde para asignatura basado en inscripción
+    const getEnrollmentBorderClass = (subjectCode) => {
+        const status = getEnrollmentStatus(subjectCode)
+        switch (status) {
+            case 'CURSANDO':
+                return 'border-amber-500 dark:border-amber-500 border-2'
+            case 'APROBADO':
+                return 'border-green-500 dark:border-green-500 border-2'
+            case 'REPROBADO':
+                return 'border-red-500 dark:border-red-500 border-2'
+            default:
+                return null
+        }
+    }
+
 
     const fetchPrograms = async () => {
         setIsProgramLoading(true)
@@ -494,6 +540,79 @@ export default function PensumPage() {
         }
     }
 
+    // === FUNCIONES DE INSCRIPCIÓN DE ESTUDIANTES ===
+
+    const isEstudianteUser = () => {
+        return userData?.groups && userData.groups.some(g => g.name === 'Estudiante')
+    }
+
+    const canStudentEnroll = () => {
+        // Siempre permitir mostrar el formulario de inscripción para estudiantes.
+        // La validación de programa se hace en el backend, que tiene acceso a los datos correctos.
+        // Si el estudiante intenta inscribirse en un programa diferente, 
+        // el backend devolverá el error apropiado.
+        return isEstudianteUser()
+    }
+
+    const handleInscribirme = async (seccionId) => {
+        if (!seccionId) {
+            setActionMessage({ type: 'error', text: 'Selecciona una sección.' })
+            return
+        }
+        setActionLoading(true)
+        setActionMessage(null)
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/${seccionId}/inscribirme/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                }
+            })
+
+            const data = await res.json()
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: data.status || 'Te has inscrito exitosamente.' })
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
+            } else {
+                throw new Error(data.error || 'Error al inscribirse.')
+            }
+        } catch (err) {
+            setActionMessage({ type: 'error', text: String(err.message || err) })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    const handleDesinscribirme = async (seccionId) => {
+        if (!confirm('¿Estás seguro de desinscribirte de esta sección?')) return
+        setActionLoading(true)
+        setActionMessage(null)
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/${seccionId}/desinscribirme/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                }
+            })
+
+            const data = await res.json()
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: data.status || 'Te has desinscrito exitosamente.' })
+                if (selectedProgram) fetchSubjects(selectedProgram.id)
+            } else {
+                throw new Error(data.error || 'Error al desinscribirse.')
+            }
+        } catch (err) {
+            setActionMessage({ type: 'error', text: String(err.message || err) })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
     const renderModalActions = () => {
         const isAdmin = isAdminUser()
         const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
@@ -687,6 +806,50 @@ export default function PensumPage() {
                     </>
                 )}
 
+                {/* === SECCIÓN DE INSCRIPCIÓN PARA ESTUDIANTES === */}
+                {isEstudianteUser() && backendSubject?.secciones?.length > 0 && (
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800 mb-3">
+                        <label className="block text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-2 uppercase">
+                            Inscripción en Secciones
+                        </label>
+
+                        {!canStudentEnroll() ? (
+                            <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 text-xs rounded-md border border-yellow-200 dark:border-yellow-800">
+                                <AlertCircle size={14} className="inline mr-1" />
+                                Esta asignatura pertenece a otro programa. Solo puedes inscribirte en asignaturas de tu carrera.
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {backendSubject.secciones.map(sec => (
+                                    <div key={sec.id} className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                                        <div className="flex-1">
+                                            <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">
+                                                {getOptionLabel(sec.codigo_seccion)}
+                                            </span>
+                                            {sec.docente_nombre && (
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                                    ({sec.docente_nombre})
+                                                </span>
+                                            )}
+                                            <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-2">
+                                                {sec.estudiantes_count || 0} inscritos
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleInscribirme(sec.id)}
+                                            disabled={actionLoading}
+                                            className="bg-emerald-600 text-white px-3 py-1 text-xs rounded-md hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1"
+                                        >
+                                            {actionLoading ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={12} />}
+                                            Inscribirme
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Controles de Carga/Descarga (Compartido) */}
                 {(isAdmin || isDocente || true) && (
                     <div className="flex gap-2">
@@ -847,6 +1010,7 @@ export default function PensumPage() {
             {(() => {
                 const isAdmin = isAdminUser()
                 const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
+                const isEstudiante = isEstudianteUser()
 
                 return (
                     <div className="flex flex-wrap gap-4 px-1 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -856,6 +1020,24 @@ export default function PensumPage() {
                                 <div className="w-4 h-4 rounded border-2 border-green-500 bg-white dark:bg-gray-800"></div>
                                 <span>{isAdmin ? 'Asignatura con Docente Asignado' : 'Asignatura Asignada a Mí'}</span>
                             </div>
+                        )}
+
+                        {/* Leyendas para Estudiantes */}
+                        {isEstudiante && (
+                            <>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded border-2 border-amber-500 bg-white dark:bg-gray-800"></div>
+                                    <span>Cursando</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded border-2 border-green-500 bg-white dark:bg-gray-800"></div>
+                                    <span>Aprobada</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded border-2 border-red-500 bg-white dark:bg-gray-800"></div>
+                                    <span>Reprobada</span>
+                                </div>
+                            </>
                         )}
 
                         {/* Green Check Legend (All Users) */}
@@ -870,6 +1052,7 @@ export default function PensumPage() {
                     </div>
                 )
             })()}
+
 
             <div className="flex-1 overflow-x-auto pb-4">
 
@@ -890,8 +1073,20 @@ export default function PensumPage() {
                                     const isAdmin = isAdminUser()
                                     // Admins ven todas las asignaciones, Docentes solo las suyas
                                     const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
+                                    const isEstudiante = isEstudianteUser()
 
                                     const showAssignedBorder = (isAdmin && status.assigned) || (isDocente && status.isAssignedToMe)
+
+                                    // Para estudiantes, priorizar el estado de inscripción
+                                    const enrollmentBorder = getEnrollmentBorderClass(subject.code)
+
+                                    // Determinar clase de borde final
+                                    let borderClass = 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-500'
+                                    if (isEstudiante && enrollmentBorder) {
+                                        borderClass = enrollmentBorder
+                                    } else if (showAssignedBorder) {
+                                        borderClass = 'border-green-500 dark:border-green-500 border-2'
+                                    }
 
                                     return (
                                         <div
@@ -899,7 +1094,7 @@ export default function PensumPage() {
                                             onClick={() => handleSubjectClick(subject)}
                                             className={`
                                                 relative bg-white dark:bg-gray-900 p-3 rounded-lg border shadow-sm hover:shadow-md cursor-pointer transition-all group
-                                                ${showAssignedBorder ? 'border-green-500 dark:border-green-500 border-2' : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-500'}
+                                                ${borderClass}
                                             `}
                                         >
                                             <div className="flex justify-between items-start mb-2">

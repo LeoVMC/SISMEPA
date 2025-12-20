@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
-import { ChevronDown, ChevronRight, Users, Award, Download } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users, Award, Download, Calendar, ToggleLeft, ToggleRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
@@ -27,12 +27,17 @@ const Dashboard = () => {
   const [expandedSemester, setExpandedSemester] = useState(null)
   const [expandedSubject, setExpandedSubject] = useState(null)
 
+  // Estado para Períodos Académicos
+  const [periodos, setPeriodos] = useState([])
+  const [periodosLoading, setPeriodosLoading] = useState(false)
+  const [periodosMessage, setPeriodosMessage] = useState(null)
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const isAdmin = userData.username === 'admin' || userData.is_staff || userData.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
   const isTeacher = userData.groups?.some(g => g.name === 'Docente' || g.name === 'Profesor')
   const showMonitoring = isAdmin || isTeacher
   const dashboardTitle = showMonitoring ? 'Monitoreo de Avance Educativo' : 'Mi Progreso Educativo'
+
 
   // Obtener datos para Vista Estudiante
   useEffect(() => {
@@ -95,6 +100,66 @@ const Dashboard = () => {
       fetchAndProcessPensum()
     }
   }, [selectedProgram, showMonitoring])
+
+  // Obtener Períodos Académicos (solo Admin)
+  useEffect(() => {
+    if (isAdmin) {
+      fetchPeriodos()
+    }
+  }, [isAdmin])
+
+  const fetchPeriodos = async () => {
+    setPeriodosLoading(true)
+    try {
+      const token = localStorage.getItem('apiToken')
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/periodos/`, {
+        headers: { Authorization: `Token ${token}` }
+      })
+      setPeriodos(res.data.results || res.data)
+    } catch (e) {
+      console.error('Error fetching periodos', e)
+    } finally {
+      setPeriodosLoading(false)
+    }
+  }
+
+  const handleToggleInscripciones = async (periodoId) => {
+    setPeriodosLoading(true)
+    setPeriodosMessage(null)
+    try {
+      const token = localStorage.getItem('apiToken')
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/periodos/${periodoId}/toggle-inscripciones/`,
+        {},
+        { headers: { Authorization: `Token ${token}` } }
+      )
+      setPeriodosMessage({ type: 'success', text: res.data.mensaje })
+      fetchPeriodos()
+    } catch (e) {
+      setPeriodosMessage({ type: 'error', text: 'Error al cambiar estado de inscripciones.' })
+    } finally {
+      setPeriodosLoading(false)
+    }
+  }
+
+  const handleActivarPeriodo = async (periodoId) => {
+    setPeriodosLoading(true)
+    setPeriodosMessage(null)
+    try {
+      const token = localStorage.getItem('apiToken')
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/periodos/${periodoId}/activar/`,
+        {},
+        { headers: { Authorization: `Token ${token}` } }
+      )
+      setPeriodosMessage({ type: 'success', text: res.data.mensaje })
+      fetchPeriodos()
+    } catch (e) {
+      setPeriodosMessage({ type: 'error', text: 'Error al activar período.' })
+    } finally {
+      setPeriodosLoading(false)
+    }
+  }
 
   const toRoman = (num) => {
     const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X' }
@@ -193,6 +258,99 @@ const Dashboard = () => {
   return (
     <div className="p-4 md:p-6 transition-colors duration-200">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">{dashboardTitle}</h1>
+
+      {/* Panel de Control de Períodos Académicos (Solo Admin) */}
+      {isAdmin && (
+        <div className="bg-white dark:bg-gray-900 dark:border dark:border-gray-800 p-4 rounded-lg shadow-md mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="text-blue-600 dark:text-blue-400" size={24} />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Control de Períodos Académicos</h2>
+          </div>
+
+          {periodosMessage && (
+            <div className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${periodosMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'}`}>
+              {periodosMessage.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
+              {periodosMessage.text}
+            </div>
+          )}
+
+          {periodosLoading ? (
+            <div className="flex items-center gap-2 text-gray-500">
+              <Loader2 className="animate-spin" size={18} />
+              Cargando períodos...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {periodos.map(periodo => (
+                <div key={periodo.id} className={`p-4 rounded-lg border-2 transition-all ${periodo.es_pasado
+                    ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 opacity-60'
+                    : periodo.activo
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : periodo.es_futuro
+                        ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
+                  }`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-bold text-gray-800 dark:text-white">{periodo.nombre_periodo}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {periodo.fecha_inicio} - {periodo.fecha_fin}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
+                      {periodo.activo && (
+                        <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded-full">Activo</span>
+                      )}
+                      {periodo.es_pasado && (
+                        <span className="px-2 py-1 text-xs bg-gray-500 text-white rounded-full">Finalizado</span>
+                      )}
+                      {periodo.es_futuro && (
+                        <span className="px-2 py-1 text-xs bg-amber-500 text-white rounded-full">Próximo</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {/* Botón toggle inscripciones - deshabilitado si período pasado */}
+                    <button
+                      onClick={() => handleToggleInscripciones(periodo.id)}
+                      disabled={periodosLoading || periodo.es_pasado}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${periodo.es_pasado
+                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          : periodo.inscripciones_activas
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        }`}
+                    >
+                      {periodo.inscripciones_activas ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                      Inscripciones: {periodo.inscripciones_activas ? 'Abiertas' : 'Cerradas'}
+                    </button>
+
+                    {/* Botón activar período */}
+                    {!periodo.activo && !periodo.es_pasado && (
+                      periodo.es_activable ? (
+                        <button
+                          onClick={() => handleActivarPeriodo(periodo.id)}
+                          disabled={periodosLoading}
+                          className="w-full px-3 py-2 rounded-lg text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                          Activar Período
+                        </button>
+                      ) : periodo.es_futuro && (
+                        <div className="w-full px-3 py-2 rounded-lg text-xs text-center bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                          <AlertCircle size={14} className="inline mr-1" />
+                          Disponible desde {periodo.fecha_inicio}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>

@@ -11,6 +11,7 @@ class PeriodoAcademico(models.Model):
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     activo = models.BooleanField(default=True)
+    inscripciones_activas = models.BooleanField(default=False, help_text="Indica si las inscripciones están abiertas para este período")
     anio = models.IntegerField(default=2025)
 
     def __str__(self):
@@ -135,6 +136,7 @@ class DetalleInscripcion(models.Model):
     """Detalle de inscripción: vincula estudiante con asignaturas y notas."""
     inscripcion = models.ForeignKey(Inscripcion, on_delete=models.CASCADE, related_name='detalles')
     asignatura = models.ForeignKey(Asignatura, on_delete=models.PROTECT)
+    seccion = models.ForeignKey(Seccion, on_delete=models.SET_NULL, null=True, blank=True, related_name='estudiantes_inscritos')
     nota_final = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     estatus = models.CharField(max_length=20, default='CURSANDO')
 

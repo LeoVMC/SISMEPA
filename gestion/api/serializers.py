@@ -70,12 +70,55 @@ class ProgramaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_programa', 'titulo_otorgado', 'duracion_anios']
 
 
+class PeriodoAcademicoSerializer(serializers.ModelSerializer):
+    """Serializer para gestión de períodos académicos."""
+    es_pasado = serializers.SerializerMethodField()
+    es_futuro = serializers.SerializerMethodField()
+    es_activable = serializers.SerializerMethodField()
+    estado = serializers.SerializerMethodField()
+    
+    class Meta:
+        from gestion.models import PeriodoAcademico
+        model = PeriodoAcademico
+        fields = ['id', 'nombre_periodo', 'fecha_inicio', 'fecha_fin', 'activo', 'inscripciones_activas', 'anio', 'es_pasado', 'es_futuro', 'es_activable', 'estado']
+
+    def get_es_pasado(self, obj):
+        from datetime import date
+        return obj.fecha_fin < date.today()
+
+    def get_es_futuro(self, obj):
+        from datetime import date
+        return obj.fecha_inicio > date.today()
+
+    def get_es_activable(self, obj):
+        from datetime import date
+        hoy = date.today()
+        # No se puede activar si ya está activo, ya pasó, o aún no ha comenzado
+        if obj.activo:
+            return False
+        if obj.fecha_fin < hoy:
+            return False
+        if obj.fecha_inicio > hoy:
+            return False
+        return True
+
+    def get_estado(self, obj):
+        from datetime import date
+        hoy = date.today()
+        if obj.fecha_fin < hoy:
+            return 'finalizado'
+        if obj.fecha_inicio > hoy:
+            return 'futuro'
+        return 'en_curso'
+
+
 class SeccionSerializer(serializers.ModelSerializer):
     docente_nombre = serializers.SerializerMethodField()
+    estudiantes_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Seccion
-        fields = ['id', 'asignatura', 'codigo_seccion', 'docente', 'docente_nombre']
+        fields = ['id', 'asignatura', 'codigo_seccion', 'docente', 'docente_nombre', 'estudiantes_count']
 
     def get_docente_nombre(self, obj):
         if obj.docente:
@@ -83,6 +126,37 @@ class SeccionSerializer(serializers.ModelSerializer):
             name = obj.docente.get_full_name()
             return name if name else obj.docente.username
         return None
+
+    def get_estudiantes_count(self, obj):
+        return obj.estudiantes_inscritos.filter(estatus='CURSANDO').count()
+
+
+class InscripcionSeccionSerializer(serializers.Serializer):
+    """Serializer para inscribir estudiante a una sección."""
+    estudiante_id = serializers.IntegerField(required=True)
+
+
+class DetalleInscripcionListSerializer(serializers.ModelSerializer):
+    """Serializer para listar estudiantes inscritos en una sección."""
+    from gestion.models import DetalleInscripcion
+    estudiante_nombre = serializers.SerializerMethodField()
+    estudiante_cedula = serializers.SerializerMethodField()
+    estudiante_id = serializers.SerializerMethodField()
+
+    class Meta:
+        from gestion.models import DetalleInscripcion
+        model = DetalleInscripcion
+        fields = ['id', 'estudiante_id', 'estudiante_nombre', 'estudiante_cedula', 'estatus', 'nota_final']
+
+    def get_estudiante_nombre(self, obj):
+        est = obj.inscripcion.estudiante
+        return est.usuario.get_full_name() or est.usuario.username
+
+    def get_estudiante_cedula(self, obj):
+        return obj.inscripcion.estudiante.cedula
+
+    def get_estudiante_id(self, obj):
+        return obj.inscripcion.estudiante.id
 
 class AsignaturaSerializer(serializers.ModelSerializer):
     secciones = SeccionSerializer(many=True, read_only=True)
