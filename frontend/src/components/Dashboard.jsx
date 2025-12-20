@@ -170,54 +170,32 @@ const Dashboard = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('apiToken')
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/asignaturas/?programa=${selectedProgram}`, {
+      // Llamar al endpoint de estadísticas reales
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/desglose/?programa=${selectedProgram}`, {
         headers: { Authorization: token ? `Token ${token}` : undefined }
       })
 
-      const subjects = res.data
-      const semestersMap = {}
+      // Los datos ya vienen formateados del backend
+      const semestresData = res.data.map(sem => ({
+        id: `sem-${sem.id}`,
+        name: `${toRoman(sem.id)} SEMESTRE`,
+        subjects: sem.subjects.map(subj => ({
+          id: subj.id,
+          name: subj.name,
+          code: subj.code,
+          sections: subj.sections.map(sec => ({
+            id: sec.id,
+            code: sec.code,
+            docente: sec.docente,
+            avg: sec.avg,
+            max: sec.max,
+            min: sec.min,
+            count: sec.count
+          }))
+        }))
+      }))
 
-      // Agrupar por semestre
-      subjects.forEach(sub => {
-        const semNum = sub.semestre
-        if (semNum > 8) return // Omitir semestre 9 en adelante (Tesis/Pasantía)
-
-        if (!semestersMap[semNum]) {
-          semestersMap[semNum] = {
-            id: `sem-${semNum}`,
-            name: `${toRoman(semNum)} SEMESTRE`,
-            subjects: []
-          }
-        }
-
-        // Generar Secciones Simuladas para esta asignatura
-        const sections = []
-        const numSections = 1 + Math.floor(Math.random() * 3) // 1-3 secciones
-        for (let k = 1; k <= numSections; k++) {
-          sections.push({
-            id: `sec-${sub.id}-${k}`,
-            code: `SEC-${String.fromCharCode(64 + k)}`, // Sec A, B, C...
-            avg: (10 + Math.random() * 10).toFixed(2),
-            max: 20,
-            min: Math.floor(Math.random() * 10),
-            count: 15 + Math.floor(Math.random() * 30)
-          })
-        }
-
-        semestersMap[semNum].subjects.push({
-          id: sub.id,
-          name: sub.nombre_asignatura,
-          code: sub.codigo,
-          sections: sections
-        })
-      })
-
-      // Convertir a array y ordenar
-      const sortedSemesters = Object.keys(semestersMap)
-        .sort((a, b) => Number(a) - Number(b))
-        .map(k => semestersMap[k])
-
-      setAdminData(sortedSemesters)
+      setAdminData(semestresData)
     } catch (e) {
       console.error('Error fetching pensum for dashboard', e)
     } finally {
@@ -283,12 +261,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {periodos.map(periodo => (
                 <div key={periodo.id} className={`p-4 rounded-lg border-2 transition-all ${periodo.es_pasado
-                    ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 opacity-60'
-                    : periodo.activo
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : periodo.es_futuro
-                        ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
+                  ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 opacity-60'
+                  : periodo.activo
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : periodo.es_futuro
+                      ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
                   }`}>
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -316,10 +294,10 @@ const Dashboard = () => {
                       onClick={() => handleToggleInscripciones(periodo.id)}
                       disabled={periodosLoading || periodo.es_pasado}
                       className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${periodo.es_pasado
-                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                          : periodo.inscripciones_activas
-                            ? 'bg-green-600 hover:bg-green-700 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : periodo.inscripciones_activas
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                         }`}
                     >
                       {periodo.inscripciones_activas ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}

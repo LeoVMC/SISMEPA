@@ -378,10 +378,12 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from rest_framework.permissions import IsAuthenticated
         if self.action in ['list', 'retrieve', 'estudiantes']:
             return [IsAuthenticated()]
-        if self.action in ['inscribir_estudiante']:
+        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante']:
             return [IsDocenteOrAdmin()]
         if self.action in ['inscribirme', 'desinscribirme']:
             return [IsEstudiante()]
+        if self.action in ['mis_secciones', 'calificar']:
+            return [IsDocente()]
         return [IsAdmin()]
 
     @action(detail=True, methods=['get'], url_path='estudiantes')
@@ -512,6 +514,107 @@ class SeccionViewSet(viewsets.ModelViewSet):
 
         detalle.delete()
         return Response({'status': 'Estudiante desinscrito exitosamente.'})
+
+    @action(detail=False, methods=['get'], url_path='mis-secciones')
+    def mis_secciones(self, request):
+        """Devuelve las secciones asignadas al docente autenticado con sus estudiantes."""
+        user = request.user
+        
+        # Verificar que sea docente
+        if not user.groups.filter(name='Docente').exists() and not user.is_superuser:
+            return Response({'error': 'Solo los docentes pueden acceder a este recurso.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        secciones = Seccion.objects.filter(docente=user).select_related('asignatura', 'asignatura__programa')
+        
+        result = []
+        for seccion in secciones:
+            estudiantes_data = []
+            detalles = DetalleInscripcion.objects.filter(seccion=seccion).select_related(
+                'inscripcion__estudiante', 'inscripcion__estudiante__usuario'
+            )
+            for detalle in detalles:
+                est = detalle.inscripcion.estudiante
+                estudiantes_data.append({
+                    'detalle_id': detalle.id,
+                    'estudiante_id': est.id,
+                    'cedula': est.cedula,
+                    'nombre': est.usuario.get_full_name(),
+                    'nota1': float(detalle.nota1) if detalle.nota1 else None,
+                    'nota2': float(detalle.nota2) if detalle.nota2 else None,
+                    'nota3': float(detalle.nota3) if detalle.nota3 else None,
+                    'nota4': float(detalle.nota4) if detalle.nota4 else None,
+                    'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
+                    'estatus': detalle.estatus
+                })
+            
+            result.append({
+                'id': seccion.id,
+                'codigo_seccion': seccion.codigo_seccion,
+                'asignatura_id': seccion.asignatura.id,
+                'asignatura_codigo': seccion.asignatura.codigo,
+                'asignatura_nombre': seccion.asignatura.nombre_asignatura,
+                'programa': seccion.asignatura.programa.nombre_programa,
+                'estudiantes': estudiantes_data,
+                'total_estudiantes': len(estudiantes_data)
+            })
+        
+        return Response(result)
+
+    @action(detail=True, methods=['post'], url_path='calificar')
+    def calificar(self, request, pk=None):
+        """Permite a un docente asignar calificaciones a un estudiante."""
+        seccion = self.get_object()
+        user = request.user
+        
+        # Verificar que sea el docente asignado o admin
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if seccion.docente != user:
+                return Response({'error': 'No estás asignado a esta sección.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        detalle_id = request.data.get('detalle_id')
+        nota1 = request.data.get('nota1')
+        nota2 = request.data.get('nota2')
+        nota3 = request.data.get('nota3')
+        nota4 = request.data.get('nota4')
+        
+        if not detalle_id:
+            return Response({'error': 'Se requiere detalle_id.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            detalle = DetalleInscripcion.objects.get(pk=detalle_id, seccion=seccion)
+        except DetalleInscripcion.DoesNotExist:
+            return Response({'error': 'Detalle de inscripción no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Validar notas (1-20)
+        from decimal import Decimal, InvalidOperation
+        def parse_nota(val):
+            if val is None or val == '':
+                return None
+            try:
+                nota = Decimal(str(val))
+                if nota < 1 or nota > 20:
+                    raise ValueError('Nota fuera de rango')
+                return nota
+            except (InvalidOperation, ValueError):
+                return None
+        
+        # Actualizar notas
+        if nota1 is not None:
+            detalle.nota1 = parse_nota(nota1)
+        if nota2 is not None:
+            detalle.nota2 = parse_nota(nota2)
+        if nota3 is not None:
+            detalle.nota3 = parse_nota(nota3)
+        if nota4 is not None:
+            detalle.nota4 = parse_nota(nota4)
+        
+        detalle.save()  # El método save() calcula nota_final automáticamente
+        
+        return Response({
+            'status': 'Calificaciones guardadas.',
+            'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
+            'estatus': detalle.estatus
+        })
 
     def _inscribir_estudiante_en_seccion(self, estudiante, seccion):
         """Método interno para realizar la inscripción con validaciones."""
@@ -646,3 +749,78 @@ class PeriodoAcademicoViewSet(viewsets.ModelViewSet):
             'status': 'success',
             'mensaje': f'Período {periodo.nombre_periodo} activado correctamente.'
         })
+
+
+class EstadisticasViewSet(viewsets.ViewSet):
+    """ViewSet para estadísticas académicas."""
+    permission_classes = [IsDocenteOrAdmin]
+
+    @action(detail=False, methods=['get'], url_path='desglose')
+    def desglose(self, request):
+        """Devuelve el desglose académico real por semestre/asignatura/sección."""
+        from django.db.models import Avg, Max, Min, Count
+        
+        programa_id = request.query_params.get('programa')
+        user = request.user
+        
+        # Determinar si es admin o docente
+        is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
+        is_docente = user.groups.filter(name='Docente').exists()
+        
+        # Obtener asignaturas agrupadas por semestre
+        asignaturas = Asignatura.objects.all().order_by('semestre', 'orden')
+        if programa_id:
+            asignaturas = asignaturas.filter(programa_id=programa_id)
+        
+        semestres = {}
+        for asig in asignaturas:
+            sem_key = asig.semestre
+            if sem_key not in semestres:
+                semestres[sem_key] = {
+                    'id': sem_key,
+                    'name': f'Semestre {sem_key}',
+                    'subjects': []
+                }
+            
+            # Obtener secciones con docente asignado
+            secciones_data = []
+            secciones = asig.secciones.filter(docente__isnull=False).select_related('docente')
+            
+            # Si es docente (no admin), filtrar solo sus secciones
+            if is_docente and not is_admin:
+                secciones = secciones.filter(docente=user)
+            
+            for seccion in secciones:
+                # Obtener estadísticas de notas
+                stats = DetalleInscripcion.objects.filter(
+                    seccion=seccion
+                ).aggregate(
+                    count=Count('id'),
+                    avg=Avg('nota_final'),
+                    max=Max('nota_final'),
+                    min=Min('nota_final')
+                )
+                
+                secciones_data.append({
+                    'id': seccion.id,
+                    'code': seccion.codigo_seccion,
+                    'docente': seccion.docente.get_full_name() if seccion.docente else 'Sin asignar',
+                    'count': stats['count'] or 0,
+                    'avg': round(float(stats['avg']), 2) if stats['avg'] else 0,
+                    'max': round(float(stats['max']), 2) if stats['max'] else 0,
+                    'min': round(float(stats['min']), 2) if stats['min'] else 0
+                })
+            
+            if secciones_data:  # Solo agregar asignaturas con secciones activas
+                semestres[sem_key]['subjects'].append({
+                    'id': asig.id,
+                    'code': asig.codigo,
+                    'name': asig.nombre_asignatura,
+                    'sections': secciones_data
+                })
+        
+        # Filtrar semestres vacíos (sin asignaturas con secciones)
+        result = [sem for sem in sorted(semestres.values(), key=lambda x: x['id']) if sem['subjects']]
+        return Response(result)
+
+

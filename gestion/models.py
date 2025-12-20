@@ -137,8 +137,31 @@ class DetalleInscripcion(models.Model):
     inscripcion = models.ForeignKey(Inscripcion, on_delete=models.CASCADE, related_name='detalles')
     asignatura = models.ForeignKey(Asignatura, on_delete=models.PROTECT)
     seccion = models.ForeignKey(Seccion, on_delete=models.SET_NULL, null=True, blank=True, related_name='estudiantes_inscritos')
+    
+    # Notas parciales (escala 1-20)
+    nota1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    nota2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    nota3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    nota4 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    
     nota_final = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     estatus = models.CharField(max_length=20, default='CURSANDO')
+
+    def calcular_nota_final(self):
+        """Calcula la nota final como promedio de las 4 notas parciales."""
+        notas = [n for n in [self.nota1, self.nota2, self.nota3, self.nota4] if n is not None]
+        if len(notas) == 4:
+            from decimal import Decimal
+            self.nota_final = sum(notas) / Decimal(4)
+            # Determinar estatus basado en nota final
+            self.estatus = 'APROBADO' if self.nota_final >= 10 else 'REPROBADO'
+        return self.nota_final
+
+    def save(self, *args, **kwargs):
+        # Recalcular nota final antes de guardar si hay notas parciales
+        if any([self.nota1, self.nota2, self.nota3, self.nota4]):
+            self.calcular_nota_final()
+        super().save(*args, **kwargs)
 
 
 class DocumentoCalificaciones(models.Model):

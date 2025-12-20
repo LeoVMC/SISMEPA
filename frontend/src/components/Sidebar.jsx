@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -33,6 +33,11 @@ export default function Sidebar({ isOpen, onClose }) {
     // Mostrar opción de Usuarios en Línea solo a Admin y Docentes
     if (showMonitoring) {
         menuItems.splice(1, 0, { path: '/active-users', icon: Wifi, label: 'Usuarios en Línea' })
+    }
+
+    // Mostrar opción de Calificaciones solo a Docentes
+    if (isTeacher) {
+        menuItems.push({ path: '/calificaciones', icon: ClipboardList, label: 'Calificaciones' })
     }
 
     if (isAdmin) {

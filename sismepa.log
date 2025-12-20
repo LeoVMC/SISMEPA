@@ -2153,3 +2153,55 @@ django.core.exceptions.FieldError: Unsupported lookup 'usuario' for ForeignKey o
 [2025-12-19 22:02:30,212] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-19 22:04:41,766] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-19 22:05:02,754] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:01:22,453] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-20 03:01:23,140] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:02:58,933] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 03:02:59,604] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:03:30,350] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 03:03:31,028] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:04:00,763] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-20 03:04:01,436] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:11:32,449] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:11:38,068] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:38,120] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:43,705] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:11:43,759] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:11:53,882] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:53,935] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:55,516] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:11:56,943] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:56,954] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:11:57,422] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:11:58,918] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:12:00,007] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:12:04,776] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:12:04,788] WARNING django.request: Forbidden: /api/secciones/mis-secciones/
+[2025-12-20 03:13:24,059] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 03:13:24,728] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:30:27,163] WARNING django.request: Forbidden: /api/estadisticas/desglose/
+[2025-12-20 03:32:54,150] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-20 03:32:54,821] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 03:36:30,112] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:36:30,127] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:44:19,726] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:44:19,739] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:44:35,679] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:44:35,698] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:29,764] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:29,776] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:33,020] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:33,035] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:45,683] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:45,703] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:47,098] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:47,114] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:49,120] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:49,132] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:51,780] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:51,795] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:56,484] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:49:56,497] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:50:15,581] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:50:15,596] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:50:36,699] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 03:50:36,714] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/

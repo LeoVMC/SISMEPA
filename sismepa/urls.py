@@ -11,7 +11,7 @@ from django.conf.urls.static import static
 from gestion.api.views import (
     EstudianteViewSet, AsignaturaViewSet, PensumViewSet,
     PlanificacionViewSet, DocumentoCalificacionesViewSet, UserManagementViewSet, ProgramaViewSet,
-    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet
+    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet, EstadisticasViewSet
 )
 
 router = DefaultRouter()
@@ -26,6 +26,7 @@ router.register(r'docentes', DocenteViewSet, basename='docentes')
 router.register(r'administradores', AdminViewSet, basename='administradores')
 router.register(r'secciones', SeccionViewSet, basename='seccion')
 router.register(r'periodos', PeriodoAcademicoViewSet, basename='periodo')
+router.register(r'estadisticas', EstadisticasViewSet, basename='estadisticas')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

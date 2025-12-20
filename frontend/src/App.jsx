@@ -5,8 +5,9 @@ import LoginPage from './pages/LoginPage'
 import RegisterUserPage from './pages/RegisterUserPage'
 import PensumPage from './pages/PensumPage'
 import ListadoPage from './pages/ListadoPage'
-import ActiveUsersPage from './pages/ActiveUsersPage' // Importación Nueva
+import ActiveUsersPage from './pages/ActiveUsersPage'
 import ProfilePage from './pages/ProfilePage'
+import CalificacionesPage from './pages/CalificacionesPage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -80,6 +81,16 @@ export default function App() {
               <PrivateRoute>
                 <AdminLayout>
                   <ProfilePage />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/calificaciones"
+            element={
+              <PrivateRoute>
+                <AdminLayout>
+                  <CalificacionesPage />
                 </AdminLayout>
               </PrivateRoute>
             }
