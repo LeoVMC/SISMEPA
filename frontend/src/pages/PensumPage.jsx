@@ -858,7 +858,7 @@ export default function PensumPage() {
                             <button
                                 onClick={handleUploadClick}
                                 disabled={actionLoading}
-                                className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                             >
                                 {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
                                 Cargar Planificación
@@ -869,7 +869,7 @@ export default function PensumPage() {
                         <button
                             onClick={handleDownloadPlan}
                             disabled={actionLoading}
-                            className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                         >
                             {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
                             Descargar Planificación

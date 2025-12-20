@@ -395,6 +395,49 @@ class SeccionViewSet(viewsets.ModelViewSet):
         serializer = DetalleInscripcionListSerializer(detalles, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'], url_path='descargar-listado')
+    def descargar_listado(self, request, pk=None):
+        """Descarga el listado de estudiantes inscritos en la sección como Excel."""
+        seccion = self.get_object()
+        user = request.user
+        
+        # Verificar permisos
+        if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            if not user.groups.filter(name='Docente').exists():
+                return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
+            if seccion.docente != user:
+                return Response({'error': 'No estás asignado a esta sección.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = f"Listado {seccion.codigo_seccion}"
+        
+        # Encabezados
+        ws.append(['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota Final', 'Estado'])
+        
+        # Datos de estudiantes
+        detalles = seccion.estudiantes_inscritos.select_related('inscripcion__estudiante__usuario')
+        for detalle in detalles:
+            est = detalle.inscripcion.estudiante
+            ws.append([
+                est.cedula,
+                est.usuario.first_name,
+                est.usuario.last_name,
+                est.usuario.email,
+                float(detalle.nota1) if detalle.nota1 else '',
+                float(detalle.nota2) if detalle.nota2 else '',
+                float(detalle.nota3) if detalle.nota3 else '',
+                float(detalle.nota4) if detalle.nota4 else '',
+                float(detalle.nota_final) if detalle.nota_final else '',
+                detalle.estatus
+            ])
+        
+        filename = f"listado_{seccion.asignatura.codigo}_{seccion.codigo_seccion}.xlsx"
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        wb.save(response)
+        return response
+
     @action(detail=True, methods=['post'], url_path='inscribir-estudiante')
     def inscribir_estudiante(self, request, pk=None):
         """Permite a un docente inscribir un estudiante en su sección asignada."""

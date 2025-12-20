@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X } from 'lucide-react'
 
 export default function CalificacionesPage() {
     const [secciones, setSecciones] = useState([])
@@ -7,7 +8,14 @@ export default function CalificacionesPage() {
     const [saving, setSaving] = useState(false)
     const [message, setMessage] = useState(null)
     const [expandedSeccion, setExpandedSeccion] = useState(null)
-    const [editedNotas, setEditedNotas] = useState({}) // { detalle_id: { nota1, nota2, nota3, nota4 } }
+    const [editedNotas, setEditedNotas] = useState({})
+
+    // Estado para modal de inscripción
+    const [inscripcionModal, setInscripcionModal] = useState(null) // seccion object or null
+    const [estudiantesDisponibles, setEstudiantesDisponibles] = useState([])
+    const [selectedEstudiante, setSelectedEstudiante] = useState('')
+    const [inscribiendo, setInscribiendo] = useState(false)
+    const [busquedaEstudiante, setBusquedaEstudiante] = useState('')
 
     const token = localStorage.getItem('apiToken') || ''
 
@@ -35,11 +43,70 @@ export default function CalificacionesPage() {
         }
     }
 
+    const fetchEstudiantesDisponibles = async (programaId) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/estudiantes/?programa=${programaId}`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setEstudiantesDisponibles(data.results || data)
+            }
+        } catch (e) {
+            console.error('Error fetching estudiantes', e)
+        }
+    }
+
+    const handleOpenInscripcionModal = (seccion) => {
+        setInscripcionModal(seccion)
+        setSelectedEstudiante('')
+        setBusquedaEstudiante('')
+        // Obtener programa de la asignatura para filtrar estudiantes
+        // El programa viene en seccion.programa (nombre), necesitamos el ID
+        // Por simplicidad, buscaremos todos los estudiantes y filtraremos por programa en la búsqueda
+        fetchEstudiantesDisponibles('')
+    }
+
+    const handleInscribirEstudiante = async () => {
+        if (!selectedEstudiante || !inscripcionModal) return
+        setInscribiendo(true)
+        setMessage(null)
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/${inscripcionModal.id}/inscribir-estudiante/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                },
+                body: JSON.stringify({ estudiante_id: selectedEstudiante })
+            })
+
+            const data = await res.json()
+            if (res.ok) {
+                setMessage({ type: 'success', text: data.status || 'Estudiante inscrito exitosamente.' })
+                setInscripcionModal(null)
+                fetchMisSecciones()
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Error al inscribir.' })
+            }
+        } catch (e) {
+            setMessage({ type: 'error', text: 'Error de conexión.' })
+        } finally {
+            setInscribiendo(false)
+        }
+    }
+
+    const handleDescargarListado = (seccionId) => {
+        // Abrir URL de descarga en nueva pestaña
+        const url = `${import.meta.env.VITE_API_URL}/secciones/${seccionId}/descargar-listado/`
+        window.open(url + `?token=${token}`, '_blank')
+    }
+
     const handleNotaChange = (detalleId, campo, valor) => {
-        // Validar que sea número entre 1 y 20
         let numVal = valor === '' ? null : parseFloat(valor)
         if (numVal !== null && (numVal < 1 || numVal > 20)) {
-            return // No permitir valores fuera de rango
+            return
         }
 
         setEditedNotas(prev => ({
@@ -102,12 +169,10 @@ export default function CalificacionesPage() {
             }
         }
 
-        // Limpiar cambios guardados
         const newEditedNotas = { ...editedNotas }
         estudiantesConCambios.forEach(est => delete newEditedNotas[est.detalle_id])
         setEditedNotas(newEditedNotas)
 
-        // Refrescar datos
         await fetchMisSecciones()
 
         if (errores.length > 0) {
@@ -129,6 +194,13 @@ export default function CalificacionesPage() {
         }
         return '--'
     }
+
+    // Filtrar estudiantes por búsqueda
+    const estudiantesFiltrados = estudiantesDisponibles.filter(est => {
+        const searchLower = busquedaEstudiante.toLowerCase()
+        const nombre = est.nombre_completo || `${est.usuario?.first_name} ${est.usuario?.last_name}` || ''
+        return nombre.toLowerCase().includes(searchLower) || est.cedula?.toLowerCase().includes(searchLower)
+    })
 
     if (loading) {
         return (
@@ -189,6 +261,26 @@ export default function CalificacionesPage() {
                             {/* Contenido expandido */}
                             {expandedSeccion === seccion.id && (
                                 <div className="p-4">
+                                    {/* Botones de acción */}
+                                    <div className="flex gap-2 mb-4">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleOpenInscripcionModal(seccion); }}
+                                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                        >
+                                            <UserPlus size={16} />
+                                            Inscribir Estudiante
+                                        </button>
+                                        <a
+                                            href={`${import.meta.env.VITE_API_URL}/secciones/${seccion.id}/descargar-listado/`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                        >
+                                            <Download size={16} />
+                                            Descargar Listado
+                                        </a>
+                                    </div>
+
                                     {seccion.estudiantes.length === 0 ? (
                                         <p className="text-center text-gray-500 dark:text-gray-400 py-4">
                                             No hay estudiantes inscritos en esta sección.
@@ -257,7 +349,7 @@ export default function CalificacionesPage() {
                                                 <button
                                                     onClick={() => handleGuardarNotas(seccion)}
                                                     disabled={saving || !Object.keys(editedNotas).some(id => seccion.estudiantes.find(e => e.detalle_id === parseInt(id)))}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
                                                 >
                                                     {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                                                     Guardar Calificaciones
@@ -270,6 +362,88 @@ export default function CalificacionesPage() {
                         </div>
                     ))}
                 </div>
+            )}
+
+            {/* Modal de inscripción */}
+            {inscripcionModal && createPortal(
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+                    onClick={() => setInscripcionModal(null)}
+                >
+                    <div
+                        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200 dark:border-gray-800"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-white">Inscribir Estudiante</h3>
+                            <button onClick={() => setInscripcionModal(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                    {inscripcionModal.asignatura_nombre}
+                                </p>
+                                <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                                    Sección {inscripcionModal.codigo_seccion} · {inscripcionModal.programa}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Buscar estudiante
+                                </label>
+                                <input
+                                    type="text"
+                                    value={busquedaEstudiante}
+                                    onChange={(e) => setBusquedaEstudiante(e.target.value)}
+                                    placeholder="Nombre o cédula..."
+                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Seleccionar estudiante
+                                </label>
+                                <select
+                                    value={selectedEstudiante}
+                                    onChange={(e) => setSelectedEstudiante(e.target.value)}
+                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                >
+                                    <option value="">-- Seleccione un estudiante --</option>
+                                    {estudiantesFiltrados.slice(0, 50).map(est => (
+                                        <option key={est.id} value={est.id}>
+                                            {est.nombre_completo || `${est.usuario?.first_name} ${est.usuario?.last_name}`} ({est.cedula})
+                                        </option>
+                                    ))}
+                                </select>
+                                {estudiantesFiltrados.length > 50 && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Mostrando primeros 50 resultados. Refine la búsqueda.</p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                            <button
+                                onClick={() => setInscripcionModal(null)}
+                                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleInscribirEstudiante}
+                                disabled={!selectedEstudiante || inscribiendo}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                            >
+                                {inscribiendo ? <Loader2 className="animate-spin" size={18} /> : <UserPlus size={18} />}
+                                Inscribir
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     )
