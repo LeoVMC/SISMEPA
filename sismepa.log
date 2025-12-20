@@ -2339,3 +2339,15 @@ Traceback (most recent call last):
 NameError: name 'Inscripcion' is not defined
 [2025-12-20 05:05:07,245] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2025-12-20 05:05:07,909] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-20 05:50:37,996] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:50:38,011] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:50:46,999] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:50:47,014] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:05,074] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:05,087] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:33,458] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:33,475] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:36,402] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:51:36,418] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:52:53,541] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-20 05:52:53,556] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/

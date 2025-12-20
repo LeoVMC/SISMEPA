@@ -245,12 +245,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 transition-colors duration-200">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">{dashboardTitle}</h1>
+    <div className="p-4 md:p-6 transition-colors duration-200 animate-fade-in">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6 animate-slide-in-left">{dashboardTitle}</h1>
 
       {/* Panel de Control de Períodos Académicos (Solo Admin) */}
       {isAdmin && (
-        <div className="bg-white dark:bg-gray-900 dark:border dark:border-gray-800 p-4 rounded-lg shadow-md mb-6">
+        <div className="bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-100 dark:border-gray-800 p-4 rounded-xl shadow-soft mb-6 transition-all duration-300 hover:shadow-soft-lg">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="text-blue-600 dark:text-blue-400" size={24} />
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Control de Períodos Académicos</h2>
