@@ -128,7 +128,8 @@ class SeccionSerializer(serializers.ModelSerializer):
         return None
 
     def get_estudiantes_count(self, obj):
-        return obj.estudiantes_inscritos.filter(estatus='CURSANDO').count()
+        # Contar inscritos en periodos activos (independiente del estatus CURSANDO/INSCRITO)
+        return obj.estudiantes_inscritos.filter(inscripcion__periodo__activo=True).count()
 
 
 class InscripcionSeccionSerializer(serializers.Serializer):

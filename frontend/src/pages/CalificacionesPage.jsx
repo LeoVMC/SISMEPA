@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X } from 'lucide-react'
+import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X, Trash2 } from 'lucide-react'
 
 export default function CalificacionesPage() {
     const [secciones, setSecciones] = useState([])
@@ -43,9 +43,9 @@ export default function CalificacionesPage() {
         }
     }
 
-    const fetchEstudiantesDisponibles = async (programaId) => {
+    const fetchEstudiantesDisponibles = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/estudiantes/?programa=${programaId}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/estudiantes/`, {
                 headers: { Authorization: `Token ${token}` }
             })
             if (res.ok) {
@@ -61,10 +61,8 @@ export default function CalificacionesPage() {
         setInscripcionModal(seccion)
         setSelectedEstudiante('')
         setBusquedaEstudiante('')
-        // Obtener programa de la asignatura para filtrar estudiantes
-        // El programa viene en seccion.programa (nombre), necesitamos el ID
-        // Por simplicidad, buscaremos todos los estudiantes y filtraremos por programa en la búsqueda
-        fetchEstudiantesDisponibles('')
+        // Obtener todos los estudiantes disponibles
+        fetchEstudiantesDisponibles()
     }
 
     const handleInscribirEstudiante = async () => {
@@ -101,6 +99,33 @@ export default function CalificacionesPage() {
         // Abrir URL de descarga en nueva pestaña
         const url = `${import.meta.env.VITE_API_URL}/secciones/${seccionId}/descargar-listado/`
         window.open(url + `?token=${token}`, '_blank')
+    }
+
+    const handleEliminarEstudiante = async (seccionId, estudianteId) => {
+        if (!confirm('¿Estás seguro de eliminar este estudiante de la sección? Esta acción eliminará sus notas y es irreversible.')) return
+        setMessage(null)
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/${seccionId}/desinscribir-estudiante/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Token ${token}`
+                },
+                body: JSON.stringify({ estudiante_id: estudianteId })
+            })
+
+            const data = await res.json()
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Estudiante eliminado exitosamente.' })
+                // Esperar un momento para que el usuario vea el mensaje y luego recargar
+                setTimeout(() => fetchMisSecciones(), 1000)
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Error al eliminar estudiante.' })
+            }
+        } catch (e) {
+            setMessage({ type: 'error', text: 'Error de conexión.' })
+        }
     }
 
     const handleNotaChange = (detalleId, campo, valor) => {
@@ -195,8 +220,14 @@ export default function CalificacionesPage() {
         return '--'
     }
 
-    // Filtrar estudiantes por búsqueda
+    // Obtener IDs de estudiantes ya inscritos en la sección actual
+    const estudiantesInscritos = inscripcionModal?.estudiantes?.map(e => e.estudiante_id) || []
+
+    // Filtrar estudiantes por búsqueda y excluir ya inscritos
     const estudiantesFiltrados = estudiantesDisponibles.filter(est => {
+        // Excluir si ya está inscrito
+        if (estudiantesInscritos.includes(est.id)) return false
+
         const searchLower = busquedaEstudiante.toLowerCase()
         const nombre = est.nombre_completo || `${est.usuario?.first_name} ${est.usuario?.last_name}` || ''
         return nombre.toLowerCase().includes(searchLower) || est.cedula?.toLowerCase().includes(searchLower)
@@ -300,6 +331,7 @@ export default function CalificacionesPage() {
                                                             <th className="text-center p-2 text-gray-600 dark:text-gray-400">Nota 4</th>
                                                             <th className="text-center p-2 text-gray-600 dark:text-gray-400">Promedio</th>
                                                             <th className="text-center p-2 text-gray-600 dark:text-gray-400">Estado</th>
+                                                            <th className="text-center p-2 text-gray-600 dark:text-gray-400">Acciones</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -336,6 +368,15 @@ export default function CalificacionesPage() {
                                                                         ) : (
                                                                             <span className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full">Reprobado</span>
                                                                         )}
+                                                                    </td>
+                                                                    <td className="p-2 text-center">
+                                                                        <button
+                                                                            onClick={() => handleEliminarEstudiante(seccion.id, est.estudiante_id)}
+                                                                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                                            title="Eliminar estudiante"
+                                                                        >
+                                                                            <Trash2 size={18} />
+                                                                        </button>
                                                                     </td>
                                                                 </tr>
                                                             )
@@ -408,20 +449,31 @@ export default function CalificacionesPage() {
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Seleccionar estudiante
                                 </label>
-                                <select
-                                    value={selectedEstudiante}
-                                    onChange={(e) => setSelectedEstudiante(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                >
-                                    <option value="">-- Seleccione un estudiante --</option>
-                                    {estudiantesFiltrados.slice(0, 50).map(est => (
-                                        <option key={est.id} value={est.id}>
-                                            {est.nombre_completo || `${est.usuario?.first_name} ${est.usuario?.last_name}`} ({est.cedula})
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                                    <div className="max-h-40 overflow-y-auto">
+                                        {estudiantesFiltrados.length === 0 ? (
+                                            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                                                No se encontraron estudiantes
+                                            </div>
+                                        ) : (
+                                            estudiantesFiltrados.slice(0, 50).map(est => (
+                                                <button
+                                                    key={est.id}
+                                                    type="button"
+                                                    onClick={() => setSelectedEstudiante(est.id)}
+                                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${selectedEstudiante === est.id
+                                                        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200'
+                                                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                        }`}
+                                                >
+                                                    {est.nombre_completo || `${est.usuario?.first_name} ${est.usuario?.last_name}`} ({est.cedula})
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
                                 {estudiantesFiltrados.length > 50 && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Mostrando primeros 50 resultados. Refine la búsqueda.</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Mostrando primeros 50. Refine la búsqueda.</p>
                                 )}
                             </div>
                         </div>

@@ -25,8 +25,10 @@ class EstudianteViewSet(viewsets.ModelViewSet):
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     def get_permissions(self):
-        # admin: acceso total; listado/creación restringido a admin
-        if self.action in ['list', 'create', 'destroy']:
+        # admin: acceso total; listado permitido a admin y docentes
+        if self.action in ['list']:
+            return [IsDocenteOrAdmin()]
+        if self.action in ['create', 'destroy']:
             return [IsAdmin()]
         if self.action in ['retrieve', 'progreso']:
             return [IsDocenteOrAdminOrOwner()]
@@ -701,17 +703,26 @@ class SeccionViewSet(viewsets.ModelViewSet):
 
         asignatura = seccion.asignatura
 
-        # Verificar si ya está inscrito en esta asignatura (cualquier sección)
-        ya_inscrito = DetalleInscripcion.objects.filter(
+        # 1. Obtener período activo con inscripciones abiertas
+        periodo = PeriodoAcademico.objects.filter(activo=True, inscripciones_activas=True).first()
+        if not periodo:
+            # Verificar si hay período activo pero inscripciones cerradas
+            periodo_cerrado = PeriodoAcademico.objects.filter(activo=True).first()
+            if periodo_cerrado:
+                return {'error': f'Las inscripciones están cerradas para el período {periodo_cerrado.nombre_periodo}.'}
+            return {'error': 'No hay período académico activo.'}
+
+        # 2. Verificar si ya está inscrito en esta asignatura EN ESTE PERIODO
+        ya_inscrito_periodo = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
-            asignatura=asignatura,
-            estatus='CURSANDO'
+            inscripcion__periodo=periodo,
+            asignatura=asignatura
         ).exists()
 
-        if ya_inscrito:
-            return {'error': 'El estudiante ya está inscrito en esta asignatura.'}
+        if ya_inscrito_periodo:
+            return {'error': 'El estudiante ya está inscrito en esta asignatura en el período actual.'}
 
-        # Verificar si ya aprobó esta asignatura
+        # 3. Verificar si ya aprobó esta asignatura (histórico)
         ya_aprobo = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             asignatura=asignatura,
@@ -719,35 +730,32 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ).exists()
 
         if ya_aprobo:
-            return {'error': 'El estudiante ya aprobó esta asignatura.'}
+            return {'error': 'El estudiante ya aprobó esta asignatura anteriormente.'}
 
-        # Verificar prelaciones
+        # 4. Verificar prelaciones
         prelaciones = asignatura.prelaciones.all()
         for prereq in prelaciones:
+            # Buscar si aprobó la prelación
             aprobada = DetalleInscripcion.objects.filter(
                 inscripcion__estudiante=estudiante,
                 asignatura=prereq,
-                nota_final__gte=10  # Nota aprobatoria >= 10
+                nota_final__gte=10
             ).exists()
+            
+            # Caso especial: PSI-30010 requiere todo el pensum (excluyendo la misma materia y electivas si aplica)
+            # Simplificación: PSI-30010 suele ser Tesis/Pasantía, requiere checkeo manual o lógica compleja.
+            # Por ahora validamos prelaciones directas.
+            
             if not aprobada:
                 return {'error': f'Prelación no cumplida: {prereq.codigo} - {prereq.nombre_asignatura}'}
 
-        # Obtener período activo con inscripciones abiertas
-        periodo = PeriodoAcademico.objects.filter(activo=True, inscripciones_activas=True).first()
-        if not periodo:
-            # Verificar si hay período activo pero inscripciones cerradas
-            periodo_cerrado = PeriodoAcademico.objects.filter(activo=True).first()
-            if periodo_cerrado:
-                return {'error': 'Las inscripciones están cerradas para el período actual.'}
-            return {'error': 'No hay período académico activo.'}
-
-        # Obtener o crear inscripción del estudiante en el período
+        # 5. Obtener o crear inscripción del estudiante en el período
         inscripcion, _ = Inscripcion.objects.get_or_create(
             estudiante=estudiante,
             periodo=periodo
         )
 
-        # Crear detalle de inscripción
+        # 6. Crear detalle de inscripción con estatus inicial 'CURSANDO'
         detalle = DetalleInscripcion.objects.create(
             inscripcion=inscripcion,
             asignatura=asignatura,
