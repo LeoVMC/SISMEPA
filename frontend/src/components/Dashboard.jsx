@@ -481,7 +481,7 @@ const Dashboard = () => {
                         className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <span className="font-medium text-gray-700 dark:text-gray-200">{toRoman(sem.id)} SEMESTRE</span>
-                        {expandedSemester === sem.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        {expandedSemester === sem.id ? <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" /> : <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />}
                       </button>
 
                       {expandedSemester === sem.id && (
@@ -493,7 +493,7 @@ const Dashboard = () => {
                                 className="w-full flex items-center justify-between p-2 pl-4 text-sm text-left text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors"
                               >
                                 <span>{subj.name}</span>
-                                {expandedSubject === subj.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                {expandedSubject === subj.id ? <ChevronDown size={14} className="text-gray-500 dark:text-gray-400" /> : <ChevronRight size={14} className="text-gray-500 dark:text-gray-400" />}
                               </button>
 
                               {expandedSubject === subj.id && (
