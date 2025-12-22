@@ -2529,3 +2529,14 @@ NameError: name 'Inscripcion' is not defined
 [2025-12-22 01:55:56,427] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-22 02:00:12,985] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-22 02:00:13,000] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:00:54,595] WARNING django.request: Not Found: /favicon.ico
+[2025-12-22 02:14:22,361] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:14:22,374] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:16:43,911] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-22 02:16:44,589] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 02:16:51,904] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-22 02:16:52,573] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 02:20:47,566] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-22 02:20:48,269] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 02:20:55,222] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:20:55,239] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
