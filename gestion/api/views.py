@@ -346,7 +346,7 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
     queryset = Planificacion.objects.all()
     serializer_class = PlanificacionSerializer
     parser_classes = [MultiPartParser, FormParser]
-    filterset_fields = ['asignatura', 'asignatura__codigo']
+    filterset_fields = ['asignatura', 'asignatura__codigo', 'codigo_especifico']
     search_fields = ['asignatura__nombre_asignatura', 'asignatura__codigo']
 
     def perform_create(self, serializer):
@@ -601,10 +601,26 @@ class SeccionViewSet(viewsets.ModelViewSet):
         user = request.user
         
         # Verificar que sea docente
-        if not user.groups.filter(name='Docente').exists() and not user.is_superuser:
-            return Response({'error': 'Solo los docentes pueden acceder a este recurso.'}, status=status.HTTP_403_FORBIDDEN)
+        if not user.groups.filter(name='Docente').exists() and not user.is_superuser and not user.groups.filter(name='Administrador').exists():
+            return Response({'error': 'Solo los docentes y administradores pueden acceder a este recurso.'}, status=status.HTTP_403_FORBIDDEN)
         
-        secciones = Seccion.objects.filter(docente=user).select_related('asignatura', 'asignatura__programa')
+        # Códigos especiales que solo gestiona el ADMINISTRADOR
+        SPECIAL_CODES = ['TAI-01', 'PRO-01', 'PSI-30010']
+
+        if user.is_superuser or user.groups.filter(name='Administrador').exists():
+            # Para administrador: Asegurar que existan secciones para las materias especiales
+            from gestion.models import Asignatura
+            for code in SPECIAL_CODES:
+                asig = Asignatura.objects.filter(codigo=code).first()
+                if asig:
+                    # Crear sección por defecto '01' si no existe ninguna
+                    if not Seccion.objects.filter(asignatura=asig).exists():
+                         Seccion.objects.create(asignatura=asig, codigo_seccion='01', docente=None)
+
+            secciones = Seccion.objects.all().select_related('asignatura', 'asignatura__programa', 'docente')
+        else:
+            # Para docentes: Mostrar sus secciones pero EXCLUIR explícitamente las especiales
+            secciones = Seccion.objects.filter(docente=user).exclude(asignatura__codigo__in=SPECIAL_CODES).select_related('asignatura', 'asignatura__programa', 'docente')
         
         result = []
         for seccion in secciones:
@@ -634,6 +650,8 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 'asignatura_codigo': seccion.asignatura.codigo,
                 'asignatura_nombre': seccion.asignatura.nombre_asignatura,
                 'programa': seccion.asignatura.programa.nombre_programa,
+                'semestre': seccion.asignatura.semestre,
+                'docente_nombre': seccion.docente.get_full_name() if seccion.docente else 'Sin Docente',
                 'estudiantes': estudiantes_data,
                 'total_estudiantes': len(estudiantes_data)
             })

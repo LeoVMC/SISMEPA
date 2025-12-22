@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X, Trash2 } from 'lucide-react'
+import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X, Trash2, Search, Filter } from 'lucide-react'
 
 export default function CalificacionesPage() {
     const [secciones, setSecciones] = useState([])
@@ -16,6 +16,8 @@ export default function CalificacionesPage() {
     const [selectedEstudiante, setSelectedEstudiante] = useState('')
     const [inscribiendo, setInscribiendo] = useState(false)
     const [busquedaEstudiante, setBusquedaEstudiante] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [filterSemestre, setFilterSemestre] = useState('')
 
     const token = localStorage.getItem('apiToken') || ''
 
@@ -233,6 +235,22 @@ export default function CalificacionesPage() {
         return nombre.toLowerCase().includes(searchLower) || est.cedula?.toLowerCase().includes(searchLower)
     })
 
+    // Lógica de búsqueda y filtrado
+    const uniqueSemesters = [...new Set(secciones.map(s => s.semestre).filter(Boolean))].sort((a, b) => a - b)
+
+    const filteredSecciones = secciones.filter(seccion => {
+        const term = (searchTerm || '').toLowerCase()
+        const matchesSearch =
+            seccion.asignatura_nombre.toLowerCase().includes(term) ||
+            seccion.asignatura_codigo.toLowerCase().includes(term) ||
+            seccion.codigo_seccion.toLowerCase().includes(term) ||
+            (seccion.programa || '').toLowerCase().includes(term)
+
+        const matchesSemestre = filterSemestre ? seccion.semestre === parseInt(filterSemestre) : true
+
+        return matchesSearch && matchesSemestre
+    })
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -253,14 +271,54 @@ export default function CalificacionesPage() {
                 </div>
             )}
 
+            {/* Barra de Búsqueda y Filtros */}
+            {secciones.length > 0 && (
+                <div className="flex flex-col md:flex-row gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border dark:border-gray-800 shadow-sm">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por materia, código, sección..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 min-w-[200px]">
+                        <Filter className="text-gray-400" size={18} />
+                        <select
+                            value={filterSemestre}
+                            onChange={(e) => setFilterSemestre(e.target.value)}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        >
+                            <option value="">Todos los semestres</option>
+                            {uniqueSemesters.map(sem => (
+                                <option key={sem} value={sem}>Semestre {sem}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            )}
+
             {secciones.length === 0 ? (
                 <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 p-8 rounded-lg text-center">
                     <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
                     <p className="text-gray-500 dark:text-gray-400">No tienes secciones asignadas.</p>
                 </div>
+            ) : filteredSecciones.length === 0 ? (
+                <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-lg border dark:border-gray-800">
+                    <Search className="mx-auto text-gray-300 mb-3" size={48} />
+                    <p className="text-gray-500 dark:text-gray-400">No se encontraron resultados para su búsqueda.</p>
+                    <button
+                        onClick={() => { setSearchTerm(''); setFilterSemestre('') }}
+                        className="mt-4 text-blue-600 hover:underline text-sm"
+                    >
+                        Limpiar filtros
+                    </button>
+                </div>
             ) : (
                 <div className="space-y-4">
-                    {secciones.map(seccion => (
+                    {filteredSecciones.map(seccion => (
                         <div key={seccion.id} className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg overflow-hidden shadow-sm">
                             {/* Header de sección */}
                             <button
@@ -276,7 +334,7 @@ export default function CalificacionesPage() {
                                             {seccion.asignatura_nombre}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            {seccion.asignatura_codigo} · Sección {seccion.codigo_seccion} · {seccion.programa}
+                                            {seccion.asignatura_codigo} · Sección {seccion.codigo_seccion} · {seccion.docente_nombre} · {seccion.programa}
                                         </p>
                                     </div>
                                 </div>

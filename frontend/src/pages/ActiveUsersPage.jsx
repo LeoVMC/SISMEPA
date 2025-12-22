@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Wifi, Search, User, Monitor, Clock, ShieldAlert } from 'lucide-react'
+import { Wifi, Search, User, Monitor, Clock, ShieldAlert, Smartphone } from 'lucide-react'
 
 // Simulación de estados de conexión
 const CONNECTION_STATUSES = ['online', 'idle', 'offline']
@@ -204,7 +204,7 @@ export default function ActiveUsersPage() {
 
                                 <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
                                     <div className="flex items-center gap-1">
-                                        <Monitor size={12} />
+                                        {user.device === 'Mobile' ? <Smartphone size={12} /> : <Monitor size={12} />}
                                         <span>{user.device}</span>
                                     </div>
                                     <div className="flex items-center gap-1">

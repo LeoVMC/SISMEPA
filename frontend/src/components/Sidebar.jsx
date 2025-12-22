@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: dashboardLabel },
-        { path: '/admin/pensum', icon: FileText, label: 'Visualizar Pensum' },
+        { path: '/admin/pensum', icon: FileText, label: 'Pensums' },
     ]
 
     // Mostrar opción de Usuarios en Línea solo a Admin y Docentes
@@ -35,8 +35,8 @@ export default function Sidebar({ isOpen, onClose }) {
         menuItems.splice(1, 0, { path: '/active-users', icon: Wifi, label: 'Usuarios en Línea' })
     }
 
-    // Mostrar opción de Calificaciones solo a Docentes
-    if (isTeacher) {
+    // Mostrar opción de Calificaciones a Docentes y Administradores
+    if (isTeacher || isAdmin) {
         menuItems.push({ path: '/calificaciones', icon: ClipboardList, label: 'Calificaciones' })
     }
 

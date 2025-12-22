@@ -183,4 +183,5 @@ class Planificacion(models.Model):
     asignatura = models.ForeignKey(Asignatura, on_delete=models.CASCADE, related_name='planificaciones')
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     archivo = models.FileField(upload_to='planificaciones/')
+    codigo_especifico = models.CharField(max_length=20, null=True, blank=True, help_text="Código específico para electivas o pasantía/tesis")
     uploaded_at = models.DateTimeField(auto_now_add=True)

@@ -62,6 +62,11 @@ const ACTIVIDADES_CULTURALES = [
     { code: 'ACT-13060', name: 'PROTOCOLO' }
 ]
 
+const PROYECTO_GRADO_OPCIONES = [
+    { code: 'TEG-01', name: 'TRABAJO ESPECIAL DE GRADO' },
+    { code: 'PAS-01', name: 'PASANTÍA' }
+]
+
 const ACTIVIDADES_DEPORTIVAS = [
     { code: 'ACT-14010', name: 'EDUCACIÓN FÍSICA Y DEPORTE' },
     { code: 'ACT-14020', name: 'EDUCACIÓN FÍSICA Y SALUD' },
@@ -370,34 +375,56 @@ export default function PensumPage() {
         }
     }
 
-    const handleUploadClick = () => {
-        fileInputRef.current.click()
+    const handleUploadClick = (specificCode = null) => {
+        if (fileInputRef.current) {
+            if (specificCode) {
+                fileInputRef.current.dataset.specificCode = specificCode
+            } else {
+                delete fileInputRef.current.dataset.specificCode
+            }
+            fileInputRef.current.click()
+        }
     }
 
+    // Acción al seleccionar archivo
     const handleFileChange = async (e) => {
         const file = e.target.files[0]
         if (!file || !selectedSubject) return
 
+        // Determinar código específico desde atributo del input o estado temporal
+        const specificCode = fileInputRef.current?.dataset?.specificCode || null
+
+        const formData = new FormData()
+        formData.append('archivo', file)
+        formData.append('asignatura', selectedSubject.code) // El serializer esperará el ID, ajustaremos esto con subjectsMap
+
+        // Buscar ID real de la asignatura
+        const backendData = subjectsMap[selectedSubject.code]
+        if (backendData) {
+            formData.set('asignatura', backendData.id)
+        } else {
+            setActionMessage({ type: 'error', text: 'Error: Asignatura no sincronizada.' })
+            return
+        }
+
+        if (specificCode) {
+            formData.append('codigo_especifico', specificCode)
+        }
+
         setActionLoading(true)
         setActionMessage(null)
 
-        const backendSubject = subjectsMap[selectedSubject.code]
-
         try {
-            if (!backendSubject) throw new Error('Asignatura no encontrada.')
-
-            const fd = new FormData()
-            fd.append('asignatura', backendSubject.id)
-            fd.append('archivo', file)
-
-            const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/`, {
                 method: 'POST',
-                headers: { Authorization: `Token ${token}` },
-                body: fd
+                headers: {
+                    Authorization: `Token ${token}`
+                },
+                body: formData
             })
 
-            if (uploadRes.ok) {
-                setActionMessage({ type: 'success', text: 'Planificación cargada exitosamente.' })
+            if (res.ok) {
+                setActionMessage({ type: 'success', text: `Planificación ${specificCode ? 'específica ' : ''}cargada exitosamente.` })
                 if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
                 throw new Error('Error al cargar archivo.')
@@ -407,22 +434,29 @@ export default function PensumPage() {
             setActionMessage({ type: 'error', text: String(err.message || err) })
         } finally {
             setActionLoading(false)
-            if (fileInputRef.current) fileInputRef.current.value = ''
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+                delete fileInputRef.current.dataset.specificCode
+            }
         }
     }
 
-    const handleDownloadPlan = async () => {
+    const handleDownloadPlan = async (specificCode = null) => {
         if (!selectedSubject) return
         setActionLoading(true)
         setActionMessage(null)
 
+        const queryCode = specificCode || selectedSubject.code
+        const queryParam = specificCode ? `asignatura__codigo=${selectedSubject.code}&codigo_especifico=${specificCode}` : `asignatura__codigo=${selectedSubject.code}`
+
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?asignatura__codigo=${selectedSubject.code}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?${queryParam}`, {
                 headers: { Authorization: `Token ${token}` }
             })
             const plans = await res.json()
 
             if (plans && plans.length > 0) {
+                // Filtrar lo más reciente del código específico si aplica (aunque el backend ya filtra, aseguramos orden)
                 const latestPlan = plans[plans.length - 1]
                 const backendOrigin = new URL(import.meta.env.VITE_API_URL).origin
                 const url = latestPlan.archivo.startsWith('http')
@@ -432,7 +466,7 @@ export default function PensumPage() {
                 window.open(url, '_blank')
                 setActionMessage({ type: 'success', text: 'Descarga iniciada.' })
             } else {
-                setActionMessage({ type: 'error', text: 'No hay planificación cargada.' })
+                setActionMessage({ type: 'error', text: 'No hay planificación cargada para esta opción.' })
             }
         } catch (err) {
             setActionMessage({ type: 'error', text: 'Error al descargar el plan.' })
@@ -442,16 +476,18 @@ export default function PensumPage() {
     }
 
 
-    const handleDeletePlan = async () => {
+    const handleDeletePlan = async (specificCode = null) => {
         if (!selectedSubject) return
         if (!confirm('¿Estás seguro de eliminar la planificación?')) return
 
         setActionLoading(true)
         setActionMessage(null)
 
+        const queryParam = specificCode ? `asignatura__codigo=${selectedSubject.code}&codigo_especifico=${specificCode}` : `asignatura__codigo=${selectedSubject.code}`
+
         try {
             // primero obtener el id del plan
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?asignatura__codigo=${selectedSubject.code}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?${queryParam}`, {
                 headers: { Authorization: `Token ${token}` }
             })
             const plans = await res.json()
@@ -631,6 +667,7 @@ export default function PensumPage() {
         else if (subjectCode.startsWith('ELE-NOTEC')) optionsList = ELECTIVAS_NO_TECNICAS
         else if (subjectCode.startsWith('ACT-CULT')) { optionsList = ACTIVIDADES_CULTURALES; isActivity = true; }
         else if (subjectCode.startsWith('ACT-DEP')) { optionsList = ACTIVIDADES_DEPORTIVAS; isActivity = true; }
+        else if (subjectCode === 'PSI-30010') { optionsList = PROYECTO_GRADO_OPCIONES; }
 
         return (
             <div className="space-y-3 mt-6">
@@ -651,65 +688,10 @@ export default function PensumPage() {
                 )}
 
 
-                {/* Lógica Especial para PSI-30010 (Tesis) */}
-                {backendSubject?.codigo === 'PSI-30010' ? (
-                    <>
-                        <div className="mb-4">
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
-                                Tutores Asignados ({backendSubject.tutores?.length || 0}/10)
-                            </label>
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
-                                {backendSubject.tutores && backendSubject.tutores.length > 0 ? (
-                                    backendSubject.tutores.map(tutor => (
-                                        <div key={tutor.id} className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-800 dark:text-white font-medium">{tutor.first_name} {tutor.last_name}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-500">({tutor.username})</span>
-                                                {isAdmin && (
-                                                    <button
-                                                        onClick={() => handleRemoveTutor(tutor.id, 'generic')}
-                                                        className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                        title="Eliminar tutor"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-gray-400 italic">No hay tutores asignados.</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {isAdmin && (
-                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-100 dark:border-purple-800 mb-3">
-                                <label className="block text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1 uppercase">Asignar Tutor</label>
-                                <div className="flex gap-2">
-                                    <select
-                                        value={selectedDocenteId}
-                                        onChange={(e) => setSelectedDocenteId(e.target.value)}
-                                        className="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                                    >
-                                        <option value="">Seleccione tutor...</option>
-                                        {docentes.map(d => (
-                                            <option key={d.id} value={d.id}>{d.nombre_completo}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => handleAssignTutor('generic')}
-                                        disabled={!selectedDocenteId || actionLoading || (backendSubject.tutores?.length >= 10)}
-                                        className="bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
-                                    >
-                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-                                        Asignar
-                                    </button>
-                                </div>
-                                {backendSubject.tutores?.length >= 10 && <p className="text-xs text-red-500 mt-1">Límite de tutores alcanzado.</p>}
-                            </div>
-                        )}
-                    </>
+                {/* Lógica Especial para PSI-30010 (Tesis) - ELIMINADO TUTORES, SOLO OPCIONES EN EL BLOQUE GENÉRICO */}
+                {backendSubject?.codigo === 'PSI-30010' && !optionsList ? (
+                    /* null - Se mostrará en el bloque genérico si optionsList está activo, o nada si se desea */
+                    null
                 ) : backendSubject?.codigo === 'TAI-01' ? (
                     /* Lógica para TAI-01: Taller */
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-lg border border-blue-100 dark:border-blue-800/30 flex items-start gap-3">
@@ -724,38 +706,104 @@ export default function PensumPage() {
                     null
                 ) : (
                     <>
-                        {/* Mostrar Asignaciones */}
-                        {backendSubject?.secciones?.length > 0 && (
+                        {/* Mostrar Asignaciones / Opciones con botones de carga */}
+                        {(backendSubject?.secciones?.length > 0 || optionsList) && (
                             <div className="mb-4">
                                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase">
-                                    {optionsList ? 'Asignaturas Ofertadas' : 'Docentes Asignados'}
+                                    {optionsList ? 'Asignaturas Ofertadas / Opciones' : 'Docentes Asignados'}
                                 </label>
                                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-100 dark:border-gray-700">
-                                    {backendSubject.secciones.map(sec => (
-                                        <div key={sec.id} className="flex justify-between items-center text-sm">
-                                            <span className="font-semibold text-gray-600 dark:text-gray-300">
-                                                {getOptionLabel(sec.codigo_seccion)}
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
-                                                {isAdmin && sec.docente_nombre && (
-                                                    <button
-                                                        onClick={() => handleRemoveDocenteFromSection(sec.codigo_seccion)}
-                                                        className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                        title="Quitar docente"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
+                                    {/* Si es una lista de opciones genéricas (Electivas/Tesis) */}
+                                    {optionsList ? (
+                                        optionsList.map(opt => {
+                                            // Find assigned teacher if exists for this option
+                                            const sec = backendSubject?.secciones?.find(s => s.codigo_seccion === opt.code)
+
+                                            return (
+                                                <div key={opt.code} className="flex justify-between items-center text-sm p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
+                                                    <div className="flex-1">
+                                                        <span className="font-semibold text-gray-700 dark:text-gray-300 block">
+                                                            {opt.name} <span className="text-xs text-gray-500 font-normal">({opt.code})</span>
+                                                        </span>
+                                                        {sec && sec.docente_nombre && (
+                                                            <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                                <UserCheck size={12} />
+                                                                <span>{sec.docente_nombre}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {/* Botón Upload */}
+                                                        {(isAdmin || (isDocente)) && (
+                                                            <button
+                                                                onClick={() => handleUploadClick(opt.code)}
+                                                                className="p-1.5 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-md transition-colors border border-transparent dark:border-blue-800"
+                                                                title="Cargar Planificación"
+                                                            >
+                                                                <Upload size={14} />
+                                                            </button>
+                                                        )}
+                                                        {/* Botón Download */}
+                                                        <button
+                                                            onClick={() => handleDownloadPlan(opt.code)}
+                                                            className="p-1.5 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-md transition-colors border border-transparent dark:border-green-800"
+                                                            title="Descargar Planificación"
+                                                        >
+                                                            <Download size={14} />
+                                                        </button>
+                                                        {/* Botón Delete */}
+                                                        {(isAdmin || (isDocente)) && (
+                                                            <button
+                                                                onClick={() => handleDeletePlan(opt.code)}
+                                                                className="p-1.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors border border-transparent dark:border-red-800"
+                                                                title="Eliminar Planificación"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        )}
+                                                        {/* Remove Docente Button if Assigned */}
+                                                        {isAdmin && sec && sec.docente_nombre && (
+                                                            <button
+                                                                onClick={() => handleRemoveDocenteFromSection(opt.code)}
+                                                                className="p-1.5 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded-md transition-colors border border-transparent dark:border-orange-800"
+                                                                title="Quitar docente"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })
+                                    ) : (
+                                        /* Lista normal de secciones/docentes */
+                                        backendSubject.secciones.map(sec => (
+                                            <div key={sec.id} className="flex justify-between items-center text-sm">
+                                                <span className="font-semibold text-gray-600 dark:text-gray-300">
+                                                    {getOptionLabel(sec.codigo_seccion)}
+                                                    {optionsList && <span className="text-xs text-gray-400 font-normal ml-1">({sec.codigo_seccion})</span>}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
+                                                    {isAdmin && sec.docente_nombre && (
+                                                        <button
+                                                            onClick={() => handleRemoveDocenteFromSection(sec.codigo_seccion)}
+                                                            className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                            title="Quitar docente"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         )}
 
-                        {/* Controles de Asignación de Admin */}
-                        {isAdmin && (
+                        {/* Controles de Asignación de Admin - EXCLUYENDO Pasantía/Tesis */}
+                        {(isAdmin && backendSubject?.codigo !== 'PSI-30010') && (
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
                                 <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">
                                     {optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección'}
@@ -825,6 +873,7 @@ export default function PensumPage() {
                                         <div className="flex-1">
                                             <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">
                                                 {getOptionLabel(sec.codigo_seccion)}
+                                                {optionsList && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal ml-1">({sec.codigo_seccion})</span>}
                                             </span>
                                             {sec.docente_nombre && (
                                                 <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
@@ -851,7 +900,7 @@ export default function PensumPage() {
                 )}
 
                 {/* Controles de Carga/Descarga (Compartido) */}
-                {(isAdmin || isDocente || true) && (
+                {!optionsList && (isAdmin || isDocente || true) && (
                     <div className="flex gap-2">
                         {/* Carga: Solo Admin o Docente (Asignado) */}
                         {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
