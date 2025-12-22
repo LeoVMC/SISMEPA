@@ -23,19 +23,49 @@ export default function ProfilePage() {
     })
 
     useEffect(() => {
-        // Cargar datos iniciales de localStorage
-        const storedUser = localStorage.getItem('userData')
-        if (storedUser) {
-            const parsed = JSON.parse(storedUser)
-            setUserData(parsed)
-            setPersonalForm({
-                first_name: parsed.first_name || '',
-                last_name: parsed.last_name || '',
-                email: parsed.email || '',
-                phone: parsed.telefono || '', // Asumiendo campo 'telefono'
-                username: parsed.username || ''
-            })
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('apiToken')
+            if (!token) return
+
+            try {
+                // Primero cargar de cache para mostrar algo rápido
+                const storedUser = localStorage.getItem('userData')
+                if (storedUser) {
+                    const parsed = JSON.parse(storedUser)
+                    setUserData(parsed)
+                    setPersonalForm({
+                        first_name: parsed.first_name || '',
+                        last_name: parsed.last_name || '',
+                        email: parsed.email || '',
+                        phone: parsed.telefono || '',
+                        username: parsed.username || ''
+                    })
+                }
+
+                // Luego obtener datos frescos del backend
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/`, {
+                    headers: { 'Authorization': `Token ${token}` }
+                })
+
+                if (res.ok) {
+                    const data = await res.json()
+                    setUserData(data)
+                    localStorage.setItem('userData', JSON.stringify(data))
+                    setPersonalForm(prev => ({
+                        ...prev,
+                        first_name: data.first_name || '',
+                        last_name: data.last_name || '',
+                        email: data.email || '',
+                        phone: data.telefono || '',
+                        username: data.username || ''
+                    }))
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error)
+            }
         }
+
+        fetchUserData()
     }, [])
 
     const handlePersonalSubmit = async (e) => {
@@ -102,7 +132,7 @@ export default function ProfilePage() {
                     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20"></div>
 
-                        <div className="relative relative z-10 flex flex-col items-center">
+                        <div className="relative z-10 flex flex-col items-center">
                             <div className="w-24 h-24 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg mb-4 text-gray-400">
                                 <User size={48} />
                                 {/* Opcional: Agregar botón de cámara */}

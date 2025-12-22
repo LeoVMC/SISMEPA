@@ -4,10 +4,22 @@ from gestion.models import Estudiante, Asignatura, Pensum, Planificacion, Docume
 
 
 class UserSerializer(serializers.ModelSerializer):
+    telefono = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups', 'is_staff', 'is_superuser']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'groups', 'is_staff', 'is_superuser', 'telefono']
         depth = 1
+
+    def get_telefono(self, obj):
+        # Intentar obtener teléfono de perfiles relacionados
+        if hasattr(obj, 'estudiante'):
+            return obj.estudiante.telefono
+        if hasattr(obj, 'docente'):
+            return obj.docente.telefono
+        if hasattr(obj, 'administrador'):
+            return obj.administrador.telefono
+        return None
 
 
 class CreateUserSerializer(serializers.Serializer):
@@ -342,7 +354,7 @@ class PlanificacionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Planificacion
-        fields = ['id', 'asignatura', 'archivo', 'uploaded_by', 'uploaded_at']
+        fields = ['id', 'asignatura', 'archivo', 'uploaded_by', 'uploaded_at', 'codigo_especifico']
 
     def validate_archivo(self, value):
         from django.conf import settings

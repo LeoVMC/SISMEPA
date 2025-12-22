@@ -453,7 +453,8 @@ export default function PensumPage() {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?${queryParam}`, {
                 headers: { Authorization: `Token ${token}` }
             })
-            const plans = await res.json()
+            let plans = await res.json()
+            if (plans.results) plans = plans.results
 
             if (plans && plans.length > 0) {
                 // Filtrar lo más reciente del código específico si aplica (aunque el backend ya filtra, aseguramos orden)
@@ -490,7 +491,8 @@ export default function PensumPage() {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?${queryParam}`, {
                 headers: { Authorization: `Token ${token}` }
             })
-            const plans = await res.json()
+            let plans = await res.json()
+            if (plans.results) plans = plans.results
 
             if (plans && plans.length > 0) {
                 const latestPlan = plans[plans.length - 1]

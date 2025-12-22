@@ -11,7 +11,7 @@ from django.conf.urls.static import static
 from gestion.api.views import (
     EstudianteViewSet, AsignaturaViewSet, PensumViewSet,
     PlanificacionViewSet, DocumentoCalificacionesViewSet, UserManagementViewSet, ProgramaViewSet,
-    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet, EstadisticasViewSet
+    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet, EstadisticasViewSet, OnlineUsersView
 )
 
 router = DefaultRouter()
@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     # Endpoints de dj-rest-auth (login/logout/restablecimiento de contraseña)
     path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/online-users/', OnlineUsersView.as_view(), name='online-users'),
     path('', RedirectView.as_view(url='/api/', permanent=False)),
 ]
 

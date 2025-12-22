@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'sismepa.middleware.UpdateLastActivityMiddleware',
 ]
 
 # CORS: permitir el frontend de desarrollo

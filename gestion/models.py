@@ -185,3 +185,14 @@ class Planificacion(models.Model):
     archivo = models.FileField(upload_to='planificaciones/')
     codigo_especifico = models.CharField(max_length=20, null=True, blank=True, help_text="Código específico para electivas o pasantía/tesis")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class UserActivity(models.Model):
+    """Registra la última actividad de un usuario para monitoreo en línea."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='activity')
+    last_activity = models.DateTimeField(auto_now=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    device_type = models.CharField(max_length=50, default='Desktop') # 'Desktop', 'Mobile'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.last_activity}"

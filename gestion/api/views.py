@@ -258,7 +258,6 @@ class ProgramaViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
         return [IsAdmin()]
 
-
 class UserManagementViewSet(viewsets.ViewSet):
     """Endpoints para que el administrador cree usuarios (docente/estudiante)."""
     permission_classes = [IsAdmin]
@@ -268,6 +267,55 @@ class UserManagementViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+from rest_framework.views import APIView
+from gestion.models import UserActivity
+from django.utils import timezone
+from datetime import timedelta
+
+class OnlineUsersView(APIView):
+    """Devuelve usuarios activos en los últimos 5 minutos."""
+    # permission_classes = [IsAuthenticated] # Opcional: IsAdmin si es restringido
+
+    def get(self, request):
+        time_threshold = timezone.now() - timedelta(minutes=5)
+        # Filtrar actividades recientes y unirse con User
+        active_users = UserActivity.objects.filter(last_activity__gte=time_threshold).select_related('user')
+        
+        data = []
+        for activity in active_users:
+            user = activity.user
+            
+            # Determinar rol
+            role = 'Desconocido'
+            if user.is_superuser or user.is_staff or user.groups.filter(name='Administrador').exists():
+                role = 'Administrador'
+            elif hasattr(user, 'docente'):
+                role = 'Docente'
+            elif hasattr(user, 'estudiante'):
+                role = 'Estudiante'
+
+            # Nombre completo
+            name = user.get_full_name() or user.username
+            
+            # ID específico para mapeo (Estudiante ID vs User ID)
+            # Para facilitar el mapeo en el frontend, enviamos ambos
+            student_id = user.estudiante.id if hasattr(user, 'estudiante') else None
+            
+            data.append({
+                'id': user.id, # User ID
+                'student_id': student_id,
+                'username': user.username,
+                'name': name,
+                'email': user.email,
+                'role': role,
+                'status': 'online',
+                'last_activity': activity.last_activity,
+                'device': activity.device_type
+            })
+            
+        return Response(data)
 
 
 class DocenteViewSet(viewsets.ModelViewSet):

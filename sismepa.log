@@ -2473,3 +2473,59 @@ NameError: name 'Inscripcion' is not defined
 [2025-12-21 23:18:03,067] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-21 23:20:54,696] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-21 23:20:54,711] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:21:59,363] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:21:59,377] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:25:54,789] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-21 23:25:55,450] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-21 23:26:04,965] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:38:52,586] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:38:52,599] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:56:02,753] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:56:02,767] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:56:06,550] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-21 23:56:06,563] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:16:56,730] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-22 00:16:57,381] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:19:45,371] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-22 00:19:46,068] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:21:07,612] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-22 00:21:08,270] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:26:34,433] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:26:34,447] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:37:16,092] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-22 00:37:16,768] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:38:57,630] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2025-12-22 00:38:58,326] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:39:23,958] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-22 00:39:24,610] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:39:30,882] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-22 00:39:31,608] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:39:38,885] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2025-12-22 00:39:39,529] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:43:30,339] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-22 00:43:31,010] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:43:38,332] INFO django.utils.autoreload: /app/sismepa/middleware.py changed, reloading.
+[2025-12-22 00:43:39,012] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:51:28,048] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-22 00:55:57,066] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:55:57,080] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:57:06,761] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 00:57:06,778] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:00:25,322] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:00:25,337] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:04:35,324] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:04:35,339] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:23,192] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:23,207] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:32,633] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:32,648] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:51,187] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:12:51,202] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:16:47,198] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:16:47,212] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:55:20,962] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:55:20,978] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:55:56,410] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 01:55:56,427] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:00:12,985] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-22 02:00:13,000] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/

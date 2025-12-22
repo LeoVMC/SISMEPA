@@ -87,9 +87,7 @@ export default function Sidebar({ isOpen, onClose }) {
                         >
                             <Icon size={20} className={`transition-transform duration-300 ${!isActive(item.path) ? 'group-hover:scale-110' : ''}`} />
                             <span className="font-medium">{item.label}</span>
-                            {isActive(item.path) && (
-                                <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                            )}
+
                         </Link>
                     )
                 })}
@@ -101,20 +99,20 @@ export default function Sidebar({ isOpen, onClose }) {
                 <Link
                     to="/profile"
                     onClick={() => window.innerWidth < 1024 && onClose()}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive('/profile')
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${isActive('/profile')
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-glow-blue'
+                        : 'text-gray-400 hover:bg-gray-800/80 hover:text-white'
                         }`}
                 >
-                    <User size={20} />
+                    <User size={20} className={`transition-transform duration-300 ${!isActive('/profile') ? 'group-hover:scale-110' : ''}`} />
                     <span className="font-medium">Mi Perfil</span>
                 </Link>
 
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-all duration-300 group text-red-400 hover:bg-red-900/20 hover:text-red-300"
                 >
-                    <LogOut size={20} />
+                    <LogOut size={20} className="transition-transform duration-300 group-hover:scale-110" />
                     <span className="font-medium">Cerrar Sesión</span>
                 </button>
             </div>

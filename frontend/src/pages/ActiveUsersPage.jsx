@@ -10,61 +10,177 @@ export default function ActiveUsersPage() {
     const [filter, setFilter] = useState('all') // all, students, teachers, admins
     const [search, setSearch] = useState('')
 
+    const [mySections, setMySections] = useState([])
+    const [selectedSection, setSelectedSection] = useState('all')
+
     // Obtener rol del usuario actual
     const currentUser = JSON.parse(localStorage.getItem('userData') || '{}')
     const isAdmin = currentUser.username === 'admin' || currentUser.is_staff || currentUser.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
     const isTeacher = currentUser.groups?.some(g => g.name === 'Docente' || g.name === 'Profesor')
+    const token = localStorage.getItem('apiToken')
 
     useEffect(() => {
-        // Carga inicial simulada de usuarios "conectados"
-        fetchUsers()
+        if (isTeacher) {
+            fetchMySectionsAndStudents()
+        } else {
+            fetchUsers()
+        }
 
         // Simulación de WebSocket: Actualizar estados cada 5 segundos
         const interval = setInterval(() => {
             updateUserStatuses()
         }, 5000)
 
-        // Simular entrada/salida de usuarios cada 8 segundos
-        const fluxInterval = setInterval(() => {
-            simulateUserFlux()
-        }, 8000)
+        // Simular entrada/salida de usuarios cada 8 segundos (solo para modo simulado/no-docente)
+        let fluxInterval
+        if (!isTeacher) {
+            fluxInterval = setInterval(() => {
+                simulateUserFlux()
+            }, 8000)
+        }
 
         return () => {
             clearInterval(interval)
-            clearInterval(fluxInterval)
+            if (fluxInterval) clearInterval(fluxInterval)
         }
     }, [])
+
+    const fetchMySectionsAndStudents = async () => {
+        setLoading(true)
+        try {
+            // 1. Obtener mis secciones
+            const secRes = await fetch(`${import.meta.env.VITE_API_URL}/secciones/mis-secciones/`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+
+            // 2. Obtener usuarios online reales
+            const onlineRes = await fetch(`${import.meta.env.VITE_API_URL}/online-users/`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+            const onlineUsers = onlineRes.ok ? await onlineRes.json() : []
+
+            if (secRes.ok) {
+                const data = await secRes.json()
+                setMySections(data)
+
+                const allStudents = []
+                const studentIds = new Set()
+
+                data.forEach(sec => {
+                    sec.estudiantes.forEach(est => {
+                        if (!studentIds.has(est.estudiante_id)) {
+                            studentIds.add(est.estudiante_id)
+
+                            // Verificar si está online (buscamos por ID de estudiante)
+                            const isOnline = onlineUsers.find(u => u.student_id === est.estudiante_id)
+
+                            if (isOnline) {
+                                allStudents.push({
+                                    id: est.estudiante_id,
+                                    name: est.nombre,
+                                    email: est.cedula,
+                                    role: 'Estudiante',
+                                    status: 'online',
+                                    lastActivity: 'Ahora',
+                                    device: isOnline ? isOnline.device : 'Unknown', // Dispositivo REAL
+                                    sectionId: sec.id,
+                                    sections: [sec.id]
+                                })
+                            }
+                        } else {
+                            const existing = allStudents.find(s => s.id === est.estudiante_id)
+                            if (existing) existing.sections.push(sec.id)
+                        }
+                    })
+                })
+                setUsers(allStudents)
+
+                // 3. Faker fallback (Simulados para rellenar)
+                try {
+                    const fakeRes = await fetch(`https://fakerapi.it/api/v2/persons?_quantity=5&_locale=es_ES`)
+                    const fakeData = await fakeRes.json()
+
+                    const simulatedUsers = fakeData.data?.map((u, i) => ({
+                        id: `sim-teacher-${i}`,
+                        name: `${u.firstname} ${u.lastname}`,
+                        email: u.email,
+                        role: 'Estudiante', // Simulamos que son estudiantes de otras secciones
+                        status: 'online',
+                        lastActivity: 'Hace un momento',
+                        device: Math.random() > 0.5 ? 'Desktop' : 'Mobile',
+                        sectionId: 9999, // ID ficticio
+                        sections: []
+                    })) || []
+
+                    // Combinar: Reales primero, luego simulados
+                    setUsers(prev => [...prev, ...simulatedUsers])
+                } catch (e) {
+                    console.error("Error fetching simulated users", e)
+                }
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const fetchUsers = async () => {
         setLoading(true)
         try {
-            // En un escenario real, esto sería un endpoint /users/active
+            // 1. Faker API (Simulados)
             const res = await fetch(`https://fakerapi.it/api/v2/persons?_quantity=15&_locale=es_ES`)
             const data = await res.json()
 
-            const simulatedUsers = data.data.map((u, i) => {
+            const simulatedUsers = data.data?.map((u, i) => {
                 let role = 'Estudiante'
                 if (i % 5 === 0) role = 'Administrador'
                 else if (i % 3 === 0) role = 'Docente'
-
                 return {
-                    id: i,
+                    id: `sim-${i}`, // Prefijo para evitar colisiones
                     name: `${u.firstname} ${u.lastname}`,
                     email: u.email,
                     role: role,
                     status: 'online',
                     lastActivity: 'Hace un momento',
                     device: Math.random() > 0.5 ? 'Desktop' : 'Mobile',
-                    ip: `192.168.1.${100 + i}`
                 }
-            })
+            }) || []
 
-            // Si es docente, filtrar solo estudiantes (simulación)
-            if (isTeacher && !isAdmin) {
-                setUsers(simulatedUsers.filter(u => u.role === 'Estudiante'))
-            } else {
-                setUsers(simulatedUsers)
+            // 2. Usuarios Reales Online
+            if (token) {
+                try {
+                    const realRes = await fetch(`${import.meta.env.VITE_API_URL}/online-users/`, {
+                        headers: { Authorization: `Token ${token}` }
+                    })
+                    if (realRes.ok) {
+                        const realUsersRaw = await realRes.json()
+                        const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+                        const currentUserId = userData.user_id || userData.id
+
+                        // Convertir formato
+                        const realUsers = realUsersRaw
+                            .filter(u => u.id !== currentUserId) // Excluirse a sí mismo
+                            .map(u => ({
+                                id: `real-${u.id}`,
+                                name: u.name,
+                                email: u.email,
+                                role: u.role,
+                                status: 'online',
+                                lastActivity: 'Ahora mismo',
+                                device: u.device
+                            }))
+
+                        // Combinar: Reales primero
+                        setUsers([...realUsers, ...simulatedUsers])
+                        return
+                    }
+                } catch (e) {
+                    console.error("Error fetching real users", e)
+                }
             }
+
+            setUsers(simulatedUsers)
         } catch (error) {
             console.error(error)
         } finally {
@@ -90,14 +206,20 @@ export default function ActiveUsersPage() {
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.toLowerCase())
+            (user.email && user.email.toLowerCase().includes(search.toLowerCase()))
 
         let matchesType = true
         if (filter === 'students') matchesType = user.role === 'Estudiante'
         if (filter === 'teachers') matchesType = user.role === 'Docente'
         if (filter === 'admins') matchesType = user.role === 'Administrador'
 
-        return matchesSearch && matchesType
+        let matchesSection = true
+        if (isTeacher && selectedSection !== 'all') {
+            // Verificar si el usuario pertenece a la sección seleccionada
+            matchesSection = user.sections && user.sections.includes(parseInt(selectedSection))
+        }
+
+        return matchesSearch && matchesType && matchesSection
     })
 
     const getStatusColor = (status) => {
@@ -145,28 +267,48 @@ export default function ActiveUsersPage() {
 
             {/* Filtros y Búsqueda */}
             <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row gap-4 justify-between">
-                <div className="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full md:w-auto self-start">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'all' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                    >Todos</button>
-                    <button
-                        onClick={() => setFilter('students')}
-                        className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'students' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                    >Estudiantes</button>
-                    {isAdmin && (
-                        <>
-                            <button
-                                onClick={() => setFilter('teachers')}
-                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'teachers' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                            >Docentes</button>
-                            <button
-                                onClick={() => setFilter('admins')}
-                                className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'admins' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
-                            >Administradores</button>
-                        </>
-                    )}
-                </div>
+                {isAdmin && (
+                    <div className="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-full md:w-auto self-start">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'all' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                        >Todos</button>
+                        <button
+                            onClick={() => setFilter('students')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'students' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                        >Estudiantes</button>
+                        <button
+                            onClick={() => setFilter('teachers')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'teachers' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                        >Docentes</button>
+                        <button
+                            onClick={() => setFilter('admins')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-all ${filter === 'admins' ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}
+                        >Administradores</button>
+                    </div>
+                )}
+
+                {isTeacher && (
+                    <div className="relative w-full md:w-64">
+                        <select
+                            value={selectedSection}
+                            onChange={(e) => setSelectedSection(e.target.value)}
+                            className="w-full pl-4 pr-8 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white appearance-none cursor-pointer text-gray-700"
+                        >
+                            <option value="all">Todas las Secciones</option>
+                            {mySections.map(sec => (
+                                <option key={sec.id} value={sec.id}>
+                                    {sec.asignatura_nombre} - Sec {sec.codigo_seccion} ({sec.periodo})
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                )}
+
+
 
                 <div className="relative w-full md:w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
