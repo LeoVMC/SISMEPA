@@ -138,6 +138,27 @@ const Dashboard = () => {
     }
   }
 
+  const handleDownloadStudentProgress = async () => {
+    try {
+      const token = localStorage.getItem('apiToken')
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/estudiantes/descargar-progreso-academico/`, {
+        headers: { Authorization: `Token ${token}` },
+        responseType: 'blob', // Important
+      })
+
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `Progreso_Academico_SISMEPA.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (error) {
+      console.error('Error descargando progreso:', error)
+      alert('Error al descargar el archivo.')
+    }
+  }
+
   const handleToggleInscripciones = async (periodoId) => {
     setPeriodosLoading(true)
     setPeriodosMessage(null)
@@ -360,13 +381,26 @@ const Dashboard = () => {
             <div className="flex items-center gap-3">
               {dataEstudiante && (
                 <div className="text-gray-800 dark:text-white">
-                  <span className="font-medium">{dataEstudiante.nombre || dataEstudiante.nombre_completo}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">— {dataEstudiante.programa}</span>
+                  <span className="font-medium text-lg">{dataEstudiante.nombre || dataEstudiante.nombre_completo}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 block sm:inline sm:ml-2">
+                    {dataEstudiante.programa}
+                  </span>
                 </div>
               )}
             </div>
           )}
         </div>
+        {!showMonitoring && (
+          <div>
+            <button
+              onClick={handleDownloadStudentProgress}
+              className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center"
+            >
+              <Download size={18} />
+              Descargar Progreso
+            </button>
+          </div>
+        )}
         {showMonitoring && (
           <div>
             <button

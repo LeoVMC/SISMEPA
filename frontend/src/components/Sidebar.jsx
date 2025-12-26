@@ -10,6 +10,7 @@ export default function Sidebar({ isOpen, onClose }) {
     const isActive = (path) => location.pathname === path
 
     const handleLogout = () => {
+        if (!window.confirm('¿Estás seguro de que deseas cerrar la sesión?')) return
         localStorage.removeItem('apiToken')
         localStorage.removeItem('userData')
         navigate('/login')

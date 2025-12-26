@@ -30,11 +30,74 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             return [IsDocenteOrAdmin()]
         if self.action in ['create', 'destroy']:
             return [IsAdmin()]
-        if self.action in ['retrieve', 'progreso']:
+        if self.action in ['retrieve', 'progreso', 'descargar_progreso_academico']:
             return [IsDocenteOrAdminOrOwner()]
-        if self.action in ['mis_inscripciones', 'mi_info']:
+        if self.action in ['mis_inscripciones', 'mi_info', 'descargar_progreso_academico']:
             return [IsEstudiante()]
         return []
+
+    @action(detail=False, methods=['get'], url_path='descargar-progreso-academico')
+    def descargar_progreso_academico(self, request):
+        """Genera un archivo Excel con el progreso académico del estudiante."""
+        from django.http import HttpResponse
+        try:
+            import openpyxl
+        except ImportError:
+            return Response({'error': 'Librería openpyxl no instalada.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        try:
+            estudiante = Estudiante.objects.get(usuario=request.user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Crear libro y hoja
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = f"Progreso - {estudiante.usuario.first_name}"
+
+        # Estilos (opcional, simple)
+        from openpyxl.styles import Font
+        header_font = Font(bold=True)
+
+        # Encabezado con información del estudiante
+        ws['A1'] = "REPORTE DE PROGRESO ACADÉMICO"
+        ws['A1'].font = header_font
+        ws.merge_cells('A1:F1')
+
+        ws['A2'] = f"Estudiante: {estudiante.usuario.get_full_name()}"
+        ws['A3'] = f"Cédula: {estudiante.cedula}"
+        ws['D3'] = f"Programa: {estudiante.programa.nombre_programa if estudiante.programa else 'N/A'}"
+
+        # Fila de Títulos de Tabla
+        headers = ['Código', 'Asignatura', 'Semestre', 'Créditos', 'Nota', 'Estatus']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col_num, value=header)
+            cell.font = header_font
+
+        # Datos
+        detalles = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante
+        ).select_related('asignatura').order_by('asignatura__semestre', 'asignatura__codigo')
+
+        row_num = 6
+        for det in detalles:
+            ws.cell(row=row_num, column=1, value=det.asignatura.codigo)
+            ws.cell(row=row_num, column=2, value=det.asignatura.nombre_asignatura)
+            ws.cell(row=row_num, column=3, value=det.asignatura.semestre)
+            ws.cell(row=row_num, column=4, value=det.asignatura.creditos)
+            ws.cell(row=row_num, column=5, value=float(det.nota_final) if det.nota_final is not None else "N/A")
+            ws.cell(row=row_num, column=6, value=det.estatus)
+            row_num += 1
+
+        # Ajustar ancho de columnas (simple)
+        ws.column_dimensions['A'].width = 15
+        ws.column_dimensions['B'].width = 40
+        ws.column_dimensions['F'].width = 15
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Record_Academico_{estudiante.cedula}.xlsx"'
+        wb.save(response)
+        return response
 
     @action(detail=True, methods=['get'])
     def progreso(self, request, pk=None):
@@ -764,10 +827,32 @@ class SeccionViewSet(viewsets.ModelViewSet):
 
     def _inscribir_estudiante_en_seccion(self, estudiante, seccion):
         """Método interno para realizar la inscripción con validaciones."""
-        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico
+        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico, Asignatura
         from django.core.exceptions import ValidationError
+        from django.db.models import Sum, Q
 
         asignatura = seccion.asignatura
+
+        # 0. Validación Especial: Servicio Comunitario (Taller o Proyecto)
+        # Requiere 50% de Unidades de Crédito Aprobadas
+        nombre_upper = asignatura.nombre_asignatura.upper()
+        if "SERVICIO COMUNITARIO" in nombre_upper:
+            # Calcular Total de Créditos del Programa
+            total_creditos = Asignatura.objects.filter(programa=estudiante.programa).aggregate(total=Sum('creditos'))['total'] or 0
+            
+            # Calcular Créditos Aprobados por el Estudiante
+            creditos_aprobados = DetalleInscripcion.objects.filter(
+                inscripcion__estudiante=estudiante
+            ).filter(
+                Q(estatus='APROBADO') | Q(nota_final__gte=10)
+            ).aggregate(total=Sum('asignatura__creditos'))['total'] or 0
+
+            # Validar 50%
+            if creditos_aprobados < (total_creditos * 0.5):
+                porcentaje_actual = (creditos_aprobados / total_creditos * 100) if total_creditos > 0 else 0
+                return {
+                    'error': f'Requisito no cumplido: Para cursar Servicio Comunitario debes tener aprobado el 50% de las Unidades de Crédito. (Tienes: {creditos_aprobados} UC - {porcentaje_actual:.1f}%)'
+                }
 
         # 1. Obtener período activo con inscripciones abiertas
         periodo = PeriodoAcademico.objects.filter(activo=True, inscripciones_activas=True).first()
@@ -801,19 +886,15 @@ class SeccionViewSet(viewsets.ModelViewSet):
         # 4. Verificar prelaciones
         prelaciones = asignatura.prelaciones.all()
         for prereq in prelaciones:
-            # Buscar si aprobó la prelación
+            # Buscar si aprobó la prelación (Por nota o por estatus explícito)
+            from django.db.models import Q
             aprobada = DetalleInscripcion.objects.filter(
                 inscripcion__estudiante=estudiante,
-                asignatura=prereq,
-                nota_final__gte=10
-            ).exists()
-            
-            # Caso especial: PSI-30010 requiere todo el pensum (excluyendo la misma materia y electivas si aplica)
-            # Simplificación: PSI-30010 suele ser Tesis/Pasantía, requiere checkeo manual o lógica compleja.
-            # Por ahora validamos prelaciones directas.
+                asignatura=prereq
+            ).filter(Q(nota_final__gte=10) | Q(estatus='APROBADO')).exists()
             
             if not aprobada:
-                return {'error': f'Prelación no cumplida: {prereq.codigo} - {prereq.nombre_asignatura}'}
+                return {'error': f'No puedes inscribir esta materia. Requiere haber aprobado: {prereq.nombre_asignatura} ({prereq.codigo}).'}
 
         # 5. Obtener o crear inscripción del estudiante en el período
         inscripcion, _ = Inscripcion.objects.get_or_create(

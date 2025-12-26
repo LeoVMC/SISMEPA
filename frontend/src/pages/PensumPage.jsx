@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower } from 'lucide-react'
+import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower, UserX } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -704,8 +704,14 @@ export default function PensumPage() {
                         </div>
                     </div>
                 ) : backendSubject?.codigo === 'PRO-01' ? (
-                    /* Lógica para PRO-01: Proyecto de Servicio - Sin Controles Específicos */
-                    null
+                    /* Lógica para PRO-01: Proyecto de Servicio */
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-lg border border-blue-100 dark:border-blue-800/30 flex items-start gap-3">
+                        <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                        <div>
+                            <strong>Nota Importante:</strong>
+                            <p className="mt-1">El taller de servicio comunitario se debe inscribir al mismo tiempo que el proyecto de servicio comunitario.</p>
+                        </div>
+                    </div>
                 ) : (
                     <>
                         {/* Mostrar Asignaciones / Opciones con botones de carga */}
@@ -739,38 +745,38 @@ export default function PensumPage() {
                                                         {(isAdmin || (isDocente)) && (
                                                             <button
                                                                 onClick={() => handleUploadClick(opt.code)}
-                                                                className="p-1.5 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-md transition-colors border border-transparent dark:border-blue-800"
+                                                                className="p-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
                                                                 title="Cargar Planificación"
                                                             >
-                                                                <Upload size={14} />
+                                                                <Upload size={16} />
                                                             </button>
                                                         )}
                                                         {/* Botón Download */}
                                                         <button
                                                             onClick={() => handleDownloadPlan(opt.code)}
-                                                            className="p-1.5 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-md transition-colors border border-transparent dark:border-green-800"
+                                                            className="p-2 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm"
                                                             title="Descargar Planificación"
                                                         >
-                                                            <Download size={14} />
+                                                            <Download size={16} />
                                                         </button>
                                                         {/* Botón Delete */}
                                                         {(isAdmin || (isDocente)) && (
                                                             <button
                                                                 onClick={() => handleDeletePlan(opt.code)}
-                                                                className="p-1.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors border border-transparent dark:border-red-800"
+                                                                className="p-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm"
                                                                 title="Eliminar Planificación"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <Trash2 size={16} />
                                                             </button>
                                                         )}
                                                         {/* Remove Docente Button if Assigned */}
                                                         {isAdmin && sec && sec.docente_nombre && (
                                                             <button
                                                                 onClick={() => handleRemoveDocenteFromSection(opt.code)}
-                                                                className="p-1.5 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded-md transition-colors border border-transparent dark:border-orange-800"
+                                                                className="p-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-sm"
                                                                 title="Quitar docente"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <UserX size={16} />
                                                             </button>
                                                         )}
                                                     </div>
@@ -790,10 +796,10 @@ export default function PensumPage() {
                                                     {isAdmin && sec.docente_nombre && (
                                                         <button
                                                             onClick={() => handleRemoveDocenteFromSection(sec.codigo_seccion)}
-                                                            className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                                            className="p-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-sm"
                                                             title="Quitar docente"
                                                         >
-                                                            <Trash2 size={14} />
+                                                            <UserX size={16} />
                                                         </button>
                                                     )}
                                                 </div>
@@ -931,7 +937,7 @@ export default function PensumPage() {
                                 <button
                                     onClick={handleDeletePlan}
                                     disabled={actionLoading}
-                                    className="flex items-center justify-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-2 px-3 text-sm rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                                    className="flex items-center justify-center gap-1 bg-red-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                                     title="Eliminar Planificación"
                                 >
                                     <Trash2 size={16} />
