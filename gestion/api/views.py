@@ -8,6 +8,7 @@ import openpyxl
 from gestion.models import (
     Estudiante, Asignatura, DetalleInscripcion, Pensum, Planificacion, DocumentoCalificaciones, Seccion, PeriodoAcademico
 )
+from gestion.utils import apply_excel_styling
 from gestion.api.serializers import (
     EstudianteSerializer, AsignaturaSerializer, PensumSerializer,
     PlanificacionSerializer, DocumentoCalificacionesSerializer, CreateUserSerializer, UserSerializer,
@@ -64,10 +65,12 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws['A1'].font = header_font
         ws.merge_cells('A1:F1')
 
-        ws['A2'] = f"Estudiante: {estudiante.usuario.get_full_name()}"
-        ws['A3'] = f"Cédula: {estudiante.cedula}"
-        ws['D3'] = f"Programa: {estudiante.programa.nombre_programa if estudiante.programa else 'N/A'}"
+        ws['A2'] = "Estudiante:"
+        ws['B2'] = estudiante.usuario.get_full_name()
 
+        ws['A3'] = "Cédula:"
+        ws['B3'] = estudiante.cedula
+        
         # Fila de Títulos de Tabla
         headers = ['Código', 'Asignatura', 'Semestre', 'Créditos', 'Nota', 'Estatus']
         for col_num, header in enumerate(headers, 1):
@@ -89,10 +92,8 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=6, value=det.estatus)
             row_num += 1
 
-        # Ajustar ancho de columnas (simple)
-        ws.column_dimensions['A'].width = 15
-        ws.column_dimensions['B'].width = 40
-        ws.column_dimensions['F'].width = 15
+        # Aplicar estilos globales
+        apply_excel_styling(ws, 5, custom_widths={'A': 13.0, 'B': 42.0})
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="Record_Academico_{estudiante.cedula}.xlsx"'
@@ -206,21 +207,40 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Estudiantes"
-        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Carrera', 'Avance (%)'])
+        
+        # Estilos
+        from openpyxl.styles import Font
+        header_font = Font(bold=True)
+        title_font = Font(bold=True, size=14)
 
+        # Título Principal
+        ws['A1'] = "LISTADO GENERAL DE ESTUDIANTES"
+        ws['A1'].font = title_font
+        ws.merge_cells('A1:G1')
+
+        # Encabezados
+        headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Carrera', 'Avance (%)']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=3, column=col, value=header)
+            cell.font = header_font
+
+        # Datos
+        row_num = 4
         for est in Estudiante.objects.select_related('usuario', 'programa').all():
-            ws.append([
-                est.usuario.first_name,
-                est.usuario.last_name,
-                est.cedula,
-                est.telefono,
-                est.usuario.email,
-                est.programa.nombre_programa if est.programa else '',
-                f"{est.calcular_avance()}"
-            ])
+            ws.cell(row=row_num, column=1, value=est.usuario.first_name)
+            ws.cell(row=row_num, column=2, value=est.usuario.last_name)
+            ws.cell(row=row_num, column=3, value=est.cedula)
+            ws.cell(row=row_num, column=4, value=est.telefono)
+            ws.cell(row=row_num, column=5, value=est.usuario.email)
+            ws.cell(row=row_num, column=6, value=est.programa.nombre_programa if est.programa else '')
+            ws.cell(row=row_num, column=7, value=f"{est.calcular_avance()}")
+            row_num += 1
+
+        # Aplicar estilos globales
+        apply_excel_styling(ws, 3)
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=reporte_academico.xlsx'
+        response['Content-Disposition'] = 'attachment; filename=Listado_Estudiantes.xlsx'
         wb.save(response)
         return response
 
@@ -389,21 +409,40 @@ class DocenteViewSet(viewsets.ModelViewSet):
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'])
     def reporte_excel(self, request):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Docentes"
-        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Contratación'])
 
+        # Estilos
+        from openpyxl.styles import Font
+        header_font = Font(bold=True)
+        title_font = Font(bold=True, size=14)
+
+        # Título
+        ws['A1'] = "LISTADO GENERAL DE DOCENTES"
+        ws['A1'].font = title_font
+        ws.merge_cells('A1:F1')
+
+        # Encabezados
+        headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Contratación']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=3, column=col, value=header)
+            cell.font = header_font
+
+        # Datos
+        row_num = 4
         for docente in self.filter_queryset(self.get_queryset()):
-            ws.append([
-                docente.usuario.first_name,
-                docente.usuario.last_name,
-                docente.cedula,
-                docente.telefono,
-                docente.usuario.email,
-                docente.tipo_contratacion
-            ])
+            ws.cell(row=row_num, column=1, value=docente.usuario.first_name)
+            ws.cell(row=row_num, column=2, value=docente.usuario.last_name)
+            ws.cell(row=row_num, column=3, value=docente.cedula)
+            ws.cell(row=row_num, column=4, value=docente.telefono)
+            ws.cell(row=row_num, column=5, value=docente.usuario.email)
+            ws.cell(row=row_num, column=6, value=docente.tipo_contratacion)
+            row_num += 1
+
+        apply_excel_styling(ws, 3, custom_widths={'A': 20.0, 'B': 20.0})
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=reporte_docentes.xlsx'
@@ -419,20 +458,40 @@ class AdminViewSet(viewsets.ModelViewSet):
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'])
     def reporte_excel(self, request):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Listado Administradores"
-        ws.append(['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo'])
 
+        # Estilos
+        from openpyxl.styles import Font
+        header_font = Font(bold=True)
+        title_font = Font(bold=True, size=14)
+
+        # Título
+        ws['A1'] = "LISTADO DE ADMINISTRADORES"
+        ws['A1'].font = title_font
+        ws.merge_cells('A1:F1')
+
+        # Encabezados
+        headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=3, column=col, value=header)
+            cell.font = header_font
+
+        # Datos
+        row_num = 4
         for admin in self.filter_queryset(self.get_queryset()):
-            ws.append([
-                admin.usuario.first_name,
-                admin.usuario.last_name,
-                admin.cedula,
-                admin.telefono,
-                admin.usuario.email
-            ])
+            ws.cell(row=row_num, column=1, value=admin.usuario.first_name)
+            ws.cell(row=row_num, column=2, value=admin.usuario.last_name)
+            ws.cell(row=row_num, column=3, value=admin.cedula)
+            ws.cell(row=row_num, column=4, value=admin.telefono)
+            ws.cell(row=row_num, column=5, value=admin.usuario.email)
+            row_num += 1
+
+        # Aplicar estilos globales
+        apply_excel_styling(ws, 3)
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=reporte_administradores.xlsx'
@@ -526,7 +585,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from rest_framework.permissions import IsAuthenticated
         if self.action in ['list', 'retrieve', 'estudiantes']:
             return [IsAuthenticated()]
-        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante']:
+        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante', 'descargar_listado']:
             return [IsDocenteOrAdmin()]
         if self.action in ['inscribirme', 'desinscribirme']:
             return [IsEstudiante()]
@@ -559,26 +618,67 @@ class SeccionViewSet(viewsets.ModelViewSet):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = f"Listado {seccion.codigo_seccion}"
+
+        # Estilos
+        from openpyxl.styles import Font, Alignment
+        header_font = Font(bold=True)
+        title_font = Font(bold=True, size=14)
         
-        # Encabezados
-        ws.append(['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota Final', 'Estado'])
+        # 1. Título
+        ws['A1'] = "PLANILLA DE EVALUACIÓN"
+        ws['A1'].font = title_font
+        ws.merge_cells('A1:J1')
+        ws['A1'].alignment = Alignment(horizontal='center')
+
+        # 2. Metadata (Asignatura, Sección, Docente)
+        ws['A2'] = "Asignatura:"
+        ws['B2'] = f"{seccion.asignatura.nombre_asignatura} ({seccion.asignatura.codigo})"
+        ws['A2'].font = header_font
+        ws.merge_cells('B2:E2')
         
-        # Datos de estudiantes
-        detalles = seccion.estudiantes_inscritos.select_related('inscripcion__estudiante__usuario')
+        ws['A3'] = "Sección:"
+        ws['B3'] = seccion.codigo_seccion
+        ws['A3'].font = header_font
+        
+        ws['A4'] = "Docente:"
+        ws['B4'] = seccion.docente.get_full_name() if seccion.docente else "Sin Asignar"
+        ws['A4'].font = header_font
+        ws.merge_cells('B4:E4')
+
+        # Nuevo: Periodo
+        from gestion.models import PeriodoAcademico
+        periodo = PeriodoAcademico.objects.filter(activo=True).first()
+        ws['A5'] = "Período:"
+        ws['B5'] = str(periodo) if periodo else "N/A"
+        ws['A5'].font = header_font
+        ws.merge_cells('B5:E5')
+        
+        # 3. Encabezados Tabla (Fila 7)
+        headers = ['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota Final', 'Estado']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=7, column=col, value=header)
+            cell.font = header_font
+        
+        # 4. Datos (Fila 8)
+        row_num = 8
+        detalles = seccion.estudiantes_inscritos.select_related('inscripcion__estudiante__usuario').order_by('inscripcion__estudiante__usuario__last_name')
+        
         for detalle in detalles:
             est = detalle.inscripcion.estudiante
-            ws.append([
-                est.cedula,
-                est.usuario.first_name,
-                est.usuario.last_name,
-                est.usuario.email,
-                float(detalle.nota1) if detalle.nota1 else '',
-                float(detalle.nota2) if detalle.nota2 else '',
-                float(detalle.nota3) if detalle.nota3 else '',
-                float(detalle.nota4) if detalle.nota4 else '',
-                float(detalle.nota_final) if detalle.nota_final else '',
-                detalle.estatus
-            ])
+            ws.cell(row=row_num, column=1, value=est.cedula)
+            ws.cell(row=row_num, column=2, value=est.usuario.first_name)
+            ws.cell(row=row_num, column=3, value=est.usuario.last_name)
+            ws.cell(row=row_num, column=4, value=est.usuario.email)
+            ws.cell(row=row_num, column=5, value=float(detalle.nota1) if detalle.nota1 is not None else '')
+            ws.cell(row=row_num, column=6, value=float(detalle.nota2) if detalle.nota2 is not None else '')
+            ws.cell(row=row_num, column=7, value=float(detalle.nota3) if detalle.nota3 is not None else '')
+            ws.cell(row=row_num, column=8, value=float(detalle.nota4) if detalle.nota4 is not None else '')
+            ws.cell(row=row_num, column=9, value=float(detalle.nota_final) if detalle.nota_final is not None else '')
+            ws.cell(row=row_num, column=10, value=detalle.estatus)
+            row_num += 1
+            
+        # Aplicar estilos globales
+        apply_excel_styling(ws, 7)
         
         filename = f"listado_{seccion.asignatura.codigo}_{seccion.codigo_seccion}.xlsx"
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -992,6 +1092,114 @@ class EstadisticasViewSet(viewsets.ViewSet):
         if self.action == 'mi_progreso':
             return [IsEstudiante()]
         return [IsDocenteOrAdmin()]
+
+    @action(detail=False, methods=['get'], url_path='descargar-desglose-excel')
+    def descargar_desglose_excel(self, request):
+        """Genera reporte Excel del desglose académico (Admin/Docente)."""
+        from django.db.models import Avg, Max, Min, Count
+        import openpyxl
+        from openpyxl.styles import Font, Alignment
+        from gestion.models import Programa
+        
+        programa_id = request.query_params.get('programa')
+        user = request.user
+        
+        # Determinar roles
+        is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
+        is_docente = user.groups.filter(name='Docente').exists()
+        
+        if not is_admin and not is_docente:
+            return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Obtener asignaturas
+        asignaturas = Asignatura.objects.all().order_by('semestre', 'orden')
+        if programa_id:
+            asignaturas = asignaturas.filter(programa_id=programa_id)
+            try:
+                programa_nombre = Programa.objects.get(id=programa_id).nombre_programa
+            except:
+                programa_nombre = "Desconocido"
+        else:
+            programa_nombre = "Todos"
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Desglose Académico"
+        
+        # Estilos
+        title_font = Font(bold=True, size=14)
+        header_font = Font(bold=True)
+        
+        # Título
+        ws['A1'] = "MONITOREO DE AVANCE EDUCATIVO"
+        ws['A1'].font = title_font
+        ws.merge_cells('A1:I1')
+        ws['A1'].alignment = Alignment(horizontal='center')
+        
+        # Metadata
+        ws['A2'] = "Carrera:"
+        ws['B2'] = programa_nombre
+        ws['A2'].font = header_font
+        ws.merge_cells('B2:E2')
+        
+        periodo_actual = PeriodoAcademico.objects.filter(activo=True).first()
+        ws['A3'] = "Período:"
+        ws['B3'] = str(periodo_actual) if periodo_actual else "N/A"
+        ws['A3'].font = header_font
+        # ws.merge_cells('B3:E3') # Handled by apply_excel_styling
+        
+        # Encabezados
+        headers = ['Semestre', 'Código', 'Asignatura', 'Sección', 'Docente', 'Inscritos', 'Promedio', 'Máxima', 'Mínima', 'Estado']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col, value=header)
+            cell.font = header_font
+            
+        row_num = 6
+        
+        for asig in asignaturas:
+            # Replicar lógica de desglose: obtener secciones con docente
+            secciones = asig.secciones.filter(docente__isnull=False).select_related('docente')
+            
+            # Filtro para docente
+            if is_docente and not is_admin:
+                secciones = secciones.filter(docente=user)
+                
+            for seccion in secciones:
+                stats = DetalleInscripcion.objects.filter(seccion=seccion).aggregate(
+                    count=Count('id'),
+                    avg=Avg('nota_final'),
+                    max=Max('nota_final'),
+                    min=Min('nota_final')
+                )
+                
+                # Solo mostrar si hay datos o si es docente (aunque no tenga alumnos, ve su sección)
+                # La lógica original de desglose filtra si no hay secciones pero en el loop itera.
+                # Aquí listaremos todas las que cumplan.
+                
+                count = stats['count'] or 0
+                avg = round(float(stats['avg']), 2) if stats['avg'] else 0
+                max_val = round(float(stats['max']), 2) if stats['max'] else 0
+                min_val = round(float(stats['min']), 2) if stats['min'] else 0
+                
+                ws.cell(row=row_num, column=1, value=asig.semestre)
+                ws.cell(row=row_num, column=2, value=asig.codigo)
+                ws.cell(row=row_num, column=3, value=asig.nombre_asignatura)
+                ws.cell(row=row_num, column=4, value=seccion.codigo_seccion)
+                ws.cell(row=row_num, column=5, value=seccion.docente.get_full_name() if seccion.docente else 'Sin asignar')
+                ws.cell(row=row_num, column=6, value=count)
+                ws.cell(row=row_num, column=7, value=avg)
+                ws.cell(row=row_num, column=8, value=max_val)
+                ws.cell(row=row_num, column=9, value=min_val)
+                ws.cell(row=row_num, column=10, value="Activo" if count > 0 else "Sin Estudiantes") # Estado derivado simple
+                row_num += 1
+
+        # Aplicar estilos globales (Asignatura=C, Docente=E)
+        apply_excel_styling(ws, 5, custom_widths={'A': 10.0, 'B': 14.0, 'C': 42.0, 'E': 42.0})
+        
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=Desglose_Academico.xlsx'
+        wb.save(response)
+        return response
 
     @action(detail=False, methods=['get'], url_path='desglose')
     def desglose(self, request):

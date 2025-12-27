@@ -159,6 +159,29 @@ const Dashboard = () => {
     }
   }
 
+  const handleDownloadReport = async () => {
+    try {
+      const token = localStorage.getItem('apiToken')
+      // Usar endpoint de desglose-excel con filtro de programa
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/descargar-desglose-excel/`, {
+        headers: { Authorization: `Token ${token}` },
+        params: { programa: selectedProgram },
+        responseType: 'blob',
+      })
+
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'Desglose_Academico.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (error) {
+      console.error('Error descargando reporte:', error)
+      alert('Error al descargar el reporte.')
+    }
+  }
+
   const handleToggleInscripciones = async (periodoId) => {
     setPeriodosLoading(true)
     setPeriodosMessage(null)
@@ -404,7 +427,7 @@ const Dashboard = () => {
         {showMonitoring && (
           <div>
             <button
-              onClick={() => window.open(`${import.meta.env.VITE_API_URL}/estudiantes/reporte_excel/`)}
+              onClick={handleDownloadReport}
               className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center gap-2 justify-center"
             >
               <Download size={18} />

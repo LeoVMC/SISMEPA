@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X, Trash2, Search, Filter } from 'lucide-react'
+import axios from 'axios'
 
 export default function CalificacionesPage() {
     const [secciones, setSecciones] = useState([])
@@ -244,6 +245,27 @@ export default function CalificacionesPage() {
         return nombre.toLowerCase().includes(searchLower) || est.cedula?.toLowerCase().includes(searchLower)
     })
 
+    const handleDownloadListado = async (seccionId, asignaturaCodigo, seccionCodigo) => {
+        try {
+            const token = localStorage.getItem('apiToken')
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/secciones/${seccionId}/descargar-listado/`, {
+                headers: { Authorization: `Token ${token}` },
+                responseType: 'blob',
+            })
+
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `Listado_${asignaturaCodigo}_${seccionCodigo}.xlsx`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+        } catch (error) {
+            console.error('Error descargando listado:', error)
+            alert('Error al descargar el listado.')
+        }
+    }
+
     // Lógica de búsqueda y filtrado
     const uniqueSemesters = [...new Set(secciones.map(s => s.semestre).filter(Boolean))].sort((a, b) => a - b)
 
@@ -378,7 +400,7 @@ export default function CalificacionesPage() {
                                         </p>
                                     </div>
                                 </div>
-                                {expandedSubjects[subject.codigo] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                                {expandedSubjects[subject.codigo] ? <ChevronDown size={20} className="text-gray-400 dark:text-gray-200" /> : <ChevronRight size={20} className="text-gray-400 dark:text-gray-200" />}
                             </button>
 
                             {/* Nivel 2: Lista de Secciones (Sub-lista desplegable) */}
@@ -409,7 +431,7 @@ export default function CalificacionesPage() {
                                                         <Users size={16} />
                                                         {seccion.total_estudiantes} estudiantes
                                                     </span>
-                                                    {expandedSeccion === seccion.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                                    {expandedSeccion === seccion.id ? <ChevronDown size={16} className="text-gray-400 dark:text-gray-200" /> : <ChevronRight size={16} className="text-gray-400 dark:text-gray-200" />}
                                                 </div>
                                             </button>
 
@@ -425,15 +447,13 @@ export default function CalificacionesPage() {
                                                             <UserPlus size={16} />
                                                             Inscribir Estudiante
                                                         </button>
-                                                        <a
-                                                            href={`${import.meta.env.VITE_API_URL}/secciones/${seccion.id}/descargar-listado/`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDownloadListado(seccion.id, seccion.asignatura_codigo, seccion.codigo_seccion); }}
                                                             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
                                                         >
                                                             <Download size={16} />
                                                             Descargar Listado
-                                                        </a>
+                                                        </button>
                                                     </div>
 
                                                     {seccion.estudiantes.length === 0 ? (

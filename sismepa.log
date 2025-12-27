@@ -2736,3 +2736,206 @@ Traceback (most recent call last):
 AttributeError: 'MergedCell' object has no attribute 'column_letter'
 [2025-12-26 04:46:15,297] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2025-12-26 04:46:15,986] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 01:02:17,796] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 01:02:18,482] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 01:02:42,053] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 01:02:42,701] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 01:17:30,432] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-27 01:17:30,449] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-27 01:19:30,324] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 01:19:30,996] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 01:19:42,402] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 01:19:43,073] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 01:26:47,929] WARNING django.request: Unauthorized: /api/secciones/27/descargar-listado/
+[2025-12-27 01:26:56,634] WARNING django.request: Unauthorized: /api/secciones/27/descargar-listado/
+[2025-12-27 01:27:36,543] WARNING django.request: Unauthorized: /api/secciones/27/descargar-listado/
+[2025-12-27 01:29:47,313] WARNING django.request: Unauthorized: /api/secciones/27/descargar-listado/
+[2025-12-27 01:56:47,672] WARNING django.request: Forbidden: /api/secciones/27/descargar-listado/
+[2025-12-27 01:57:09,978] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 01:57:09,990] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:13:25,026] WARNING django.request: Forbidden: /api/secciones/27/descargar-listado/
+[2025-12-27 02:16:05,187] WARNING django.request: Forbidden: /api/secciones/27/descargar-listado/
+[2025-12-27 02:20:48,642] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 02:20:49,311] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 02:36:13,242] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:36:13,255] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:39:46,455] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:39:46,470] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:43:12,379] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 02:43:12,395] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 04:36:50,543] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 04:36:51,393] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 04:41:14,781] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 04:41:15,445] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:07:45,071] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:07:45,794] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:07:58,212] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:07:58,877] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:08:19,445] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:08:20,114] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:08:44,754] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:08:45,442] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:14:30,357] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:14:31,033] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:17:11,963] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:17:12,636] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:17:57,895] ERROR django.request: Internal Server Error: /api/estadisticas/descargar-desglose-excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 1189, in descargar_desglose_excel
+    apply_excel_styling(ws, 5)
+  File "/app/gestion/utils.py", line 24, in apply_excel_styling
+    thin_border = Border(
+                  ^^^^^^
+NameError: name 'Border' is not defined
+[2025-12-27 05:18:01,729] ERROR django.request: Internal Server Error: /api/estadisticas/descargar-desglose-excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 1189, in descargar_desglose_excel
+    apply_excel_styling(ws, 5)
+  File "/app/gestion/utils.py", line 24, in apply_excel_styling
+    thin_border = Border(
+                  ^^^^^^
+NameError: name 'Border' is not defined
+[2025-12-27 05:18:48,480] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:18:49,166] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:19:18,442] ERROR django.request: Internal Server Error: /api/estadisticas/descargar-desglose-excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 1189, in descargar_desglose_excel
+    apply_excel_styling(ws, 5)
+  File "/app/gestion/utils.py", line 24, in apply_excel_styling
+    thin_border = Border(
+                  ^^^^^^
+NameError: name 'Border' is not defined
+[2025-12-27 05:19:22,344] ERROR django.request: Internal Server Error: /api/estadisticas/descargar-desglose-excel/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 1189, in descargar_desglose_excel
+    apply_excel_styling(ws, 5)
+  File "/app/gestion/utils.py", line 24, in apply_excel_styling
+    thin_border = Border(
+                  ^^^^^^
+NameError: name 'Border' is not defined
+[2025-12-27 05:19:54,514] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:19:55,195] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:26:06,696] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:26:07,367] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:33:18,023] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:33:18,710] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:35:02,633] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:35:03,338] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:37:49,288] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:37:49,970] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:43:11,474] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 05:43:12,176] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:43:40,874] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:43:41,545] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 05:53:53,993] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 05:53:54,666] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:01:55,918] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 06:01:56,579] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:02:05,944] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:02:06,607] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:02:20,023] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:02:20,718] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:05:09,688] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:05:10,373] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:09:27,862] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:09:28,535] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:12:43,904] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:12:44,587] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:22:47,610] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:22:48,275] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:29:25,907] INFO django.utils.autoreload: /app/gestion/utils.py changed, reloading.
+[2025-12-27 06:29:26,559] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:29:33,856] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:29:34,558] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:32:12,220] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 06:32:12,237] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2025-12-27 06:36:09,802] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-27 06:36:09,817] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
