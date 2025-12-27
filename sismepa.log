@@ -2939,3 +2939,42 @@ NameError: name 'Border' is not defined
 [2025-12-27 06:32:12,237] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2025-12-27 06:36:09,802] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-27 06:36:09,817] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-27 06:42:56,772] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:42:57,449] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:47:34,727] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 06:47:35,355] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:49:35,378] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 06:50:57,153] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 06:50:57,950] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 06:51:04,475] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 06:51:29,097] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 06:51:44,418] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 06:57:49,409] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 07:06:05,505] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 07:06:31,259] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:06:32,438] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:07:22,741] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 07:07:23,463] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 07:07:51,339] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:07:51,975] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:04,760] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:05,262] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:05,454] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:05,622] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:05,889] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:06,087] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:06,247] WARNING django.request: Unauthorized: /api/estudiantes/cargar-record/
+[2025-12-27 07:08:27,662] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 07:08:36,150] WARNING django.request: Unauthorized: /api/estadisticas/mi-progreso/
+[2025-12-27 07:08:36,161] WARNING django.request: Unauthorized: /api/estadisticas/mi-progreso/
+[2025-12-27 07:08:36,758] WARNING django.request: Unauthorized: /api/estudiantes/mis-inscripciones/
+[2025-12-27 07:08:36,762] WARNING django.request: Unauthorized: /api/asignaturas/
+[2025-12-27 07:08:36,770] WARNING django.request: Unauthorized: /api/estudiantes/mis-inscripciones/
+[2025-12-27 07:14:07,293] WARNING django.request: Unauthorized: /api/estudiantes/mis-inscripciones/
+[2025-12-27 07:14:07,305] WARNING django.request: Unauthorized: /api/asignaturas/
+[2025-12-27 07:14:07,306] WARNING django.request: Unauthorized: /api/estudiantes/mis-inscripciones/
+[2025-12-27 07:14:08,453] WARNING django.request: Unauthorized: /api/estadisticas/mi-progreso/
+[2025-12-27 07:14:08,463] WARNING django.request: Unauthorized: /api/estadisticas/mi-progreso/
+[2025-12-27 07:21:08,194] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
+[2025-12-27 07:23:53,871] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 07:23:56,127] INFO django.utils.autoreload: Watching for file changes with StatReloader
