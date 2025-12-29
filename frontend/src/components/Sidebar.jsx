@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -28,6 +28,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: dashboardLabel },
+        { path: '/horario', icon: Calendar, label: 'Horario' },
         { path: '/admin/pensum', icon: FileText, label: 'Pensums' },
     ]
 

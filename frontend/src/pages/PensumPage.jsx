@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower, UserX } from 'lucide-react'
+import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower, UserX, Pencil, Ban } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -89,6 +89,13 @@ export default function PensumPage() {
     const [selectedSeccion, setSelectedSeccion] = useState('D1') // Mantendrá D1.. o Código de Opción
     const [subjectsMap, setSubjectsMap] = useState({}) // código -> datos del backend
     const [misInscripciones, setMisInscripciones] = useState({}) // código -> datos de inscripción del estudiante
+
+    // Schedule Assignment States
+    const [selectedDia, setSelectedDia] = useState('')
+    const [selectedBloqueInicio, setSelectedBloqueInicio] = useState('')
+    const [selectedBloqueFin, setSelectedBloqueFin] = useState('')
+    const [selectedAula, setSelectedAula] = useState('')
+    const [isEditingSection, setIsEditingSection] = useState(false)
 
 
 
@@ -285,7 +292,15 @@ export default function PensumPage() {
         setSelectedSubject(subject)
         setIsModalOpen(true)
         setActionMessage(null)
+        setIsModalOpen(true)
+        setActionMessage(null)
         setSelectedDocenteId('')
+        // Reset schedule
+        setSelectedDia('')
+        setSelectedBloqueInicio('')
+        setSelectedBloqueFin('')
+        setSelectedAula('')
+        setIsEditingSection(false)
 
         // selección por defecto precisa
         if (subject.code.startsWith('ELE-TEC')) {
@@ -307,7 +322,10 @@ export default function PensumPage() {
     }
 
     const handleAssignDocente = async () => {
-        if (!selectedDocenteId || !selectedSubject) return
+        // Validation: If deleting section (no docente selected in edit mode), allow it via different handler or here?
+        // User asked for "Simply delete section" button.
+        // If Assigning/Updating, Docente is required.
+        if (!selectedDocenteId || !selectedSeccion) return
         setActionLoading(true)
         setActionMessage(null)
 
@@ -323,12 +341,24 @@ export default function PensumPage() {
                 },
                 body: JSON.stringify({
                     codigo_seccion: selectedSeccion,
-                    docente: selectedDocenteId
+                    docente: selectedDocenteId,
+                    horario: (selectedDia && selectedBloqueInicio && selectedBloqueFin) ? {
+                        dia: selectedDia,
+                        bloque_inicio: selectedBloqueInicio,
+                        bloque_fin: selectedBloqueFin,
+                        aula: selectedAula
+                    } : null
                 })
             })
 
             if (res.ok) {
-                setActionMessage({ type: 'success', text: `Docente asignado a sección ${selectedSeccion} exitosamente.` })
+                setActionMessage({ type: 'success', text: `Sección ${selectedSeccion} actualizada exitosamente.` })
+                setIsEditingSection(false)
+                setSelectedDocenteId('') // Reset after success
+                setSelectedDia('')
+                setSelectedBloqueInicio('')
+                setSelectedBloqueFin('')
+                setSelectedAula('')
                 if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
                 throw new Error('Error al asignar docente.')
@@ -548,7 +578,9 @@ export default function PensumPage() {
     }
 
     const handleRemoveDocenteFromSection = async (seccionCode) => {
-        if (!confirm(`¿Quitar docente de la sección ${seccionCode}?`)) return
+        // Legacy: Used for "Remove Docente" button. Now integrated into Edit -> Delete Section logic mostly.
+        // We will keep this function generic but maybe rename or adapt to "Delete Section"
+        if (!confirm(`¿Eliminar la sección ${seccionCode}? Esta acción es irreversible.`)) return
         setActionLoading(true)
         const backendSubject = subjectsMap[selectedSubject.code]
 
@@ -561,21 +593,106 @@ export default function PensumPage() {
                 },
                 body: JSON.stringify({
                     codigo_seccion: seccionCode,
-                    docente: '' // Limpiar asignación
+                    docente: '' // Empty docente triggers deletion in backend
                 })
             })
 
             if (res.ok) {
-                setActionMessage({ type: 'success', text: `Docente removido de sección ${seccionCode}.` })
+                setActionMessage({ type: 'success', text: `Sección ${seccionCode} eliminada.` })
+                setIsEditingSection(false)
+                setSelectedDocenteId('')
+                setSelectedDia('')
+                setSelectedBloqueInicio('')
+                setSelectedBloqueFin('')
+                setSelectedAula('')
                 if (selectedProgram) fetchSubjects(selectedProgram.id)
             } else {
-                throw new Error('Error al remover docente.')
+                throw new Error('Error al eliminar sección.')
             }
         } catch (err) {
             setActionMessage({ type: 'error', text: String(err.message || err) })
         } finally {
             setActionLoading(false)
         }
+    }
+
+    const handleEditSection = (section) => {
+        setIsEditingSection(true)
+        setSelectedSeccion(section.codigo_seccion)
+
+        // Match section.docente (User ID) to Docente ID in our list
+        // Docente list format: { id: 1, usuario: { id: 5, ... }, ... }
+        if (section.docente) {
+            const matchedDocente = docentes.find(d => d.usuario.id === section.docente)
+            if (matchedDocente) {
+                setSelectedDocenteId(matchedDocente.id)
+            } else {
+                console.warn("Docente assigned to section not found in loaded docentes list", section.docente)
+                setSelectedDocenteId('')
+            }
+        } else {
+            setSelectedDocenteId('')
+        }
+
+        // Parse Schedule
+        if (section.horarios && section.horarios.length > 0) {
+            const h = section.horarios[0]
+            setSelectedDia(h.dia)
+            setSelectedAula(h.aula || '')
+            // Reverse Map Time to Block
+            // "07:00" -> 1. Simple lookup or switch.
+            const TIME_TO_BLOCK = {
+                "07:00:00": 1, "07:00": 1,
+                "07:45:00": 2, "07:45": 2,
+                "08:30:00": 3, "08:30": 3,
+                "09:15:00": 4, "09:15": 4,
+                "10:00:00": 5, "10:00": 5,
+                "10:45:00": 6, "10:45": 6,
+                "11:30:00": 7, "11:30": 7,
+                "12:15:00": 8, "12:15": 8,
+                "13:00:00": 9, "13:00": 9,
+                "13:45:00": 10, "13:45": 10,
+                "14:30:00": 11, "14:30": 11,
+                "15:15:00": 12, "15:15": 12,
+                "16:00:00": 13, "16:00": 13,
+                "16:45:00": 14, "16:45": 14
+            }
+            // End Time Map
+            const END_TIME_TO_BLOCK = {
+                "07:45:00": 1, "07:45": 1,
+                "08:30:00": 2, "08:30": 2,
+                "09:15:00": 3, "09:15": 3,
+                "10:00:00": 4, "10:00": 4,
+                "10:45:00": 5, "10:45": 5,
+                "11:30:00": 6, "11:30": 6,
+                "12:15:00": 7, "12:15": 7,
+                "13:00:00": 8, "13:00": 8,
+                "13:45:00": 9, "13:45": 9,
+                "14:30:00": 10, "14:30": 10,
+                "15:15:00": 11, "15:15": 11,
+                "16:00:00": 12, "16:00": 12,
+                "16:45:00": 13, "16:45": 13,
+                "17:30:00": 14, "17:30": 14
+            }
+
+            setSelectedBloqueInicio(TIME_TO_BLOCK[h.hora_inicio] || '')
+            setSelectedBloqueFin(END_TIME_TO_BLOCK[h.hora_fin] || '')
+        } else {
+            setSelectedDia('')
+            setSelectedBloqueInicio('')
+            setSelectedBloqueFin('')
+            setSelectedAula('')
+        }
+    }
+
+    const cancelEdit = () => {
+        setIsEditingSection(false)
+        setSelectedDocenteId('')
+        setSelectedDia('')
+        setSelectedBloqueInicio('')
+        setSelectedBloqueFin('')
+        setSelectedAula('')
+        setActionMessage(null)
     }
 
     // === FUNCIONES DE INSCRIPCIÓN DE ESTUDIANTES ===
@@ -770,13 +887,14 @@ export default function PensumPage() {
                                                             </button>
                                                         )}
                                                         {/* Remove Docente Button if Assigned */}
-                                                        {isAdmin && sec && sec.docente_nombre && (
+                                                        {/* Edit Section Button */}
+                                                        {isAdmin && sec && (
                                                             <button
-                                                                onClick={() => handleRemoveDocenteFromSection(opt.code)}
-                                                                className="p-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-sm"
-                                                                title="Quitar docente"
+                                                                onClick={() => handleEditSection(sec)}
+                                                                className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors shadow-sm"
+                                                                title="Editar Sección"
                                                             >
-                                                                <UserX size={16} />
+                                                                <Pencil size={16} />
                                                             </button>
                                                         )}
                                                     </div>
@@ -793,13 +911,14 @@ export default function PensumPage() {
                                                 </span>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-gray-800 dark:text-white">{sec.docente_nombre || 'Sin asignar'}</span>
-                                                    {isAdmin && sec.docente_nombre && (
+                                                    {/* Edit Section Button */}
+                                                    {isAdmin && (
                                                         <button
-                                                            onClick={() => handleRemoveDocenteFromSection(sec.codigo_seccion)}
-                                                            className="p-2 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-sm"
-                                                            title="Quitar docente"
+                                                            onClick={() => handleEditSection(sec)}
+                                                            className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors shadow-sm"
+                                                            title="Editar Sección"
                                                         >
-                                                            <UserX size={16} />
+                                                            <Pencil size={16} />
                                                         </button>
                                                     )}
                                                 </div>
@@ -812,10 +931,17 @@ export default function PensumPage() {
 
                         {/* Controles de Asignación de Admin - EXCLUYENDO Pasantía/Tesis */}
                         {(isAdmin && backendSubject?.codigo !== 'PSI-30010') && (
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-3">
-                                <label className="block text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1 uppercase">
-                                    {optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección'}
-                                </label>
+                            <div className={`p-3 rounded-lg border mb-3 transition-colors ${isEditingSection ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' : 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800'}`}>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className={`block text-xs font-semibold uppercase ${isEditingSection ? 'text-orange-700 dark:text-orange-300' : 'text-indigo-700 dark:text-indigo-300'}`}>
+                                        {isEditingSection ? `Editando Sección ${selectedSeccion}` : (optionsList ? 'Asignar Asignatura a Docente' : 'Asignar Docente a Sección')}
+                                    </label>
+                                    {isEditingSection && (
+                                        <button onClick={cancelEdit} className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 flex items-center gap-1">
+                                            <X size={14} /> Cancelar
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="flex flex-col gap-3">
                                     <div className="flex flex-col gap-3">
                                         {/* Desplegable Dinámico: Opciones vs Secciones */}
@@ -824,6 +950,7 @@ export default function PensumPage() {
                                                 className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm truncate"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
+                                                disabled={isEditingSection}
                                             >
                                                 {optionsList.map(opt => <option key={opt.code} value={opt.code}>{opt.name}</option>)}
                                             </select>
@@ -832,6 +959,7 @@ export default function PensumPage() {
                                                 className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
                                                 value={selectedSeccion}
                                                 onChange={e => setSelectedSeccion(e.target.value)}
+                                                disabled={isEditingSection}
                                             >
                                                 {SECCIONES.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
@@ -848,111 +976,181 @@ export default function PensumPage() {
                                             ))}
                                         </select>
                                     </div>
-                                    <button
-                                        onClick={handleAssignDocente}
-                                        disabled={!selectedDocenteId || !selectedSeccion || actionLoading}
-                                        className="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium flex justify-center gap-2 items-center"
-                                    >
-                                        {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
-                                        Asignar
-                                    </button>
+
+                                    {/* Selectores de Horario (Opcional) */}
+                                    <div className="flex flex-col gap-2">
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <select
+                                                value={selectedDia}
+                                                onChange={(e) => setSelectedDia(e.target.value)}
+                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                            >
+                                                <option value="">Día...</option>
+                                                <option value="1">Lunes</option>
+                                                <option value="2">Martes</option>
+                                                <option value="3">Miércoles</option>
+                                                <option value="4">Jueves</option>
+                                                <option value="5">Viernes</option>
+                                                <option value="6">Sábado</option>
+                                            </select>
+                                            <select
+                                                value={selectedBloqueInicio}
+                                                onChange={(e) => setSelectedBloqueInicio(e.target.value)}
+                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                            >
+                                                <option value="">Inicio...</option>
+                                                {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
+                                                    <option key={b} value={b}>Bloque {b}</option>
+                                                ))}
+                                            </select>
+                                            <select
+                                                value={selectedBloqueFin}
+                                                onChange={(e) => setSelectedBloqueFin(e.target.value)}
+                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                            >
+                                                <option value="">Fin...</option>
+                                                {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
+                                                    <option key={b} value={b}>Bloque {b}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <select
+                                            value={selectedAula}
+                                            onChange={(e) => setSelectedAula(e.target.value)}
+                                            className="w-full text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                        >
+                                            <option value="">Seleccione Aula...</option>
+                                            {Array.from({ length: 20 }, (_, i) => {
+                                                const num = String(i + 1).padStart(3, '0')
+                                                return `ASMA-${num}`
+                                            }).map(aula => (
+                                                <option key={aula} value={aula}>{aula}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {isEditingSection && (
+                                            <button
+                                                onClick={() => handleRemoveDocenteFromSection(selectedSeccion)}
+                                                className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 text-sm font-medium flex justify-center items-center px-3"
+                                                title="Eliminar Sección"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={handleAssignDocente}
+                                            disabled={!selectedDocenteId || !selectedSeccion || actionLoading}
+                                            className={`flex-1 text-white p-2 rounded-md text-sm font-medium flex justify-center gap-2 items-center disabled:opacity-50 ${isEditingSection ? 'bg-orange-600 hover:bg-orange-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                                        >
+                                            {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
+                                            {isEditingSection ? 'Actualizar' : 'Asignar'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
                     </>
-                )}
+                )
+                }
 
                 {/* === SECCIÓN DE INSCRIPCIÓN PARA ESTUDIANTES === */}
-                {isEstudianteUser() && backendSubject?.secciones?.length > 0 && (
-                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800 mb-3">
-                        <label className="block text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-2 uppercase">
-                            Inscripción en Secciones
-                        </label>
+                {
+                    isEstudianteUser() && backendSubject?.secciones?.length > 0 && (
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800 mb-3">
+                            <label className="block text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-2 uppercase">
+                                Inscripción en Secciones
+                            </label>
 
-                        {!canStudentEnroll() ? (
-                            <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 text-xs rounded-md border border-yellow-200 dark:border-yellow-800">
-                                <AlertCircle size={14} className="inline mr-1" />
-                                Esta asignatura pertenece a otro programa. Solo puedes inscribirte en asignaturas de tu carrera.
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {backendSubject.secciones.map(sec => (
-                                    <div key={sec.id} className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-                                        <div className="flex-1">
-                                            <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">
-                                                {getOptionLabel(sec.codigo_seccion)}
-                                                {optionsList && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal ml-1">({sec.codigo_seccion})</span>}
-                                            </span>
-                                            {sec.docente_nombre && (
-                                                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                                                    ({sec.docente_nombre})
+                            {!canStudentEnroll() ? (
+                                <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 text-xs rounded-md border border-yellow-200 dark:border-yellow-800">
+                                    <AlertCircle size={14} className="inline mr-1" />
+                                    Esta asignatura pertenece a otro programa. Solo puedes inscribirte en asignaturas de tu carrera.
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {backendSubject.secciones.map(sec => (
+                                        <div key={sec.id} className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                                            <div className="flex-1">
+                                                <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">
+                                                    {getOptionLabel(sec.codigo_seccion)}
+                                                    {optionsList && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal ml-1">({sec.codigo_seccion})</span>}
                                                 </span>
-                                            )}
-                                            <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-2">
-                                                {sec.estudiantes_count || 0} inscritos
-                                            </span>
+                                                {sec.docente_nombre && (
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                                        ({sec.docente_nombre})
+                                                    </span>
+                                                )}
+                                                <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-2">
+                                                    {sec.estudiantes_count || 0} inscritos
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleInscribirme(sec.id)}
+                                                disabled={actionLoading}
+                                                className="bg-emerald-600 text-white px-3 py-1 text-xs rounded-md hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1"
+                                            >
+                                                {actionLoading ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={12} />}
+                                                Inscribirme
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => handleInscribirme(sec.id)}
-                                            disabled={actionLoading}
-                                            className="bg-emerald-600 text-white px-3 py-1 text-xs rounded-md hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1"
-                                        >
-                                            {actionLoading ? <Loader2 size={12} className="animate-spin" /> : <UserPlus size={12} />}
-                                            Inscribirme
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
 
                 {/* Controles de Carga/Descarga (Compartido) */}
-                {!optionsList && (isAdmin || isDocente || true) && (
-                    <div className="flex gap-2">
-                        {/* Carga: Solo Admin o Docente (Asignado) */}
-                        {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
-                            <button
-                                onClick={handleUploadClick}
-                                disabled={actionLoading}
-                                className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                            >
-                                {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
-                                Cargar Planificación
-                            </button>
-                        )}
-
-                        {/* Descarga: Todos (si existe, manejado por lógica de botón pero visible a todos) */}
-                        <button
-                            onClick={handleDownloadPlan}
-                            disabled={actionLoading}
-                            className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                        >
-                            {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
-                            Descargar Planificación
-                        </button>
-                        {/* Botón Eliminar Plan: Admin o Docente (Asignado) */}
-                        {getSubjectStatus(selectedSubject?.code).hasPlan &&
-                            (isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
+                {
+                    !optionsList && (isAdmin || isDocente || true) && (
+                        <div className="flex gap-2">
+                            {/* Carga: Solo Admin o Docente (Asignado) */}
+                            {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
                                 <button
-                                    onClick={handleDeletePlan}
+                                    onClick={handleUploadClick}
                                     disabled={actionLoading}
-                                    className="flex items-center justify-center gap-1 bg-red-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                                    title="Eliminar Planificación"
+                                    className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                                 >
-                                    <Trash2 size={16} />
+                                    {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
+                                    Cargar Planificación
                                 </button>
                             )}
-                    </div>
-                )}
 
-                {actionMessage && (
-                    <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${actionMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'}`}>
-                        {actionMessage.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
-                        {actionMessage.text}
-                    </div>
-                )}
-            </div>
+                            {/* Descarga: Todos (si existe, manejado por lógica de botón pero visible a todos) */}
+                            <button
+                                onClick={handleDownloadPlan}
+                                disabled={actionLoading}
+                                className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                            >
+                                {actionLoading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
+                                Descargar Planificación
+                            </button>
+                            {/* Botón Eliminar Plan: Admin o Docente (Asignado) */}
+                            {getSubjectStatus(selectedSubject?.code).hasPlan &&
+                                (isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
+                                    <button
+                                        onClick={handleDeletePlan}
+                                        disabled={actionLoading}
+                                        className="flex items-center justify-center gap-1 bg-red-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                        title="Eliminar Planificación"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
+                        </div>
+                    )
+                }
+
+                {
+                    actionMessage && (
+                        <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${actionMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'}`}>
+                            {actionMessage.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
+                            {actionMessage.text}
+                        </div>
+                    )
+                }
+            </div >
         )
     }
 

@@ -124,13 +124,26 @@ class PeriodoAcademicoSerializer(serializers.ModelSerializer):
         return 'en_curso'
 
 
+
+class HorarioSerializer(serializers.ModelSerializer):
+    dia_nombre = serializers.CharField(source='get_dia_display', read_only=True)
+    
+    class Meta:
+        from gestion.models import Horario
+        model = Horario
+        fields = ['id', 'dia', 'dia_nombre', 'hora_inicio', 'hora_fin', 'aula']
+
+
 class SeccionSerializer(serializers.ModelSerializer):
     docente_nombre = serializers.SerializerMethodField()
     estudiantes_count = serializers.SerializerMethodField()
+    horarios = HorarioSerializer(many=True, read_only=True)
+    nombre_asignatura = serializers.CharField(source='asignatura.nombre_asignatura', read_only=True)
+    codigo_asignatura = serializers.CharField(source='asignatura.codigo', read_only=True)
     
     class Meta:
         model = Seccion
-        fields = ['id', 'asignatura', 'codigo_seccion', 'docente', 'docente_nombre', 'estudiantes_count']
+        fields = ['id', 'asignatura', 'nombre_asignatura', 'codigo_asignatura', 'codigo_seccion', 'docente', 'docente_nombre', 'estudiantes_count', 'horarios']
 
     def get_docente_nombre(self, obj):
         if obj.docente:

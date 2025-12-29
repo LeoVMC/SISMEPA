@@ -100,6 +100,198 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         wb.save(response)
         return response
 
+    @action(detail=False, methods=['get'], url_path='mi-horario')
+    def mi_horario(self, request):
+        """Devuelve el horario de clases del estudiante."""
+        try:
+            estudiante = Estudiante.objects.get(usuario=request.user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No eres un estudiante.'}, status=status.HTTP_403_FORBIDDEN)
+
+        periodo_actual = PeriodoAcademico.objects.filter(activo=True).first()
+        if not periodo_actual:
+            return Response({'error': 'No hay período académico activo.'}, status=status.HTTP_404_NOT_FOUND)
+
+        inscripciones = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            inscripcion__periodo=periodo_actual
+        ).select_related('seccion', 'asignatura', 'seccion__docente')
+
+        horario_data = []
+        # Paleta de colores suaves para el horario
+        colores = [
+            {'bg': 'bg-blue-100 dark:bg-blue-900/30', 'border': 'border-blue-200 dark:border-blue-800', 'text': 'text-blue-800 dark:text-blue-200'},
+            {'bg': 'bg-green-100 dark:bg-green-900/30', 'border': 'border-green-200 dark:border-green-800', 'text': 'text-green-800 dark:text-green-200'},
+            {'bg': 'bg-purple-100 dark:bg-purple-900/30', 'border': 'border-purple-200 dark:border-purple-800', 'text': 'text-purple-800 dark:text-purple-200'},
+            {'bg': 'bg-amber-100 dark:bg-amber-900/30', 'border': 'border-amber-200 dark:border-amber-800', 'text': 'text-amber-800 dark:text-amber-200'},
+            {'bg': 'bg-rose-100 dark:bg-rose-900/30', 'border': 'border-rose-200 dark:border-rose-800', 'text': 'text-rose-800 dark:text-rose-200'},
+            {'bg': 'bg-indigo-100 dark:bg-indigo-900/30', 'border': 'border-indigo-200 dark:border-indigo-800', 'text': 'text-indigo-800 dark:text-indigo-200'},
+            {'bg': 'bg-teal-100 dark:bg-teal-900/30', 'border': 'border-teal-200 dark:border-teal-800', 'text': 'text-teal-800 dark:text-teal-200'},
+            {'bg': 'bg-cyan-100 dark:bg-cyan-900/30', 'border': 'border-cyan-200 dark:border-cyan-800', 'text': 'text-cyan-800 dark:text-cyan-200'},
+        ]
+        
+        asignatura_color_map = {}
+        color_index = 0
+
+        for detalle in inscripciones:
+            if not detalle.seccion:
+                continue
+            
+            # Asignar color consistente a la asignatura
+            if detalle.asignatura.codigo not in asignatura_color_map:
+                asignatura_color_map[detalle.asignatura.codigo] = colores[color_index % len(colores)]
+                color_index += 1
+            
+            estilos = asignatura_color_map[detalle.asignatura.codigo]
+
+            # Obtener horarios de la sección
+            horarios = detalle.seccion.horarios.all()
+            for h in horarios:
+                horario_data.append({
+                    'id': h.id,
+                    'dia': h.dia,
+                    'hora_inicio': h.hora_inicio.strftime('%H:%M'),
+                    'hora_fin': h.hora_fin.strftime('%H:%M'),
+                    'asignatura': detalle.asignatura.nombre_asignatura,
+                    'codigo': detalle.asignatura.codigo,
+                    'seccion': detalle.seccion.codigo_seccion,
+                    'aula': h.aula,
+                    'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar',
+                    'estilos': estilos
+                })
+        
+        return Response({
+            'estudiante': estudiante.usuario.get_full_name(),
+            'cedula': estudiante.cedula,
+            'periodo': periodo_actual.nombre_periodo,
+            'carrera': estudiante.programa.nombre_programa if estudiante.programa else '',
+            'horario': horario_data
+        })
+
+    @action(detail=False, methods=['get'], url_path='descargar-horario')
+    def descargar_horario(self, request):
+        """Genera y descarga el horario en formato Excel."""
+        try:
+            estudiante = Estudiante.objects.get(usuario=request.user)
+        except Estudiante.DoesNotExist:
+            return Response({'error': 'No eres un estudiante.'}, status=status.HTTP_403_FORBIDDEN)
+
+        periodo_actual = PeriodoAcademico.objects.filter(activo=True).first()
+        if not periodo_actual:
+            return Response({'error': 'No hay período académico activo.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Obtener inscripciones
+        inscripciones = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            inscripcion__periodo=periodo_actual
+        ).select_related('seccion', 'asignatura', 'seccion__docente').prefetch_related('seccion__horarios')
+
+        # Estructurar datos de horario para búsqueda rápida
+        # Key: (dia_iso, hora_inicio_str) -> Info Clase
+        schedule_map = {}
+        for detalle in inscripciones:
+            if not detalle.seccion:
+                continue
+            for h in detalle.seccion.horarios.all():
+                key = (h.dia, h.hora_inicio.strftime('%H:%M'))
+                schedule_map[key] = {
+                    'asignatura': detalle.asignatura.nombre_asignatura,
+                    'codigo': detalle.asignatura.codigo,
+                    'seccion': detalle.seccion.codigo_seccion,
+                    'aula': h.aula,
+                    'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar'
+                }
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Horario de Clases"
+
+        # Estilos
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+        align_center = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        font_bold = Font(bold=True)
+        border_thin = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+        fill_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid") # Azul similar al frontend
+        font_white = Font(color="FFFFFF", bold=True)
+
+        # Encabezado General
+        ws['A1'] = "HORARIO DE CLASES"
+        ws.merge_cells('A1:H1')
+        ws['A1'].font = Font(size=14, bold=True)
+        ws['A1'].alignment = align_center
+
+        ws['A2'] = f"Estudiante: {estudiante.usuario.get_full_name()}"
+        ws['A3'] = f"Cédula: {estudiante.cedula}"
+        ws['D2'] = f"Periodo: {periodo_actual.nombre_periodo}"
+        ws['D3'] = f"Carrera: {estudiante.programa.nombre_programa if estudiante.programa else ''}"
+
+        # Configurar anchos
+        ws.column_dimensions['A'].width = 8   # Bloque
+        ws.column_dimensions['B'].width = 15  # Hora
+        for col in ['C', 'D', 'E', 'F', 'G', 'H']:
+            ws.column_dimensions[col].width = 25 # Días
+
+        # Encabezados de Tabla (Fila 5)
+        headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
+        for col_idx, text in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col_idx, value=text)
+            cell.font = font_white
+            cell.fill = fill_header
+            cell.alignment = align_center
+            cell.border = border_thin
+
+        # Definición de Bloques (Mismos que frontend)
+        bloques = [
+            (1, "07:00", "07:45"), (2, "07:45", "08:30"), (3, "08:30", "09:15"), (4, "09:15", "10:00"),
+            (5, "10:00", "10:45"), (6, "10:45", "11:30"), (7, "11:30", "12:15"), (8, "12:15", "13:00"),
+            (9, "13:00", "13:45"), (10, "13:45", "14:30"), (11, "14:30", "15:15"), (12, "15:15", "16:00"),
+            (13, "16:00", "16:45"), (14, "16:45", "17:30")
+        ]
+        
+        # Mapeo de Dias a Columnas (1=Lunes -> Col 3, etc.)
+        # Backend 1=Lunes, 2=Martes... 6=Sábado.
+        # Columnas: A=1, B=2, C=3(Lun), D=4(Mar), E=5(Mie), F=6(Jue), G=7(Vie), H=8(Sab)
+        dia_col_map = {1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8}
+
+        current_row = 6
+        for b_id, b_start, b_end in bloques:
+            # Columna A: ID Bloque
+            c_id = ws.cell(row=current_row, column=1, value=b_id)
+            c_id.alignment = align_center
+            c_id.border = border_thin
+            c_id.font = font_bold
+            
+            # Columna B: Hora
+            c_time = ws.cell(row=current_row, column=2, value=f"{b_start} - {b_end}")
+            c_time.alignment = align_center
+            c_time.border = border_thin
+
+            # Días (C a H)
+            for dia_iso in range(1, 7):
+                col_idx = dia_col_map[dia_iso]
+                cell = ws.cell(row=current_row, column=col_idx)
+                cell.border = border_thin
+                cell.alignment = align_center
+                
+                # Buscar clase
+                # Nota: b_start es "07:00". schedule_map keys tienen formato "07:00".
+                # Ajuste: el frontend mapea "01:00" visual a "13:00" backend.
+                # Aquí 'bloques' usa formato 24h directamente.
+                
+                clase_info = schedule_map.get((dia_iso, b_start))
+                if clase_info:
+                    cell.value = f"{clase_info['asignatura']}\n({clase_info['aula']})"
+                    # cell.fill = PatternFill(...) # Opcional: colorear si se desea
+                else:
+                    cell.value = ""
+
+            current_row += 1
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Horario_{estudiante.cedula}.xlsx"'
+        wb.save(response)
+        return response
+
     @action(detail=True, methods=['get'])
     def progreso(self, request, pk=None):
         estudiante = self.get_object()
@@ -256,6 +448,9 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         asignatura = self.get_object()
         codigo_seccion = request.data.get('codigo_seccion')
         docente_id = request.data.get('docente') # User ID
+        
+        # Schedule Data (Optional)
+        horario_data = request.data.get('horario') # { dia: 1, bloque_inicio: 1, bloque_fin: 2 }
 
         if not codigo_seccion:
             return Response({'error': 'Código de sección requerido'}, status=400)
@@ -282,6 +477,70 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
             codigo_seccion=codigo_seccion,
             defaults={'docente': docente_user}
         )
+        
+        # Handle Schedule Assignment
+        if horario_data:
+            dia = int(horario_data.get('dia'))
+            bloque_inicio = int(horario_data.get('bloque_inicio')) # 1-14
+            bloque_fin = int(horario_data.get('bloque_fin')) # 1-14
+            
+            if dia and bloque_inicio and bloque_fin:
+                from gestion.models import Horario
+                from datetime import time
+                
+                # Definitions of Blocks (Start Times)
+                # 1: 07:00, 2: 07:45, ...
+                # Block duration: 45 min.
+                # Start Time Calculation:
+                # Block 1 starts at 07:00.
+                # Block 2 starts at 07:45.
+                # Etc.
+                # Using a map for precision matches frontend
+                BLOCK_MAP = {
+                    1: "07:00", 2: "07:45", 3: "08:30", 4: "09:15", 
+                    5: "10:00", 6: "10:45", 7: "11:30", 8: "12:15", 
+                    9: "13:00", 10: "13:45", 11: "14:30", 12: "15:15", 
+                    13: "16:00", 14: "16:45"
+                }
+                
+                # End Time Calculation: 
+                # Block 1 Ends at 07:45
+                # Block 14 Ends at 17:30
+                BLOCK_END_MAP = {
+                    1: "07:45", 2: "08:30", 3: "09:15", 4: "10:00", 
+                    5: "10:45", 6: "11:30", 7: "12:15", 8: "13:00", 
+                    9: "13:45", 10: "14:30", 11: "15:15", 12: "16:00", 
+                    13: "16:45", 14: "17:30"
+                }
+                
+                t_start_str = BLOCK_MAP.get(bloque_inicio)
+                t_end_str = BLOCK_END_MAP.get(bloque_fin)
+                
+                aula = horario_data.get('aula', '')
+
+                if t_start_str and t_end_str:
+                     # Parse to Time objects
+                     h_start = int(t_start_str.split(':')[0])
+                     m_start = int(t_start_str.split(':')[1])
+                     h_end = int(t_end_str.split(':')[0])
+                     m_end = int(t_end_str.split(':')[1])
+                     
+                     start_time = time(h_start, m_start)
+                     end_time = time(h_end, m_end)
+                     
+                     # Clear existing schedule for this section (Assuming 1 main block per section or overwrite)
+                     # User request: "Una vez asignado eso...". 
+                     # Strategy: Wipe old schedules for this section to avoid conflicts.
+                     Horario.objects.filter(seccion=seccion).delete()
+                     
+                     # Create new
+                     Horario.objects.create(
+                         seccion=seccion,
+                         dia=dia,
+                         hora_inicio=start_time,
+                         hora_fin=end_time,
+                         aula=aula
+                     )
 
         return Response(SeccionSerializer(seccion).data)
 
@@ -580,6 +839,68 @@ class SeccionViewSet(viewsets.ModelViewSet):
     queryset = Seccion.objects.all()
     serializer_class = SeccionSerializer
     filterset_fields = ['asignatura', 'asignatura__programa', 'docente']
+
+    @action(detail=False, methods=['get'], url_path='master-horario')
+    def master_horario(self, request):
+        """
+        Retorna horarios de todas las secciones, filtrable por programa, semestre y sección.
+        Acceso restringido a Docentes y Administradores.
+        """
+        user = request.user
+        
+        # Verificar permisos (Docente o Admin)
+        is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
+        is_docente = user.groups.filter(name='Docente').exists()
+        
+        if not is_admin and not is_docente:
+            return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Filtros
+        programa_id = request.query_params.get('programa')
+        semestre = request.query_params.get('semestre')
+        codigo_seccion = request.query_params.get('seccion')
+        
+        # Base Query
+        secciones = Seccion.objects.all().select_related(
+            'asignatura', 
+            'asignatura__programa', 
+            'docente'
+        ).prefetch_related('horarios')
+        
+        # Aplicar Filtros
+        if programa_id:
+            secciones = secciones.filter(asignatura__programa_id=programa_id)
+        
+        if semestre:
+            secciones = secciones.filter(asignatura__semestre=semestre)
+            
+        if codigo_seccion:
+            secciones = secciones.filter(codigo_seccion__icontains=codigo_seccion)
+            
+        # Restricción para Docentes (si NO es admin)
+        if is_docente and not is_admin:
+            secciones = secciones.filter(docente=user)
+            
+        # Construir respuesta
+        horario_data = []
+        
+        for sec in secciones:
+            for h in sec.horarios.all():
+                horario_data.append({
+                    'id': h.id,
+                    'dia': h.dia,
+                    'hora_inicio': h.hora_inicio.strftime('%H:%M'),
+                    'hora_fin': h.hora_fin.strftime('%H:%M'),
+                    'asignatura': sec.asignatura.nombre_asignatura,
+                    'codigo': sec.asignatura.codigo,
+                    'seccion': sec.codigo_seccion,
+                    'semestre': sec.asignatura.semestre,
+                    'programa': sec.asignatura.programa.nombre_programa,
+                    'aula': h.aula,
+                    'docente': sec.docente.get_full_name() if sec.docente else 'Sin asignar',
+                })
+                
+        return Response(horario_data)
 
     def get_permissions(self):
         from rest_framework.permissions import IsAuthenticated

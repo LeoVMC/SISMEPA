@@ -2978,3 +2978,47 @@ NameError: name 'Border' is not defined
 [2025-12-27 07:21:08,194] ERROR django.request: Internal Server Error: /api/estudiantes/cargar-record/
 [2025-12-27 07:23:53,871] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2025-12-27 07:23:56,127] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 08:28:51,211] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2025-12-27 08:28:51,904] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 08:29:12,353] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2025-12-27 08:29:13,020] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-27 08:29:47,667] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-27 08:29:48,356] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 18:00:33,907] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-28 18:00:34,610] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 18:14:03,130] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-28 18:14:03,796] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 18:47:47,495] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 18:47:47,509] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 18:47:53,647] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 18:47:53,667] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 18:51:02,095] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 18:51:02,110] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 18:51:33,099] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 20:39:38,442] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 20:39:38,457] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 21:36:10,857] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-28 21:36:11,606] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 21:41:34,930] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-28 21:41:35,594] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 22:43:07,812] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 22:43:07,826] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 22:43:08,282] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 22:43:08,302] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 22:46:26,093] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-28 23:04:57,740] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 23:04:57,755] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 23:05:06,246] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 23:05:06,260] WARNING django.request: Forbidden: /api/estudiantes/mi-horario/
+[2025-12-28 23:24:00,631] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-28 23:24:01,296] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-28 23:28:27,826] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-28 23:28:53,129] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-28 23:58:31,195] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-29 00:02:40,181] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-29 00:02:40,908] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-12-29 00:03:17,095] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-29 00:05:05,719] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-29 00:05:37,102] WARNING django.request: Forbidden: /api/secciones/master-horario/
+[2025-12-29 00:05:37,365] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2025-12-29 00:05:39,282] INFO django.utils.autoreload: Watching for file changes with StatReloader

@@ -196,3 +196,27 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.last_activity}"
+
+
+class Horario(models.Model):
+    """Horario de clases de una sección."""
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, related_name='horarios')
+    DIA_CHOICES = [
+        (1, 'Lunes'),
+        (2, 'Martes'),
+        (3, 'Miércoles'),
+        (4, 'Jueves'),
+        (5, 'Viernes'),
+        (6, 'Sábado'),
+        (7, 'Domingo'),
+    ]
+    dia = models.IntegerField(choices=DIA_CHOICES)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    aula = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        ordering = ['dia', 'hora_inicio']
+
+    def __str__(self):
+        return f"{self.get_dia_display()} {self.hora_inicio}-{self.hora_fin} ({self.aula})"
