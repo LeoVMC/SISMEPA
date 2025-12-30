@@ -971,63 +971,77 @@ export default function PensumPage() {
                                             className="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         >
                                             <option value="">Seleccione docente...</option>
-                                            {docentes.map(d => (
+                                            {docentes.filter(d => d.nombre_completo && d.nombre_completo.trim() !== '').map(d => (
                                                 <option key={d.id} value={d.id}>{d.nombre_completo}</option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    {/* Selectores de Horario (Opcional) */}
-                                    <div className="flex flex-col gap-2">
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <select
-                                                value={selectedDia}
-                                                onChange={(e) => setSelectedDia(e.target.value)}
-                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                            >
-                                                <option value="">Día...</option>
-                                                <option value="1">Lunes</option>
-                                                <option value="2">Martes</option>
-                                                <option value="3">Miércoles</option>
-                                                <option value="4">Jueves</option>
-                                                <option value="5">Viernes</option>
-                                                <option value="6">Sábado</option>
-                                            </select>
-                                            <select
-                                                value={selectedBloqueInicio}
-                                                onChange={(e) => setSelectedBloqueInicio(e.target.value)}
-                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                            >
-                                                <option value="">Inicio...</option>
-                                                {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
-                                                    <option key={b} value={b}>Bloque {b}</option>
-                                                ))}
-                                            </select>
-                                            <select
-                                                value={selectedBloqueFin}
-                                                onChange={(e) => setSelectedBloqueFin(e.target.value)}
-                                                className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                            >
-                                                <option value="">Fin...</option>
-                                                {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
-                                                    <option key={b} value={b}>Bloque {b}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <select
-                                            value={selectedAula}
-                                            onChange={(e) => setSelectedAula(e.target.value)}
-                                            className="w-full text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
-                                        >
-                                            <option value="">Seleccione Aula...</option>
-                                            {Array.from({ length: 20 }, (_, i) => {
-                                                const num = String(i + 1).padStart(3, '0')
-                                                return `ASMA-${num}`
-                                            }).map(aula => (
-                                                <option key={aula} value={aula}>{aula}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                    {/* Selectores de Horario (Opcional - Excluir ciertas materias) */}
+                                    {(() => {
+                                        const exemptions = ['TAI-01', 'PRO-01', 'PSI-30010', 'PAS-31150'] // Códigos conocidos + Pasantía
+                                        const subjectName = backendSubject?.asignatura?.toLowerCase() || ''
+                                        const requiresSchedule = !exemptions.includes(backendSubject?.codigo) &&
+                                            !subjectName.includes('pasantia') &&
+                                            !subjectName.includes('trabajo especial de grado') &&
+                                            !subjectName.includes('taller comunitario') &&
+                                            !subjectName.includes('proyecto comunitario')
+
+                                        if (!requiresSchedule) return null
+
+                                        return (
+                                            <div className="flex flex-col gap-2">
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <select
+                                                        value={selectedDia}
+                                                        onChange={(e) => setSelectedDia(e.target.value)}
+                                                        className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                    >
+                                                        <option value="">Día...</option>
+                                                        <option value="1">Lunes</option>
+                                                        <option value="2">Martes</option>
+                                                        <option value="3">Miércoles</option>
+                                                        <option value="4">Jueves</option>
+                                                        <option value="5">Viernes</option>
+                                                        <option value="6">Sábado</option>
+                                                    </select>
+                                                    <select
+                                                        value={selectedBloqueInicio}
+                                                        onChange={(e) => setSelectedBloqueInicio(e.target.value)}
+                                                        className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                    >
+                                                        <option value="">Inicio...</option>
+                                                        {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
+                                                            <option key={b} value={b}>Bloque {b}</option>
+                                                        ))}
+                                                    </select>
+                                                    <select
+                                                        value={selectedBloqueFin}
+                                                        onChange={(e) => setSelectedBloqueFin(e.target.value)}
+                                                        className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                    >
+                                                        <option value="">Fin...</option>
+                                                        {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
+                                                            <option key={b} value={b}>Bloque {b}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <select
+                                                    value={selectedAula}
+                                                    onChange={(e) => setSelectedAula(e.target.value)}
+                                                    className="w-full text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
+                                                >
+                                                    <option value="">Seleccione Aula...</option>
+                                                    {Array.from({ length: 20 }, (_, i) => {
+                                                        const num = String(i + 1).padStart(3, '0')
+                                                        return `ASMA-${num}`
+                                                    }).map(aula => (
+                                                        <option key={aula} value={aula}>{aula}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )
+                                    })()}
                                     <div className="flex gap-2">
                                         {isEditingSection && (
                                             <button
@@ -1185,53 +1199,54 @@ export default function PensumPage() {
     // --- VISTA SELECTOR DE PROGRAMA ---
     if (!selectedProgram) {
         return (
-            <div className="h-full flex flex-col items-center justify-center p-8">
-                <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-5 duration-500">
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex flex-col items-center justify-center p-8 mb-4">
                     <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mb-4">
                         <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Seleccione su Carrera</h2>
-                    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2 text-center">
+                        Visualizador de Pensums
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto text-center">
                         Para visualizar el pensum de estudios correspondiente, por favor seleccione una de las carreras disponibles.
                     </p>
                 </div>
 
-                {isProgramLoading ? (
-                    <div className="flex flex-col items-center gap-4">
-                        <Loader2 className="animate-spin text-blue-500" size={40} />
-                        <span className="text-sm text-gray-500">Cargando programas...</span>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
-                        {availablePrograms.map(prog => (
-                            <div
-                                key={prog.id}
-                                onClick={() => handleSelectProgram(prog)}
-                                className="group relative overflow-hidden bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
-                            >
-                                <div className="flex justify-between items-start mb-4 relative z-10">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 pr-2">
-                                        {prog.nombre_programa}
-                                    </h3>
-                                    <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full mt-1 shrink-0">
-                                        <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 pl-1 relative z-10">
-                                    <p>Duración: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.duracion_anios} años</span></p>
-                                    <p>Título: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.titulo_otorgado}</span></p>
-                                </div>
-
-                                {/* Diagonal Stripe Decoration */}
-                                <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-gray-200 dark:bg-gray-800 rotate-45 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20">
-                                    <div className="transform -rotate-45 -translate-x-7 -translate-y-0 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                                        {React.cloneElement(getProgramIcon(prog.nombre_programa), { size: 24, className: "text-gray-600 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" })}
-                                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {availablePrograms.map(prog => (
+                        <div
+                            key={prog.id}
+                            onClick={() => handleSelectProgram(prog)}
+                            className="group relative overflow-hidden bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                        >
+                            <div className="flex justify-between items-start mb-4 relative z-10">
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 pr-2">
+                                    {prog.nombre_programa}
+                                </h3>
+                                <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full mt-1 shrink-0">
+                                    <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" />
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+                            <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 pl-1 relative z-10">
+                                <p>Duración: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.duracion_anios} años</span></p>
+                                <p>Título: <span className="font-semibold text-gray-700 dark:text-gray-300">{prog.titulo_otorgado}</span></p>
+                            </div>
+
+                            {/* Diagonal Stripe Decoration */}
+                            <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-gray-200 dark:bg-gray-800 rotate-45 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20">
+                                <div className="transform -rotate-45 -translate-x-7 -translate-y-0 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                    {React.cloneElement(getProgramIcon(prog.nombre_programa), { size: 24, className: "text-gray-600 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" })}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {availablePrograms.length === 0 && (
+                        <div className="col-span-full p-10 text-center bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-gray-500">
+                            <Loader2 className="animate-spin mx-auto mb-3 text-blue-500" />
+                            Cargando programas...
+                        </div>
+                    )}
+                </div>
             </div>
         )
     }
@@ -1245,7 +1260,7 @@ export default function PensumPage() {
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        {getProgramIcon(selectedProgram.nombre_programa)}
+                        {React.cloneElement(getProgramIcon(selectedProgram.nombre_programa), { size: 32, className: "text-blue-600 dark:text-blue-400" })}
                         {selectedProgram.nombre_programa}
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-1 ml-9">Mapa curricular interactivo</p>

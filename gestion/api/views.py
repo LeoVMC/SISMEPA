@@ -906,7 +906,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from rest_framework.permissions import IsAuthenticated
         if self.action in ['list', 'retrieve', 'estudiantes']:
             return [IsAuthenticated()]
-        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante', 'descargar_listado']:
+        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante', 'descargar_listado', 'master_horario']:
             return [IsDocenteOrAdmin()]
         if self.action in ['inscribirme', 'desinscribirme']:
             return [IsEstudiante()]
@@ -1138,7 +1138,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         
         # Códigos especiales que solo gestiona el ADMINISTRADOR
         SPECIAL_CODES = ['TAI-01', 'PRO-01', 'PSI-30010']
-
         if user.is_superuser or user.groups.filter(name='Administrador').exists():
             # Para administrador: Asegurar que existan secciones para las materias especiales
             from gestion.models import Asignatura
@@ -1153,6 +1152,11 @@ class SeccionViewSet(viewsets.ModelViewSet):
         else:
             # Para docentes: Mostrar sus secciones pero EXCLUIR explícitamente las especiales
             secciones = Seccion.objects.filter(docente=user).exclude(asignatura__codigo__in=SPECIAL_CODES).select_related('asignatura', 'asignatura__programa', 'docente')
+
+        # Filtrar por Programa si se especifica
+        programa_id = request.query_params.get('programa')
+        if programa_id:
+            secciones = secciones.filter(asignatura__programa_id=programa_id)
         
         result = []
         for seccion in secciones:
