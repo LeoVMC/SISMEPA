@@ -175,6 +175,35 @@ export default function HorarioPage() {
         }
     }
 
+    const handleDownloadMaster = async () => {
+        try {
+            const query = new URLSearchParams()
+            if (selectedProgram) query.append('programa', selectedProgram.id)
+            if (filters.semestre) query.append('semestre', filters.semestre)
+            if (debouncedSection) query.append('seccion', debouncedSection)
+
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/descargar-master-horario/?${query.toString()}`, {
+                headers: { Authorization: `Token ${token}` }
+            })
+
+            if (res.ok) {
+                const blob = await res.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `Horario_Maestro_${selectedProgram?.nombre_programa || 'Global'}.xlsx`
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+            } else {
+                console.error("Error downloading master schedule")
+            }
+        } catch (error) {
+            console.error("Network error downloading master schedule", error)
+        }
+    }
+
     // Shared Definitions
     const bloques = [
         { id: 1, hora: "07:00 - 07:45" },
@@ -276,18 +305,17 @@ export default function HorarioPage() {
             <td key={`${diaId}-${bloqueId}`} rowSpan={maxRowSpan} className="p-1 border-r border-gray-200 dark:border-gray-700 h-24 align-top relative">
                 <div className="flex flex-col gap-1 h-full w-full">
                     {startingClasses.map((clase, idx) => {
-                        const colorClass = getCourseColor(clase.codigo) // Ensure this returns bg/border/text classes string
+                        const purpleStyle = 'bg-purple-100 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200'
                         return (
-                            <div key={idx} className={`flex-1 w-full p-2 rounded-lg border-l-4 shadow-sm animate-in zoom-in-95 duration-200 flex flex-col justify-between ${clase.estilos?.bg || colorClass.replace('border-', 'border-l-')} ${clase.estilos?.border || ''}`}>
-                                {/* Note: master data might not have 'estilos'. We fallback to colorClass */}
+                            <div key={idx} className={`flex-1 w-full p-2 rounded-lg border-l-4 shadow-sm animate-in zoom-in-95 duration-200 flex flex-col justify-between ${purpleStyle.replace('border-', 'border-l-')} border-purple-200 dark:border-purple-800`}>
 
                                 <div className="flex justify-end items-start mb-1 h-5">
                                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/50 dark:bg-white/20 dark:text-white">{clase.codigo}</span>
                                 </div>
                                 <div className="flex-1 flex items-center">
-                                    <span className="text-xs font-bold leading-tight line-clamp-3">{clase.asignatura}</span>
+                                    <span className="text-xs font-bold leading-tight line-clamp-3 text-purple-900 dark:text-purple-100">{clase.asignatura}</span>
                                 </div>
-                                <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex justify-between items-end gap-2 text-[10px] opacity-80">
+                                <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex justify-between items-end gap-2 text-[10px] opacity-80 text-purple-800 dark:text-purple-200">
                                     <div className="flex flex-col gap-0.5">
                                         <div className="font-semibold">{clase.seccion}</div>
                                         <div className="truncate max-w-[80px]">{clase.docente.split(' ')[0]}</div>
@@ -339,17 +367,17 @@ export default function HorarioPage() {
 
             return (
                 <td key={diaId} rowSpan={rowSpan} className="p-1 border-r border-gray-200 dark:border-gray-700 h-24 align-top relative">
-                    <div className={`h-full w-full p-2 rounded-lg border-l-4 shadow-sm animate-in zoom-in-95 duration-200 flex flex-col justify-between ${clase.estilos.bg} ${clase.estilos.border}`}>
+                    <div className="h-full w-full p-2 rounded-lg border-l-4 border-purple-300 dark:border-purple-700 bg-purple-100 dark:bg-purple-900/30 shadow-sm animate-in zoom-in-95 duration-200 flex flex-col justify-between">
                         <div className="flex justify-end items-start mb-1 h-5">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/50 dark:bg-white/20 dark:text-white ${clase.estilos.text}`}>{clase.codigo}</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/50 dark:bg-white/20 dark:text-white text-purple-900 dark:text-purple-100">{clase.codigo}</span>
                         </div>
                         <div className="flex-1 flex items-center">
-                            <span className={`text-xs font-bold leading-tight line-clamp-3 ${clase.estilos.text}`}>{clase.asignatura}</span>
+                            <span className="text-xs font-bold leading-tight line-clamp-3 text-purple-900 dark:text-purple-100">{clase.asignatura}</span>
                         </div>
-                        <div className={`mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex justify-between items-end gap-2 text-[10px] opacity-80 ${clase.estilos.text}`}>
+                        <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex justify-between items-end gap-2 text-[10px] opacity-80 text-purple-800 dark:text-purple-200">
                             <div className="flex flex-col gap-0.5">
                                 <div className="font-semibold">{clase.seccion}</div>
-                                <div className="truncate max-w-[80px]">{clase.docente}</div>
+                                <div className="truncate max-w-[80px]">{clase.docente.split(' ')[0]}</div>
                             </div>
                             {clase.aula && (
                                 <div className="flex items-center gap-1 text-[10px] bg-white/50 dark:bg-white/20 dark:text-white px-1.5 py-0.5 rounded">
@@ -372,17 +400,17 @@ export default function HorarioPage() {
                         </p>
                     </div>
                     <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-sm">
-                        <Download size={18} /><span>Descargar Excel</span>
+                        <Download size={18} /><span>Descargar Horario</span>
                     </button>
                 </div>
 
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm border-collapse">
+                        <table className="w-full text-sm border-collapse table-fixed">
                             <thead>
                                 <tr className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                                     <th className="p-3 border-b border-r border-gray-200 dark:border-gray-700 sticky left-0 bg-gray-50 dark:bg-gray-800 z-10 w-24">Bloque</th>
-                                    {dias.map(dia => <th key={dia.id} className="p-3 border-b border-r border-gray-200 dark:border-gray-700 min-w-[140px] text-center font-bold">{dia.nombre}</th>)}
+                                    {dias.map(dia => <th key={dia.id} className="p-3 border-b border-r border-gray-200 dark:border-gray-700 text-center font-bold">{dia.nombre}</th>)}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -526,7 +554,7 @@ export default function HorarioPage() {
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 {/* Removed Carrera Selector */}
                 <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Semestre</label>
@@ -554,9 +582,14 @@ export default function HorarioPage() {
                     </select>
                 </div>
                 <div>
-                    <div>
-                        {/* Loading indicator removed */}
-                    </div>
+                    <button
+                        onClick={handleDownloadMaster}
+                        disabled={loadingMaster || masterHorarioData.length === 0}
+                        className="w-full flex justify-center items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-sm font-medium"
+                    >
+                        <Download size={18} />
+                        <span>Descargar Horario</span>
+                    </button>
                 </div>
             </div>
 

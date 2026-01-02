@@ -210,17 +210,7 @@ class AsignaturaSerializer(serializers.ModelSerializer):
     def get_has_plan(self, obj):
         return obj.planificaciones.exists()
 
-    def to_representation(self, instance):
-        """
-        Sobrescribir para ocultar secciones y tutores para Pasantía/TEG (PSI-30010)
-        según solicitud de eliminar gestión de docentes para esta materia.
-        """
-        data = super().to_representation(instance)
-        if instance.codigo == 'PSI-30010':
-            data['secciones'] = []
-            data['tutores'] = []
-            data['has_assignments'] = False
-        return data
+
 
 
 class EstudianteSerializer(serializers.ModelSerializer):

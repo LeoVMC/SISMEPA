@@ -338,7 +338,15 @@ export default function CalificacionesPage() {
             }
             groups[sec.asignatura_codigo].secciones.push(sec)
         })
-        return Object.values(groups)
+
+        // Convert to array and sort sections internally
+        const result = Object.values(groups)
+        result.forEach(group => {
+            group.secciones.sort((a, b) => {
+                return a.codigo_seccion.localeCompare(b.codigo_seccion, undefined, { numeric: true, sensitivity: 'base' })
+            })
+        })
+        return result
     }, [filteredSecciones])
 
     const toggleSubject = (codigo) => {

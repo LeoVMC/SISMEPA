@@ -157,6 +157,20 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                     'seccion': detalle.seccion.codigo_seccion,
                     'aula': h.aula,
                     'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar',
+                })
+
+            # Si no tiene horarios (Caso asignaturas especiales), agregar entrada placeholder para la lista
+            if not horarios.exists():
+                horario_data.append({
+                    'id': f'placeholder-{detalle.id}',
+                    'dia': 0, # 0 para que no aparezca en la grilla regular (1-6)
+                    'hora_inicio': '00:00',
+                    'hora_fin': '00:00',
+                    'asignatura': detalle.asignatura.nombre_asignatura,
+                    'codigo': detalle.asignatura.codigo,
+                    'seccion': detalle.seccion.codigo_seccion,
+                    'aula': 'N/A',
+                    'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar',
                     'estilos': estilos
                 })
         
@@ -901,6 +915,92 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 })
                 
         return Response(horario_data)
+
+    @action(detail=False, methods=['get'], url_path='descargar-master-horario')
+    def descargar_master_horario(self, request):
+        """Genera Excel del Horario Master con los filtros aplicados."""
+        user = request.user
+        
+        # Verificar permisos (Docente o Admin)
+        is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
+        is_docente = user.groups.filter(name='Docente').exists()
+        
+        if not is_admin and not is_docente:
+            return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Filtros
+        programa_id = request.query_params.get('programa')
+        semestre = request.query_params.get('semestre')
+        codigo_seccion = request.query_params.get('seccion')
+        
+        # Base Query
+        secciones = Seccion.objects.all().select_related(
+            'asignatura', 
+            'asignatura__programa', 
+            'docente'
+        ).prefetch_related('horarios')
+        
+        # Aplicar Filtros
+        if programa_id:
+            secciones = secciones.filter(asignatura__programa_id=programa_id)
+        if semestre:
+            secciones = secciones.filter(asignatura__semestre=semestre)
+        if codigo_seccion:
+            secciones = secciones.filter(codigo_seccion__icontains=codigo_seccion)
+            
+        # Restricción para Docentes (si NO es admin)
+        if is_docente and not is_admin:
+            secciones = secciones.filter(docente=user)
+            
+        # Crear Excel
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Horario Maestro"
+        
+        # Estilos
+        from openpyxl.styles import Font, Alignment
+        header_font = Font(bold=True)
+        
+        # Títulos
+        headers = ['Día', 'Hora Inicio', 'Hora Fin', 'Código', 'Asignatura', 'Sección', 'Semestre', 'Programa', 'Aula', 'Docente']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            cell.font = header_font
+            
+        # Datos
+        row_num = 2
+        for sec in secciones:
+            for h in sec.horarios.all():
+                time_map = {1: '07:00', 2: '07:45', 3: '08:30', 4: '09:15', 5: '10:00', 6: '10:45', 7: '11:30', 8: '12:15', 9: '13:00', 10: '13:45', 11: '14:30', 12: '15:15', 13: '16:00', 14: '16:45'}
+                # Si h.hora_inicio es time object, usarlo. Si es bloque ID (int), mapearlo?
+                # master_horario usa h.hora_inicio.strftime('%H:%M'), asumiendo que es TimeField.
+                # Pero en HorarioPage logic vimos mapeo manual.
+                # Validemos modelo Horario. Pero asumo TimeField por strftime usage en master_horario.
+                
+                day_map = {1: 'LUNES', 2: 'MARTES', 3: 'MIÉRCOLES', 4: 'JUEVES', 5: 'VIERNES', 6: 'SÁBADO'}
+                dia_str = day_map.get(h.dia, str(h.dia))
+                
+                ws.cell(row=row_num, column=1, value=dia_str)
+                ws.cell(row=row_num, column=2, value=h.hora_inicio.strftime('%H:%M'))
+                ws.cell(row=row_num, column=3, value=h.hora_fin.strftime('%H:%M'))
+                ws.cell(row=row_num, column=4, value=sec.asignatura.codigo)
+                ws.cell(row=row_num, column=5, value=sec.asignatura.nombre_asignatura)
+                ws.cell(row=row_num, column=6, value=sec.codigo_seccion)
+                ws.cell(row=row_num, column=7, value=sec.asignatura.semestre)
+                ws.cell(row=row_num, column=8, value=sec.asignatura.programa.nombre_programa)
+                ws.cell(row=row_num, column=9, value=h.aula or 'Sin Aula')
+                ws.cell(row=row_num, column=10, value=sec.docente.get_full_name() if sec.docente else 'Sin Asignar')
+                row_num += 1
+                
+        # Ajustar anchos
+        dims = {'A': 15, 'B': 10, 'C': 10, 'D': 12, 'E': 40, 'F': 10, 'G': 10, 'H': 30, 'I': 15, 'J': 25}
+        for col, width in dims.items():
+            ws.column_dimensions[col].width = width
+            
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Horario_Maestro.xlsx"'
+        wb.save(response)
+        return response
 
     def get_permissions(self):
         from rest_framework.permissions import IsAuthenticated

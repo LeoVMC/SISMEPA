@@ -3350,3 +3350,42 @@ NameError: name 'Border' is not defined
 [2025-12-29 23:41:41,097] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-29 23:41:47,092] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2025-12-29 23:41:47,113] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:09,511] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:09,530] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:15,939] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:15,959] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:18,705] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:18,723] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:22,574] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:22,593] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:24,354] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-30 13:56:24,372] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:39,029] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:39,057] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:41,624] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:41,642] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:42,598] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:42,615] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:45,110] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:45,130] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:50,012] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2025-12-31 19:46:50,030] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-01 21:42:14,714] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-01 21:42:14,734] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-01 21:45:09,650] WARNING django.request: Bad Request: /api/planificaciones/
+[2026-01-01 21:46:49,256] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-01 21:46:49,275] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-01 22:16:54,876] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-01 22:16:54,896] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:17:56,287] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:17:56,308] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:18:11,654] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:18:11,674] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:32:34,656] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-02 04:32:35,516] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 04:51:42,901] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 04:51:42,920] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 05:02:05,689] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2026-01-02 05:02:06,449] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 05:05:42,454] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-02 05:05:43,163] INFO django.utils.autoreload: Watching for file changes with StatReloader
