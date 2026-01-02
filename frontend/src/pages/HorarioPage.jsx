@@ -205,7 +205,9 @@ export default function HorarioPage() {
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = `Horario_Maestro_${selectedProgram?.nombre_programa || 'Global'}.xlsx`
+                a.download = isDocenteOnly
+                    ? "Horario_Docencia.xlsx"
+                    : `Horario_Maestro_${selectedProgram?.nombre_programa || 'Global'}.xlsx`
                 document.body.appendChild(a)
                 a.click()
                 window.URL.revokeObjectURL(url)
@@ -545,8 +547,8 @@ export default function HorarioPage() {
     }
 
     // 2. Schedule View (Filtered by Selected Program)
-    const headerTitle = selectedProgram ? selectedProgram.nombre_programa : "Mi Horario"
-    const headerSubtitle = selectedProgram
+    const headerTitle = isDocenteOnly ? "Horario de Docencia" : (selectedProgram ? selectedProgram.nombre_programa : "Mi Horario")
+    const headerSubtitle = (selectedProgram && !isDocenteOnly)
         ? "Visualización global y filtrado de secciones académicas"
         : "Visualización completa de todas sus asignaciones académicas"
 
@@ -555,7 +557,7 @@ export default function HorarioPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        {React.cloneElement(getProgramIcon(headerTitle), { size: 32, className: "text-blue-600 dark:text-blue-400" })}
+                        {(!isDocenteOnly && selectedProgram) && React.cloneElement(getProgramIcon(headerTitle), { size: 32, className: "text-blue-600 dark:text-blue-400" })}
                         {headerTitle}
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
