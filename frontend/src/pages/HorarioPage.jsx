@@ -577,14 +577,16 @@ export default function HorarioPage() {
                         </div>
                     </button>
                 )}
-                {/* Download Button (Identical to Student View) */}
-                <button
-                    onClick={handleDownloadMaster}
-                    disabled={loadingMaster || masterHorarioData.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors shadow-sm ml-auto md:ml-0"
-                >
-                    <Download size={18} /><span>Descargar Horario</span>
-                </button>
+                {/* Download Button (Only for Docente View in Header) */}
+                {isDocenteOnly && (
+                    <button
+                        onClick={handleDownloadMaster}
+                        disabled={loadingMaster || masterHorarioData.length === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors shadow-sm ml-auto md:ml-0"
+                    >
+                        <Download size={18} /><span>Descargar Horario</span>
+                    </button>
+                )}
             </div>
 
             {/* Filters Bar */}
@@ -621,6 +623,18 @@ export default function HorarioPage() {
                     ) : (
                         <div className="col-span-2 hidden md:block"></div>
                     )}
+
+                    {/* Admin Download Button (Restored here) */}
+                    <div className={!(userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))) ? "col-span-1 md:col-start-3" : ""}>
+                        <button
+                            onClick={handleDownloadMaster}
+                            disabled={loadingMaster || masterHorarioData.length === 0}
+                            className="w-full flex justify-center items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-sm font-medium"
+                        >
+                            <Download size={18} />
+                            <span>Descargar Horario</span>
+                        </button>
+                    </div>
                 </div>
             )}
 

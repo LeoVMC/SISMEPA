@@ -414,7 +414,7 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         # Configurar anchos de columna globales para que calce todo
         # A: small, B: med, C-H dynamic
         ws.column_dimensions['A'].width = 9.50   # N
-        ws.column_dimensions['B'].width = 12  # Codigo / Horas
+        ws.column_dimensions['B'].width = 13.50  # Codigo / Horas
         ws.column_dimensions['C'].width = 18  # Lunes / Asig pt1
         ws.column_dimensions['D'].width = 18  # Martes / Asig pt2
         ws.column_dimensions['E'].width = 18  # Miercoles / Semestre
@@ -1322,36 +1322,83 @@ class SeccionViewSet(viewsets.ModelViewSet):
         align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
 
         # --- 1. ENCABEZADO ---
-        ws['A1'] = "HORARIO MAESTRO DE CLASES"
-        ws['A1'].font = font_title
-        ws['A1'].fill = fill_header
-        ws['A1'].alignment = align_center
-        ws.merge_cells('A1:H1')
+        if is_docente and not is_admin:
+            # --- HEADER DOCENTE CUSTOM --
+            ws['A1'] = "HORARIO ACADÉMICO"
+            ws['A1'].font = font_title
+            ws['A1'].fill = fill_header
+            ws['A1'].alignment = align_center
+            ws.merge_cells('A1:H1')
 
-        # Row 2: Programa | Semestre
-        ws['A2'] = f"Programa: {program_name}"
-        ws['A2'].alignment = align_left
-        ws['A2'].border = border_all
-        ws.merge_cells('A2:D2')
-        
-        sem_text = f"Semestre: {semestre}" if semestre else "Semestre: TODOS"
-        ws['E2'] = sem_text
-        ws['E2'].alignment = align_left
-        ws['E2'].border = border_all
-        ws.merge_cells('E2:H2')
+            # Get Docente specific info
+            try:
+                from gestion.models import PeriodoAcademico
+                periodo_obj = PeriodoAcademico.objects.filter(activo=True).first()
+                periodo_str = periodo_obj.nombre_periodo if periodo_obj else "Periodo Actual"
+                
+                # Try to get extended profile
+                docente_profile = user.docente
+                cedula = docente_profile.cedula
+                tipo_contratacion = docente_profile.tipo_contratacion
+            except Exception:
+                cedula = "N/A"
+                tipo_contratacion = "N/A"
+                periodo_str = "Periodo Actual"
 
-        # Row 3: Sección/Filtros | Info Docente
-        sec_text = f"Sección: {codigo_seccion}" if codigo_seccion else "Sección: TODAS"
-        ws['A3'] = sec_text
-        ws['A3'].alignment = align_left
-        ws['A3'].border = border_all
-        ws.merge_cells('A3:D3')
+            # Row 2: Nombre Completo | Periodo
+            ws['A2'] = f"DOCENTE: {user.get_full_name().upper()}"
+            ws['A2'].alignment = align_left
+            ws['A2'].border = border_all
+            ws.merge_cells('A2:D2')
 
-        doc_text = docente_filter_text if docente_filter_text else "Vista: ADMINISTRADOR"
-        ws['E3'] = doc_text
-        ws['E3'].alignment = align_left
-        ws['E3'].border = border_all
-        ws.merge_cells('E3:H3')
+            ws['E2'] = f"PERÍODO: {periodo_str.upper()}"
+            ws['E2'].alignment = align_left
+            ws['E2'].border = border_all
+            ws.merge_cells('E2:H2')
+
+            # Row 3: Cédula | Condición
+            ws['A3'] = f"C.I.: {cedula}"
+            ws['A3'].alignment = align_left
+            ws['A3'].border = border_all
+            ws.merge_cells('A3:D3')
+
+            ws['E3'] = f"CONTRATACIÓN: {tipo_contratacion.upper()}"
+            ws['E3'].alignment = align_left
+            ws['E3'].border = border_all
+            ws.merge_cells('E3:H3')
+
+        else:
+            # --- HEADER ADMIN (Original) ---
+            ws['A1'] = "HORARIO MAESTRO DE CLASES"
+            ws['A1'].font = font_title
+            ws['A1'].fill = fill_header
+            ws['A1'].alignment = align_center
+            ws.merge_cells('A1:H1')
+
+            # Row 2: Programa | Semestre
+            ws['A2'] = f"Programa: {program_name}"
+            ws['A2'].alignment = align_left
+            ws['A2'].border = border_all
+            ws.merge_cells('A2:D2')
+            
+            sem_text = f"Semestre: {semestre}" if semestre else "Semestre: TODOS"
+            ws['E2'] = sem_text
+            ws['E2'].alignment = align_left
+            ws['E2'].border = border_all
+            ws.merge_cells('E2:H2')
+
+            # Row 3: Sección/Filtros | Info Docente
+            sec_text = f"Sección: {codigo_seccion}" if codigo_seccion else "Sección: TODAS"
+            ws['A3'] = sec_text
+            ws['A3'].alignment = align_left
+            ws['A3'].border = border_all
+            ws.merge_cells('A3:D3')
+
+            doc_text = docente_filter_text if docente_filter_text else "Vista: ADMINISTRADOR"
+            ws['E3'] = doc_text
+            ws['E3'].alignment = align_left
+            ws['E3'].border = border_all
+            ws.merge_cells('E3:H3')
 
         # --- 2. GRILLA ---
         headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
@@ -1418,7 +1465,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         det_head_row = 21
         
         ws.column_dimensions['A'].width = 9.50
-        ws.column_dimensions['B'].width = 12
+        ws.column_dimensions['B'].width = 13.50
         ws.column_dimensions['C'].width = 18
         ws.column_dimensions['D'].width = 18
         ws.column_dimensions['E'].width = 18

@@ -5203,3 +5203,9 @@ ValueError: Cannot query "Yelitza Martinez (V-25432542)": Must be "User" instanc
 [2026-01-02 07:27:01,999] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-01-02 07:27:03,214] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2026-01-02 07:27:03,876] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 07:43:14,309] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 07:43:14,326] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 07:49:40,618] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-02 07:49:41,295] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 07:52:29,692] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-02 07:52:30,392] INFO django.utils.autoreload: Watching for file changes with StatReloader
