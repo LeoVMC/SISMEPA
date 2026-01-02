@@ -77,10 +77,14 @@ export default function HorarioPage() {
 
     // Fetch Master Horario on Filter Change
     useEffect(() => {
-        if (viewMode === 'master' && selectedProgram) {
+        const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
+        const isDocente = userData && (userData.groups && userData.groups.some(g => g.name === 'Docente'))
+        const isDocenteOnly = isDocente && !isAdmin
+
+        if (viewMode === 'master' && (selectedProgram || isDocenteOnly)) {
             fetchMasterHorario()
         }
-    }, [selectedProgram, filters.semestre, debouncedSection, viewMode])
+    }, [selectedProgram, filters.semestre, debouncedSection, viewMode, userData])
 
     const fetchPrograms = async () => {
         try {
@@ -137,8 +141,13 @@ export default function HorarioPage() {
         try {
             const query = new URLSearchParams()
             if (selectedProgram) query.append('programa', selectedProgram.id)
-            if (filters.semestre) query.append('semestre', filters.semestre)
-            if (debouncedSection) query.append('seccion', debouncedSection)
+
+            // Only apply filters if Admin
+            const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
+            if (isAdmin) {
+                if (filters.semestre) query.append('semestre', filters.semestre)
+                if (debouncedSection) query.append('seccion', debouncedSection)
+            }
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/master-horario/?${query.toString()}`, {
                 headers: { Authorization: `Token ${token}` }
@@ -179,8 +188,13 @@ export default function HorarioPage() {
         try {
             const query = new URLSearchParams()
             if (selectedProgram) query.append('programa', selectedProgram.id)
-            if (filters.semestre) query.append('semestre', filters.semestre)
-            if (debouncedSection) query.append('seccion', debouncedSection)
+
+            // Only apply filters if Admin
+            const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
+            if (isAdmin) {
+                if (filters.semestre) query.append('semestre', filters.semestre)
+                if (debouncedSection) query.append('seccion', debouncedSection)
+            }
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/descargar-master-horario/?${query.toString()}`, {
                 headers: { Authorization: `Token ${token}` }
@@ -415,7 +429,7 @@ export default function HorarioPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {bloques.map((bloque) => (
-                                    <tr key={bloque.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <tr key={bloque.id} className="group transition-colors">
                                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-mono text-xs text-center text-gray-500 dark:text-gray-400">
                                             <div className="font-bold text-gray-700 dark:text-gray-300">BLOQUE {bloque.id}</div>
                                             <div>{bloque.hora}</div>
@@ -449,7 +463,7 @@ export default function HorarioPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {[...new Map(horarioData.horario.map(item => [item.codigo, item])).values()].map((item, idx) => (
-                                    <tr key={item.codigo} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                    <tr key={item.codigo} className="transition-colors">
                                         <td className="p-2 font-mono text-gray-400">{idx + 1}</td>
                                         <td className="p-2 font-mono font-bold text-gray-700 dark:text-gray-300">{item.codigo}</td>
                                         <td className="p-2 font-medium text-gray-800 dark:text-gray-200">{item.asignatura}</td>
@@ -468,7 +482,12 @@ export default function HorarioPage() {
     // --- MASTER VIEW (ADMIN/DOCENTE) ---
 
     // 1. Program Selection View
-    if (!selectedProgram) {
+    // Bypass for Docente Only (shows all their schedule)
+    const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
+    const isDocente = userData && (userData.groups && userData.groups.some(g => g.name === 'Docente'))
+    const isDocenteOnly = isDocente && !isAdmin
+
+    if (!selectedProgram && !isDocenteOnly) {
         return (
             <div className="space-y-6 animate-in fade-in duration-500">
                 <div className="flex flex-col items-center justify-center p-8 mb-4">
@@ -526,72 +545,84 @@ export default function HorarioPage() {
     }
 
     // 2. Schedule View (Filtered by Selected Program)
+    const headerTitle = selectedProgram ? selectedProgram.nombre_programa : "Mi Horario"
+    const headerSubtitle = selectedProgram
+        ? "Visualización global y filtrado de secciones académicas"
+        : "Visualización completa de todas sus asignaciones académicas"
+
     return (
         <div className="space-y-6 max-w-full mx-auto animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        {React.cloneElement(getProgramIcon(selectedProgram.nombre_programa), { size: 32, className: "text-blue-600 dark:text-blue-400" })}
-                        {selectedProgram.nombre_programa}
+                        {React.cloneElement(getProgramIcon(headerTitle), { size: 32, className: "text-blue-600 dark:text-blue-400" })}
+                        {headerTitle}
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Visualización global y filtrado de secciones académicas
+                        {headerSubtitle}
                     </p>
                 </div>
+                {!isDocenteOnly && (
+                    <button
+                        onClick={() => {
+                            setSelectedProgram(null)
+                            sessionStorage.removeItem('horarioSelectedProgram')
+                            setMasterHorarioData([])
+                        }}
+                        className="group flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300"
+                    >
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Cambiar Carrera</span>
+                        <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
+                            <ArrowRight size={14} className="text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                        </div>
+                    </button>
+                )}
+                {/* Download Button (Identical to Student View) */}
                 <button
-                    onClick={() => {
-                        setSelectedProgram(null)
-                        sessionStorage.removeItem('horarioSelectedProgram')
-                        setMasterHorarioData([])
-                    }}
-                    className="group flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300"
+                    onClick={handleDownloadMaster}
+                    disabled={loadingMaster || masterHorarioData.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors shadow-sm ml-auto md:ml-0"
                 >
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Cambiar Carrera</span>
-                    <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
-                        <ArrowRight size={14} className="text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
-                    </div>
+                    <Download size={18} /><span>Descargar Horario</span>
                 </button>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                {/* Removed Carrera Selector */}
-                <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Semestre</label>
-                    <select
-                        className="w-full text-sm border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2.5 px-3"
-                        value={filters.semestre}
-                        onChange={e => setFilters({ ...filters, semestre: e.target.value })}
-                    >
-                        {/* Removed 'Todos', defaulting to I */}
-                        {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'].map((roman, idx) => (
-                            <option key={idx + 1} value={idx + 1}>{roman} SEMESTRE</option>
-                        ))}
-                    </select>
+            {!isDocenteOnly && (
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    {/* Admin Only Filters */}
+                    {userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador'))) ? (
+                        <>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Semestre</label>
+                                <select
+                                    className="w-full text-sm border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2.5 px-3"
+                                    value={filters.semestre}
+                                    onChange={e => setFilters({ ...filters, semestre: e.target.value })}
+                                >
+                                    {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'].map((roman, idx) => (
+                                        <option key={idx + 1} value={idx + 1}>{roman} SEMESTRE</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Sección</label>
+                                <select
+                                    className="w-full text-sm border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2.5 px-3"
+                                    value={filters.seccion}
+                                    onChange={e => setFilters({ ...filters, seccion: e.target.value })}
+                                >
+                                    {Array.from({ length: 10 }, (_, i) => `D${i + 1}`).map(sec => (
+                                        <option key={sec} value={sec}>{sec}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="col-span-2 hidden md:block"></div>
+                    )}
                 </div>
-                <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 ml-1">Sección</label>
-                    <select
-                        className="w-full text-sm border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2.5 px-3"
-                        value={filters.seccion}
-                        onChange={e => setFilters({ ...filters, seccion: e.target.value })}
-                    >
-                        {Array.from({ length: 10 }, (_, i) => `D${i + 1}`).map(sec => (
-                            <option key={sec} value={sec}>{sec}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <button
-                        onClick={handleDownloadMaster}
-                        disabled={loadingMaster || masterHorarioData.length === 0}
-                        className="w-full flex justify-center items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-sm font-medium"
-                    >
-                        <Download size={18} />
-                        <span>Descargar Horario</span>
-                    </button>
-                </div>
-            </div>
+            )}
 
             {/* Results Grid */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -609,7 +640,7 @@ export default function HorarioPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                             {bloques.map((bloque) => (
-                                <tr key={bloque.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <tr key={bloque.id} className="group transition-colors">
                                     <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-mono text-xs text-center text-gray-500 dark:text-gray-400">
                                         <div className="font-bold text-gray-700 dark:text-gray-300">BLOQUE {bloque.id}</div>
                                         <div>{bloque.hora}</div>
@@ -644,7 +675,7 @@ export default function HorarioPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {[...new Map(masterHorarioData.map(item => [item.codigo, item])).values()].map((item, idx) => (
-                                    <tr key={item.codigo} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                    <tr key={item.codigo} className="transition-colors">
                                         <td className="p-2 font-mono text-gray-400">{idx + 1}</td>
                                         <td className="p-2 font-mono font-bold text-gray-700 dark:text-gray-300">{item.codigo}</td>
                                         <td className="p-2 font-medium text-gray-800 dark:text-gray-200">{item.asignatura}</td>

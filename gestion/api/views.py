@@ -184,37 +184,313 @@ class EstudianteViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='descargar-horario')
     def descargar_horario(self, request):
-        """Genera y descarga el horario en formato Excel."""
+        """Genera y descarga el horario en formato Excel (Diseño Exacto Imagen)."""
         try:
             estudiante = Estudiante.objects.get(usuario=request.user)
         except Estudiante.DoesNotExist:
             return Response({'error': 'No eres un estudiante.'}, status=status.HTTP_403_FORBIDDEN)
 
         periodo_actual = PeriodoAcademico.objects.filter(activo=True).first()
-        if not periodo_actual:
-            return Response({'error': 'No hay período académico activo.'}, status=status.HTTP_404_NOT_FOUND)
+        periodo_str = periodo_actual.nombre_periodo if periodo_actual else "N/A"
 
-        # Obtener inscripciones
+        # Datos
         inscripciones = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             inscripcion__periodo=periodo_actual
         ).select_related('seccion', 'asignatura', 'seccion__docente').prefetch_related('seccion__horarios')
 
-        # Estructurar datos de horario para búsqueda rápida
-        # Key: (dia_iso, hora_inicio_str) -> Info Clase
-        schedule_map = {}
-        for detalle in inscripciones:
-            if not detalle.seccion:
-                continue
-            for h in detalle.seccion.horarios.all():
-                key = (h.dia, h.hora_inicio.strftime('%H:%M'))
-                schedule_map[key] = {
-                    'asignatura': detalle.asignatura.nombre_asignatura,
-                    'codigo': detalle.asignatura.codigo,
-                    'seccion': detalle.seccion.codigo_seccion,
-                    'aula': h.aula,
-                    'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar'
+        # --- PREPARACIÓN DE DATOS ---
+        # 1. Grilla: Necesitamos saber qué celdas unir.
+        # Estructura: grid_data[day][block] = { 'text': ..., 'uid': ... }
+        # uid es único por (asignatura, sección) para detectar contigüidad.
+        grid_data = {day: {} for day in range(1, 7)}
+        
+        # 2. Lista de Materias (para tabla inferior)
+        subjects_list = {}
+        
+        # Definición de horas (Hardcoded para coincidir con frontend)
+        bloques_data = [
+            (1, '07:00 - 07:45'), (2, '07:45 - 08:30'), (3, '08:30 - 09:15'),
+            (4, '09:15 - 10:00'), (5, '10:00 - 10:45'), (6, '10:45 - 11:30'),
+            (7, '11:30 - 12:15'), (8, '12:15 - 13:00'), (9, '13:00 - 13:45'),
+            (10, '13:45 - 14:30'), (11, '14:30 - 15:15'), (12, '15:15 - 16:00'),
+            (13, '16:00 - 16:45'), (14, '16:45 - 17:30')
+        ]
+
+        # Mapa rápido para inicio de bloque
+        start_to_block = { label.split(' - ')[0]: bid for bid, label in bloques_data }
+
+        for det in inscripciones:
+            if not det.seccion: continue
+            
+            uid = f"{det.asignatura.codigo}-{det.seccion.codigo_seccion}"
+            if uid not in subjects_list:
+                subjects_list[uid] = {
+                    'codigo': det.asignatura.codigo,
+                    'asignatura': det.asignatura.nombre_asignatura,
+                    'semestre': det.asignatura.semestre,
+                    'seccion': det.seccion.codigo_seccion,
+                    'docente': det.seccion.docente.get_full_name() if det.seccion.docente else "SIN ASIGNAR"
                 }
+
+            for h in det.seccion.horarios.all():
+                start_str = h.hora_inicio.strftime('%H:%M')
+                
+                # 1. Identificar Bloque Inicial
+                # Usar start_to_block con fallback
+                start_block = start_to_block.get(start_str)
+                if not start_block:
+                     for bid, label in bloques_data:
+                        if label.startswith(start_str):
+                            start_block = bid
+                            break
+                
+                if start_block:
+                    # 2. Calcular Duración en Bloques (aprox 45 min c/u)
+                    h_total = (h.hora_fin.hour * 60 + h.hora_fin.minute) - (h.hora_inicio.hour * 60 + h.hora_inicio.minute)
+                    num_blocks = max(1, round(h_total / 45))
+                    
+                    # 3. Llenar Bloques Consecutivos (para merge automatico posterior)
+                    room_info = f"({h.aula})" if h.aula else "(N/A)"
+                    cell_text = f"{det.asignatura.nombre_asignatura}\n{room_info}"
+
+                    for i in range(num_blocks):
+                        current_block = start_block + i
+                        if current_block > 14: break 
+                        grid_data[h.dia][current_block] = {'text': cell_text, 'uid': uid}
+
+        # --- CREACIÓN EXCEL ---
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = f"Horario {estudiante.cedula}"
+        ws.sheet_view.showGridLines = False
+
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+        from openpyxl.utils import get_column_letter
+
+        # Colores y Estilos
+        COLOR_HEADER_BG = "4472C4" # Azul Oscuro (Títulos)
+        COLOR_HEADER_TXT = "FFFFFF"
+        COLOR_GRID_HEADER_BG = "4472C4" 
+        COLOR_CLASS_BG = "CCC0DA" # Lila/Morado claro (Celdas de clase)
+        COLOR_BORDER = "000000"
+
+        font_title = Font(name='Calibri', size=11, bold=True, color=COLOR_HEADER_TXT)
+        font_header_row = Font(name='Calibri', size=11, bold=True, color=COLOR_HEADER_TXT) # Grid headers
+        font_cell = Font(name='Calibri', size=10)
+        font_cell_bold = Font(name='Calibri', size=10, bold=True) # Bloque numbers
+        
+        fill_header = PatternFill("solid", fgColor=COLOR_HEADER_BG)
+        fill_class = PatternFill("solid", fgColor=COLOR_CLASS_BG)
+        
+        border_thin = Side(border_style="thin", color=COLOR_BORDER)
+        border_all = Border(top=border_thin, left=border_thin, right=border_thin, bottom=border_thin)
+        
+        align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+        # --- 1. ENCABEZADO SUPERIOR (Row 1-3) ---
+        # Row 1: Título Grande
+        ws['A1'] = "HORARIO DE CLASES"
+        ws['A1'].font = font_title
+        ws['A1'].fill = fill_header
+        ws['A1'].alignment = align_center
+        ws.merge_cells('A1:H1')
+
+        # Row 2: Estudiante | Periodo
+        # A2 merged hasta D2? E2 merged hasta H2?
+        ws['A2'] = f"Estudiante: {estudiante.usuario.get_full_name()}"
+        ws['A2'].alignment = align_left
+        ws['A2'].border = border_all
+        ws.merge_cells('A2:D2') # A,B,C,D
+        
+        ws['E2'] = f"Periodo: {periodo_str}"
+        ws['E2'].alignment = align_left
+        ws['E2'].border = border_all
+        ws.merge_cells('E2:H2') # E,F,G,H
+
+        # Row 3: Cédula | Carrera
+        ws['A3'] = f"Cédula: {estudiante.cedula}"
+        ws['A3'].alignment = align_left
+        ws['A3'].border = border_all
+        ws.merge_cells('A3:D3')
+
+        ws['E3'] = f"Carrera: {estudiante.programa.nombre_programa if estudiante.programa else ''}"
+        ws['E3'].alignment = align_left
+        ws['E3'].border = border_all
+        ws.merge_cells('E3:H3')
+        
+        # Bordes para las celdas merged (tienes que bordear el rango completo o la celda izq)
+        # OpenPyXL bordes en merged cells son tricky. Aplicaremos border_all a todas las celdas implicadas luego.
+
+        # --- 2. GRILLA (Header Row 5) ---
+        headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
+        for col, text in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col, value=text)
+            cell.font = font_header_row
+            cell.fill = fill_header
+            cell.alignment = align_center
+            cell.border = border_all
+
+        # --- Contenido Grilla (Rows 6-19) ---
+        start_row = 6
+        
+        # Primero, llenar Bloque y Horas (Cols A, B)
+        for i, (bid, time_label) in enumerate(bloques_data):
+            row = start_row + i
+            # Block ID
+            c1 = ws.cell(row=row, column=1, value=bid)
+            c1.font = font_cell_bold
+            c1.alignment = align_center
+            c1.border = border_all
+            
+            # Hora
+            c2 = ws.cell(row=row, column=2, value=time_label)
+            c2.font = font_cell
+            c2.alignment = align_center
+            c2.border = border_all
+
+        # Llenar Días (Cols C-H -> 3-8) y MERGE VERTICAL
+        # Iterar por día (Columna)
+        for d_idx in range(1, 7): # Dias 1 a 6
+            col_idx = 2 + d_idx # Lunes es col 3 (C)
+            current_uid = None
+            merge_start_row = None
+            
+            # Recorrer bloques del 1 al 14
+            for b_idx in range(1, 15):
+                current_row = start_row + (b_idx - 1)
+                cell = ws.cell(row=current_row, column=col_idx)
+                cell.border = border_all # Default border empty cells
+                
+                data = grid_data[d_idx].get(b_idx)
+                
+                # Lógica de Inicio de Bloquee
+                if data:
+                    new_uid = data['uid']
+                    text = data['text']
+                    
+                    if new_uid == current_uid:
+                        # Continuación del mismo bloque: no escribimos texto, solo continuamos
+                        pass
+                    else:
+                        # Cambio de bloque (o inicio): 
+                        # 1. Cerrar anterior si existía
+                        if current_uid is not None:
+                            # Merge desde merge_start_row hasta current_row - 1
+                            if merge_start_row < current_row - 1:
+                                ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
+
+                        # 2. Iniciar nuevo
+                        cell.value = text
+                        cell.font = font_cell_bold
+                        cell.fill = fill_class
+                        cell.alignment = align_center
+                        current_uid = new_uid
+                        merge_start_row = current_row
+                        
+                    # Aplicar estilo a celda actual (siempre parte del bloque)
+                    cell.fill = fill_class
+                else:
+                    # Celda vacía
+                    if current_uid is not None:
+                         # Cerrar bloque anterior
+                         if merge_start_row < current_row: # end was prev row
+                             ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
+                         current_uid = None
+                         merge_start_row = None
+            
+            # Al final del día, cerrar si quedó abierto
+            if current_uid is not None:
+                 if merge_start_row < (start_row + 14):
+                     ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=start_row+13, end_column=col_idx)
+
+        # --- 3. DETALLE INFERIOR (Row 21) ---
+        det_head_row = 21
+        
+        # Headers Detalle
+        # A: N°, B: Código, C-D: Asignatura, E: Semestre, F: Sección, G-H: Docente
+        
+        # Configurar anchos de columna globales para que calce todo
+        # A: small, B: med, C-H dynamic
+        ws.column_dimensions['A'].width = 9.50   # N
+        ws.column_dimensions['B'].width = 12  # Codigo / Horas
+        ws.column_dimensions['C'].width = 18  # Lunes / Asig pt1
+        ws.column_dimensions['D'].width = 18  # Martes / Asig pt2
+        ws.column_dimensions['E'].width = 18  # Miercoles / Semestre
+        ws.column_dimensions['F'].width = 18  # Jueves / Sección
+        ws.column_dimensions['G'].width = 18  # Viernes / Docente pt1
+        ws.column_dimensions['H'].width = 18  # Sabado / Docente pt2
+
+        # Header Row Layout
+        # N°
+        c = ws.cell(row=det_head_row, column=1, value="N°")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        
+        # CÓDIGO
+        c = ws.cell(row=det_head_row, column=2, value="CÓDIGO")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        
+        # ASIGNATURA (Merged C-D)
+        c = ws.cell(row=det_head_row, column=3, value="ASIGNATURA")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        ws.merge_cells(start_row=det_head_row, start_column=3, end_row=det_head_row, end_column=4)
+        # Apply border to merged cells manually (D21)
+        ws.cell(row=det_head_row, column=4).border = border_all
+
+        # SEMESTRE
+        c = ws.cell(row=det_head_row, column=5, value="SEMESTRE")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        
+        # SECCIÓN
+        c = ws.cell(row=det_head_row, column=6, value="SECCIÓN")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        
+        # DOCENTE (Merged G-H)
+        c = ws.cell(row=det_head_row, column=7, value="DOCENTE")
+        c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+        ws.merge_cells(start_row=det_head_row, start_column=7, end_row=det_head_row, end_column=8)
+        ws.cell(row=det_head_row, column=8).border = border_all
+
+        # Content Rows
+        sorted_subs = sorted(subjects_list.values(), key=lambda x: (x['semestre'], x['codigo']))
+        row_idx = det_head_row + 1
+        
+        for idx, sub in enumerate(sorted_subs, 1):
+            # N
+            ws.cell(row=row_idx, column=1, value=idx).border = border_all
+            ws.cell(row=row_idx, column=1).alignment = align_center
+            
+            # Codigo
+            ws.cell(row=row_idx, column=2, value=sub['codigo']).border = border_all
+            ws.cell(row=row_idx, column=2).alignment = align_center
+            
+            # Asignatura (Merged)
+            ws.cell(row=row_idx, column=3, value=sub['asignatura']).border = border_all
+            ws.cell(row=row_idx, column=3).alignment = align_center
+            ws.merge_cells(start_row=row_idx, start_column=3, end_row=row_idx, end_column=4)
+            ws.cell(row=row_idx, column=4).border = border_all
+            
+            # Semestre
+            ws.cell(row=row_idx, column=5, value=sub['semestre']).border = border_all
+            ws.cell(row=row_idx, column=5).alignment = align_center
+            
+            # Sección
+            ws.cell(row=row_idx, column=6, value=sub['seccion']).border = border_all
+            ws.cell(row=row_idx, column=6).alignment = align_center
+            
+            # Docente (Merged)
+            ws.cell(row=row_idx, column=7, value=sub['docente']).border = border_all
+            ws.cell(row=row_idx, column=7).alignment = align_center
+            ws.merge_cells(start_row=row_idx, start_column=7, end_row=row_idx, end_column=8)
+            ws.cell(row=row_idx, column=8).border = border_all
+            
+            row_idx += 1
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Horario_{estudiante.cedula}.xlsx"'
+        wb.save(response)
+        return response
 
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -918,10 +1194,10 @@ class SeccionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='descargar-master-horario')
     def descargar_master_horario(self, request):
-        """Genera Excel del Horario Master con los filtros aplicados."""
+        """Genera Excel del Horario Master con filtros (Diseño Exacto Imagen)."""
         user = request.user
         
-        # Verificar permisos (Docente o Admin)
+        # Verificar permisos
         is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
         is_docente = user.groups.filter(name='Docente').exists()
         
@@ -940,20 +1216,416 @@ class SeccionViewSet(viewsets.ModelViewSet):
             'docente'
         ).prefetch_related('horarios')
         
-        # Aplicar Filtros
+        # Aplicar Filtros y Obtener Metadata
+        program_name = "TODOS LOS PROGRAMAS"
         if programa_id:
             secciones = secciones.filter(asignatura__programa_id=programa_id)
+            from gestion.models import Programa
+            try:
+                prog = Programa.objects.get(pk=programa_id)
+                program_name = prog.nombre_programa
+            except:
+                program_name = "PROGRAMA DESCONOCIDO"
+        
         if semestre:
             secciones = secciones.filter(asignatura__semestre=semestre)
         if codigo_seccion:
             secciones = secciones.filter(codigo_seccion__icontains=codigo_seccion)
             
-        # Restricción para Docentes (si NO es admin)
+        docente_filter_text = ""
         if is_docente and not is_admin:
             secciones = secciones.filter(docente=user)
+            docente_filter_text = f"DOCENTE: {user.get_full_name()}"
             
-        # Crear Excel
+        # --- PREPARACIÓN DE DATOS ---
+        grid_data = {day: {} for day in range(1, 7)}
+        subjects_list = {}
+        
+        bloques_data = [
+            (1, '07:00 - 07:45'), (2, '07:45 - 08:30'), (3, '08:30 - 09:15'),
+            (4, '09:15 - 10:00'), (5, '10:00 - 10:45'), (6, '10:45 - 11:30'),
+            (7, '11:30 - 12:15'), (8, '12:15 - 13:00'), (9, '13:00 - 13:45'),
+            (10, '13:45 - 14:30'), (11, '14:30 - 15:15'), (12, '15:15 - 16:00'),
+            (13, '16:00 - 16:45'), (14, '16:45 - 17:30')
+        ]
+        
+        start_to_block = { label.split(' - ')[0]: bid for bid, label in bloques_data }
+        
+        for sec in secciones:
+            uid = f"{sec.asignatura.codigo}-{sec.codigo_seccion}"
+            if uid not in subjects_list:
+                subjects_list[uid] = {
+                    'codigo': sec.asignatura.codigo,
+                    'asignatura': sec.asignatura.nombre_asignatura,
+                    'semestre': sec.asignatura.semestre,
+                    'seccion': sec.codigo_seccion,
+                    'docente': sec.docente.get_full_name() if sec.docente else "SIN ASIGNAR"
+                }
+            
+            for h in sec.horarios.all():
+                start_str = h.hora_inicio.strftime('%H:%M')
+                
+                start_block = start_to_block.get(start_str)
+                if not start_block:
+                     for bid, label in bloques_data:
+                        if label.startswith(start_str):
+                            start_block = bid
+                            break
+                
+                if start_block:
+                    # Calc Blocks
+                    h_total = (h.hora_fin.hour * 60 + h.hora_fin.minute) - (h.hora_inicio.hour * 60 + h.hora_inicio.minute)
+                    num_blocks = max(1, round(h_total / 45))
+                    
+                    # Fill
+                    cell_text = f"{sec.asignatura.nombre_asignatura}\n({h.aula or 'N/A'})"
+                    
+                    for i in range(num_blocks):
+                        current_block = start_block + i
+                        if current_block > 14: break
+                        
+                        if current_block in grid_data[h.dia]:
+                            # Collision Logic
+                            existing = grid_data[h.dia][current_block]
+                            if existing['uid'] != uid: # Avoid duplicating self if somehow overlap
+                                grid_data[h.dia][current_block] = {'text': existing['text'] + "\n-----\n" + cell_text, 'uid': 'COLLISION'}
+                        else:
+                            grid_data[h.dia][current_block] = {'text': cell_text, 'uid': uid}
+
+        # --- CREACIÓN EXCEL ---
         wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Horario Maestro"
+        ws.sheet_view.showGridLines = False
+        
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+        from openpyxl.utils import get_column_letter
+
+        # Colores (Mismos que estudiante)
+        COLOR_HEADER_BG = "4472C4"
+        COLOR_HEADER_TXT = "FFFFFF"
+        COLOR_CLASS_BG = "CCC0DA"
+        COLOR_BORDER = "000000"
+
+        font_title = Font(name='Calibri', size=11, bold=True, color=COLOR_HEADER_TXT)
+        font_header_row = Font(name='Calibri', size=11, bold=True, color=COLOR_HEADER_TXT)
+        font_cell = Font(name='Calibri', size=10)
+        font_cell_bold = Font(name='Calibri', size=10, bold=True)
+        
+        fill_header = PatternFill("solid", fgColor=COLOR_HEADER_BG)
+        fill_class = PatternFill("solid", fgColor=COLOR_CLASS_BG)
+        
+        border_thin = Side(border_style="thin", color=COLOR_BORDER)
+        border_all = Border(top=border_thin, left=border_thin, right=border_thin, bottom=border_thin)
+        
+        align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+        # --- 1. ENCABEZADO ---
+        ws['A1'] = "HORARIO MAESTRO DE CLASES"
+        ws['A1'].font = font_title
+        ws['A1'].fill = fill_header
+        ws['A1'].alignment = align_center
+        ws.merge_cells('A1:H1')
+
+        # Row 2: Programa | Semestre
+        ws['A2'] = f"Programa: {program_name}"
+        ws['A2'].alignment = align_left
+        ws['A2'].border = border_all
+        ws.merge_cells('A2:D2')
+        
+        sem_text = f"Semestre: {semestre}" if semestre else "Semestre: TODOS"
+        ws['E2'] = sem_text
+        ws['E2'].alignment = align_left
+        ws['E2'].border = border_all
+        ws.merge_cells('E2:H2')
+
+        # Row 3: Sección/Filtros | Info Docente
+        sec_text = f"Sección: {codigo_seccion}" if codigo_seccion else "Sección: TODAS"
+        ws['A3'] = sec_text
+        ws['A3'].alignment = align_left
+        ws['A3'].border = border_all
+        ws.merge_cells('A3:D3')
+
+        doc_text = docente_filter_text if docente_filter_text else "Vista: ADMINISTRADOR"
+        ws['E3'] = doc_text
+        ws['E3'].alignment = align_left
+        ws['E3'].border = border_all
+        ws.merge_cells('E3:H3')
+
+        # --- 2. GRILLA ---
+        headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
+        for col, text in enumerate(headers, 1):
+            cell = ws.cell(row=5, column=col, value=text)
+            cell.font = font_header_row
+            cell.fill = fill_header
+            cell.alignment = align_center
+            cell.border = border_all
+
+        start_row = 6
+        # Generar Bloque/Hora
+        for i, (bid, time_label) in enumerate(bloques_data):
+            row = start_row + i
+            c1 = ws.cell(row=row, column=1, value=bid)
+            c1.font = font_cell_bold; c1.alignment = align_center; c1.border = border_all
+            c2 = ws.cell(row=row, column=2, value=time_label)
+            c2.font = font_cell; c2.alignment = align_center; c2.border = border_all
+
+        # Llenar Días
+        for d_idx in range(1, 7):
+            col_idx = 2 + d_idx
+            current_uid = None
+            merge_start_row = None
+            
+            for b_idx in range(1, 15):
+                current_row = start_row + (b_idx - 1)
+                cell = ws.cell(row=current_row, column=col_idx)
+                cell.border = border_all
+                
+                data = grid_data[d_idx].get(b_idx)
+                
+                if data:
+                    new_uid = data['uid']
+                    text = data['text']
+                    
+                    if new_uid == current_uid and new_uid != 'COLLISION':
+                        pass # Continue merging
+                    else:
+                        if current_uid is not None:
+                            if merge_start_row < current_row - 1:
+                                ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
+                        
+                        cell.value = text
+                        cell.font = font_cell_bold
+                        cell.fill = fill_class
+                        cell.alignment = align_center
+                        current_uid = new_uid
+                        merge_start_row = current_row
+                        
+                    cell.fill = fill_class
+                else:
+                    if current_uid is not None:
+                         if merge_start_row < current_row:
+                             ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
+                         current_uid = None
+                         merge_start_row = None
+            
+            if current_uid is not None:
+                 if merge_start_row < (start_row + 14):
+                     ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=start_row+13, end_column=col_idx)
+
+        # --- 3. DETALLE INFERIOR ---
+        det_head_row = 21
+        
+        ws.column_dimensions['A'].width = 9.50
+        ws.column_dimensions['B'].width = 12
+        ws.column_dimensions['C'].width = 18
+        ws.column_dimensions['D'].width = 18
+        ws.column_dimensions['E'].width = 18
+        ws.column_dimensions['F'].width = 18
+        ws.column_dimensions['G'].width = 18
+        ws.column_dimensions['H'].width = 18
+        
+        # Headers: N, Código, Asignatura (C-D), Semestre, Sección, Docente (G-H)
+        headers_def = [
+            (1, "N°"), (2, "CÓDIGO"), (3, "ASIGNATURA"), (5, "SEMESTRE"), (6, "SECCIÓN"), (7, "DOCENTE")
+        ]
+        
+        for col, text in headers_def:
+            c = ws.cell(row=det_head_row, column=col, value=text)
+            c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
+            
+            if col == 3: # Asignatura merge
+                ws.merge_cells(start_row=det_head_row, start_column=3, end_row=det_head_row, end_column=4)
+                ws.cell(row=det_head_row, column=4).border = border_all
+            if col == 7: # Docente merge
+                ws.merge_cells(start_row=det_head_row, start_column=7, end_row=det_head_row, end_column=8)
+                ws.cell(row=det_head_row, column=8).border = border_all
+                
+        sorted_subs = sorted(subjects_list.values(), key=lambda x: (x['semestre'], x['codigo'], x['seccion']))
+        row_idx = det_head_row + 1
+        
+        for idx, sub in enumerate(sorted_subs, 1):
+            # N
+            ws.cell(row=row_idx, column=1, value=idx).border = border_all; ws.cell(row=row_idx, column=1).alignment = align_center
+            # Cod
+            ws.cell(row=row_idx, column=2, value=sub['codigo']).border = border_all; ws.cell(row=row_idx, column=2).alignment = align_center
+            # Asig
+            ws.cell(row=row_idx, column=3, value=sub['asignatura']).border = border_all; ws.cell(row=row_idx, column=3).alignment = align_center
+            ws.merge_cells(start_row=row_idx, start_column=3, end_row=row_idx, end_column=4); ws.cell(row=row_idx, column=4).border = border_all
+            # Sem
+            ws.cell(row=row_idx, column=5, value=sub['semestre']).border = border_all; ws.cell(row=row_idx, column=5).alignment = align_center
+            # Sec
+            ws.cell(row=row_idx, column=6, value=sub['seccion']).border = border_all; ws.cell(row=row_idx, column=6).alignment = align_center
+            # Doc
+            ws.cell(row=row_idx, column=7, value=sub['docente']).border = border_all; ws.cell(row=row_idx, column=7).alignment = align_center
+            ws.merge_cells(start_row=row_idx, start_column=7, end_row=row_idx, end_column=8); ws.cell(row=row_idx, column=8).border = border_all
+            
+            row_idx += 1
+            
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Horario_Maestro.xlsx"'
+        wb.save(response)
+        return response
+        ws = wb.active
+        ws.title = "Horario Maestro"
+        
+        # --- ESTILOS ---
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+        from openpyxl.utils import get_column_letter
+
+        header_font = Font(bold=True, size=12)
+        title_font = Font(bold=True, size=16)
+        
+        border_thin = Side(border_style="thin", color="000000")
+        border_all = Border(top=border_thin, left=border_thin, right=border_thin, bottom=border_thin)
+        
+        align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        
+        fill_header = PatternFill("solid", fgColor="E0E0E0")
+        fill_block = PatternFill("solid", fgColor="F5F5F5")
+
+        # --- 1. ENCABEZADO ---
+        ws['A1'] = "REPÚBLICA BOLIVARIANA DE VENEZUELA"
+        ws['A2'] = program_name
+        ws['A3'] = "HORARIO MAESTRO DE CLASES"
+        
+        info_parts = []
+        if semestre: info_parts.append(f"SEMESTRE: {semestre}")
+        if codigo_seccion: info_parts.append(f"SECCIÓN: {codigo_seccion}")
+        if docente_filter_text: info_parts.append(docente_filter_text)
+        
+        ws['A4'] = " | ".join(info_parts) if info_parts else "VISTA GENERAL"
+        
+        for i in range(1, 5):
+            ws.merge_cells(f'A{i}:H{i}')
+            ws[f'A{i}'].font = title_font if i == 3 else header_font
+            ws[f'A{i}'].alignment = align_center
+
+        # --- 2. GRILLA ---
+        headers = ['BLOQUE', 'HORA', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=6, column=col, value=header)
+            cell.font = header_font
+            cell.fill = fill_header
+            cell.border = border_all
+            cell.alignment = align_center
+
+        ws.column_dimensions['A'].width = 10
+        ws.column_dimensions['B'].width = 15
+        for col in range(3, 9):
+            ws.column_dimensions[get_column_letter(col)].width = 25
+
+        bloques_data = [
+            (1, '07:00 - 07:45'), (2, '07:45 - 08:30'), (3, '08:30 - 09:15'),
+            (4, '09:15 - 10:00'), (5, '10:00 - 10:45'), (6, '10:45 - 11:30'),
+            (7, '11:30 - 12:15'), (8, '12:15 - 13:00'), (9, '13:00 - 13:45'),
+            (10, '13:45 - 14:30'), (11, '14:30 - 15:15'), (12, '15:15 - 16:00'),
+            (13, '16:00 - 16:45'), (14, '16:45 - 17:30')
+        ]
+
+        grid_map = {} # (dia, block_id) -> list of strings
+        subjects_list = {}
+
+        for sec in secciones:
+            # Info detallada
+            uid = f"{sec.asignatura.codigo}-{sec.codigo_seccion}"
+            if uid not in subjects_list:
+                subjects_list[uid] = {
+                    'codigo': sec.asignatura.codigo,
+                    'asignatura': sec.asignatura.nombre_asignatura,
+                    'semestre': sec.asignatura.semestre,
+                    'seccion': sec.codigo_seccion,
+                    'docente': sec.docente.get_full_name() if sec.docente else "SIN ASIGNAR"
+                }
+
+            # Llenar Grilla
+            for h in sec.horarios.all():
+                start_str = h.hora_inicio.strftime('%H:%M')
+                block_id = 0
+                for bid, label in bloques_data:
+                    if label.startswith(start_str):
+                        block_id = bid
+                        break
+                
+                if block_id > 0:
+                    key = (h.dia, block_id)
+                    if key not in grid_map:
+                        grid_map[key] = []
+                    
+                    entry = f"{sec.asignatura.nombre_asignatura}\nSec: {sec.codigo_seccion} | Aula: {h.aula or 'N/A'}"
+                    if sec.docente:
+                        entry += f"\nProf. {sec.docente.first_name} {sec.docente.last_name}"
+                    
+                    grid_map[key].append(entry)
+
+        # Renderizar Filas
+        start_row = 7
+        for i, (block_id, time_label) in enumerate(bloques_data):
+            row_num = start_row + i
+            
+            # Bloque/Hora
+            ws.cell(row=row_num, column=1, value=f"BLOQUE {block_id}").border = border_all
+            ws.cell(row=row_num, column=1).fill = fill_block
+            ws.cell(row=row_num, column=1).alignment = align_center
+
+            ws.cell(row=row_num, column=2, value=time_label).border = border_all
+            ws.cell(row=row_num, column=2).alignment = align_center
+            
+            for day_idx in range(1, 7):
+                cell_col = 2 + day_idx
+                entries = grid_map.get((day_idx, block_id), [])
+                
+                cell_content = "\n\n".join(entries)
+                cell = ws.cell(row=row_num, column=cell_col, value=cell_content)
+                cell.border = border_all
+                cell.alignment = align_center
+                cell.font = Font(size=9)
+                if entries:
+                    cell.fill = PatternFill("solid", fgColor="E6E6FA")
+
+        # --- 3. DETALLE DE ASIGNATURAS ---
+        detail_start_row = start_row + 15
+        
+        ws[f'A{detail_start_row}'] = "DETALLE DE SECCIONES ENCONTRADAS"
+        ws[f'A{detail_start_row}'].font = header_font
+        ws.merge_cells(f'A{detail_start_row}:F{detail_start_row}')
+        
+        detail_header_row = detail_start_row + 1
+        d_headers = ['N°', 'CÓDIGO', 'ASIGNATURA', 'SEM', 'SECCIÓN', 'DOCENTE']
+        d_widths = [5, 15, 35, 5, 10, 30]
+        
+        for col, (header, width) in enumerate(zip(d_headers, d_widths), 1):
+            cell = ws.cell(row=detail_header_row, column=col, value=header)
+            cell.font = header_font
+            cell.border = border_all
+            cell.fill = fill_header
+            # Be careful overwriting widths, grid depends on them. 
+            # Columns A (10) and B (15) are fine. C (35) is wider than Grid C (25).
+            # We'll stick to Grid widths or accept resizing. Grid is priority.
+            
+        r_idx = detail_header_row + 1
+        # Ordenar lista por Semestre -> Código -> Sección
+        sorted_subs = sorted(subjects_list.values(), key=lambda x: (x['semestre'], x['codigo'], x['seccion']))
+        
+        for idx, sub in enumerate(sorted_subs, 1):
+            ws.cell(row=r_idx, column=1, value=idx).border = border_all
+            ws.cell(row=r_idx, column=2, value=sub['codigo']).border = border_all
+            ws.cell(row=r_idx, column=3, value=sub['asignatura']).border = border_all
+            ws.cell(row=r_idx, column=4, value=sub['semestre']).border = border_all
+            ws.cell(row=r_idx, column=5, value=sub['seccion']).border = border_all
+            ws.cell(row=r_idx, column=6, value=sub['docente']).border = border_all
+            
+            ws.cell(row=r_idx, column=1).alignment = align_center
+            ws.cell(row=r_idx, column=2).alignment = align_center
+            ws.cell(row=r_idx, column=4).alignment = align_center
+            ws.cell(row=r_idx, column=5).alignment = align_center
+            r_idx += 1
+            
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Horario_Maestro.xlsx"'
+        wb.save(response)
+        return response
         ws = wb.active
         ws.title = "Horario Maestro"
         
@@ -1006,7 +1678,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from rest_framework.permissions import IsAuthenticated
         if self.action in ['list', 'retrieve', 'estudiantes']:
             return [IsAuthenticated()]
-        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante', 'descargar_listado', 'master_horario']:
+        if self.action in ['inscribir_estudiante', 'desinscribir_estudiante', 'descargar_listado', 'master_horario', 'descargar_master_horario']:
             return [IsDocenteOrAdmin()]
         if self.action in ['inscribirme', 'desinscribirme']:
             return [IsEstudiante()]
