@@ -30,8 +30,9 @@ def send_notification_email(subject, message, recipient_list):
 
 def notify_student_period_start(estudiante, periodo):
     """Notificar al estudiante que ha iniciado un nuevo periodo académico."""
+    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
     subject = f"Inicio del Periodo Académico {periodo.nombre_periodo} - SISMEPA"
-    message = f"""Hola {estudiante.nombre},
+    message = f"""Hola {nombre},
 
 Te informamos que el periodo académico {periodo.nombre_periodo} ha iniciado.
 Fecha de inicio: {periodo.fecha_inicio}
@@ -45,13 +46,19 @@ Administración SISMEPA
     if estudiante.usuario.email:
         send_notification_email(subject, message, estudiante.usuario.email)
 
-def notify_student_risk(estudiante, asignatura, nota_actual):
+def notify_student_risk(estudiante, asignatura, nota_actual, nota_necesaria=None):
     """Notificar al estudiante riesgo de reprobar."""
+    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
     subject = f"Alerta de Rendimiento: {asignatura.nombre_asignatura}"
-    message = f"""Hola {estudiante.nombre},
+    
+    extra_msg = ""
+    if nota_necesaria is not None:
+        extra_msg = f"\nPara aprobar con la nota mínima (10.00), necesitas obtener en tu próxima evaluación: {nota_necesaria:.2f} pts."
+
+    message = f"""Hola {nombre},
 
 Hemos detectado que tu rendimiento actual en la asignatura {asignatura.nombre_asignatura} presenta riesgo de reprobación.
-Tu nota parcial acumulada/reciente es: {nota_actual}
+Tu nota parcial acumulada/reciente es: {nota_actual:.2f}{extra_msg}
 
 Te recomendamos contactar a tu docente o buscar asesoría académica.
 
@@ -61,16 +68,35 @@ Sistema de Alerta Temprana - SISMEPA
     if estudiante.usuario.email:
         send_notification_email(subject, message, estudiante.usuario.email)
 
+def notify_student_failure(estudiante, asignatura, nota_final):
+    """Notificar al estudiante que ha reprobado la asignatura."""
+    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
+    subject = f"Notificación de Reprobación: {asignatura.nombre_asignatura}"
+    message = f"""Hola {nombre},
+
+Lamentamos informarte que has reprobado la asignatura {asignatura.nombre_asignatura}.
+Tu nota definitiva es: {nota_final:.2f}
+
+Deberás inscribir esta asignatura nuevamente en un próximo periodo.
+Si consideras que hay un error, por favor contacta a Control de Estudios.
+
+Atentamente,
+Departamento de Evaluación - SISMEPA
+"""
+    if estudiante.usuario.email:
+        send_notification_email(subject, message, estudiante.usuario.email)
+
 # --- Docentes ---
 
 def notify_docente_assignment(docente, seccion):
     """Notificar al docente de una nueva asignación."""
+    nombre = docente.usuario.get_full_name() or docente.usuario.username
     subject = f"Nueva Asignación de Carga Académica - {seccion.asignatura.nombre_asignatura}"
     
     horarios = seccion.horarios.all()
-    horario_txt = "\n".join([f"- {h.get_dia_display()} {h.hora_inicio}-{h.hora_fin} ({h.aula})" for h in horarios])
+    horario_txt = "\n".join([f"- {h.get_dia_display()} {h.hora_inicio.strftime('%H:%M')}-{h.hora_fin.strftime('%H:%M')} ({h.aula})" for h in horarios])
     
-    message = f"""Hola Prof. {docente.nombre_completo},
+    message = f"""Hola Prof. {nombre},
 
 Se le ha asignado una nueva sección para el periodo actual:
 
@@ -91,8 +117,9 @@ Coordinación Académica - SISMEPA
 
 def notify_docente_period_end(docente, periodo):
     """Recordatorio para cargar notas al final del periodo."""
+    nombre = docente.usuario.get_full_name() or docente.usuario.username
     subject = f"Cierre del Periodo {periodo.nombre_periodo} - Carga de Notas"
-    message = f"""Estimado Prof. {docente.nombre_completo},
+    message = f"""Estimado Prof. {nombre},
 
 El periodo académico {periodo.nombre_periodo} está próximo a finalizar el {periodo.fecha_fin}.
 Le recordamos que debe completar la carga de todas las calificaciones pendientes en el sistema antes de la fecha de cierre.

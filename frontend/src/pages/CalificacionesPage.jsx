@@ -267,9 +267,18 @@ export default function CalificacionesPage() {
         const n2 = getNotaValue(est, 'nota2')
         const n3 = getNotaValue(est, 'nota3')
         const n4 = getNotaValue(est, 'nota4')
-        const notas = [n1, n2, n3, n4].filter(n => n !== null && n !== undefined)
-        if (notas.length === 4) {
-            return (notas.reduce((a, b) => a + b, 0) / 4).toFixed(2)
+
+        // Verificar si hay al menos una nota cargada
+        const agunaNota = [n1, n2, n3, n4].some(n => n !== null && n !== undefined && n !== '')
+
+        if (agunaNota) {
+            // Si falta alguna nota, se asume 1 (nota mínima)
+            const v1 = (n1 !== null && n1 !== undefined && n1 !== '') ? parseFloat(n1) : 1
+            const v2 = (n2 !== null && n2 !== undefined && n2 !== '') ? parseFloat(n2) : 1
+            const v3 = (n3 !== null && n3 !== undefined && n3 !== '') ? parseFloat(n3) : 1
+            const v4 = (n4 !== null && n4 !== undefined && n4 !== '') ? parseFloat(n4) : 1
+
+            return ((v1 + v2 + v3 + v4) / 4).toFixed(2)
         }
         return '--'
     }

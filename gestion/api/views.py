@@ -768,15 +768,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
             defaults={'docente': docente_user}
         )
         
-        # Notificar al docente
-        try:
-            from gestion.models import Docente
-            from gestion.notifications import notify_docente_assignment
-            if docente_user and hasattr(docente_user, 'docente'):
-                 notify_docente_assignment(docente_user.docente, seccion)
-        except Exception as e:
-            print(f"Error enviando correo al docente: {e}")
-
         
         # Handle Schedule Assignment
         if horario_data:
@@ -834,14 +825,25 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                      Horario.objects.filter(seccion=seccion).delete()
                      
                      # Create new
-                     Horario.objects.create(
+                     Horario.objects.update_or_create(
                          seccion=seccion,
                          dia=dia,
-                         hora_inicio=start_time,
-                         hora_fin=end_time,
-                         aula=aula
+                         defaults={
+                             'hora_inicio': start_time,
+                             'hora_fin': end_time,
+                             'aula': aula
+                         }
                      )
 
+        # Notificar al docente (Después de asignar horario)
+        try:
+            from gestion.models import Docente
+            from gestion.notifications import notify_docente_assignment
+            if docente_user and hasattr(docente_user, 'docente'):
+                 notify_docente_assignment(docente_user.docente, seccion)
+        except Exception as e:
+            print(f"Error enviando correo al docente: {e}")
+            
         return Response(SeccionSerializer(seccion).data)
 
     @action(detail=True, methods=['post'], url_path='assign-tutor')
@@ -1946,8 +1948,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from gestion.models import DetalleInscripcion
         detalle = DetalleInscripcion.objects.filter(
             inscripcion__estudiante_id=estudiante_id,
-            seccion=seccion,
-            estatus='CURSANDO'
+            seccion=seccion
         ).first()
 
         if not detalle:

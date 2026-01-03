@@ -1011,8 +1011,13 @@ export default function PensumPage() {
                                                         className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
                                                     >
                                                         <option value="">Inicio...</option>
-                                                        {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
-                                                            <option key={b} value={b}>Bloque {b}</option>
+                                                        {[
+                                                            { b: 1, t: "7:00 - 7:45" }, { b: 2, t: "7:45 - 8:30" }, { b: 3, t: "8:30 - 9:15" }, { b: 4, t: "9:15 - 10:00" },
+                                                            { b: 5, t: "10:00 - 10:45" }, { b: 6, t: "10:45 - 11:30" }, { b: 7, t: "11:30 - 12:15" }, { b: 8, t: "12:15 - 13:00" },
+                                                            { b: 9, t: "13:00 - 13:45" }, { b: 10, t: "13:45 - 14:30" }, { b: 11, t: "14:30 - 15:15" }, { b: 12, t: "15:15 - 16:00" },
+                                                            { b: 13, t: "16:00 - 16:45" }, { b: 14, t: "16:45 - 17:30" }
+                                                        ].map(item => (
+                                                            <option key={item.b} value={item.b}>Bloque {item.b} ({item.t})</option>
                                                         ))}
                                                     </select>
                                                     <select
@@ -1021,8 +1026,13 @@ export default function PensumPage() {
                                                         className="text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm"
                                                     >
                                                         <option value="">Fin...</option>
-                                                        {Array.from({ length: 14 }, (_, i) => i + 1).map(b => (
-                                                            <option key={b} value={b}>Bloque {b}</option>
+                                                        {[
+                                                            { b: 1, t: "7:00 - 7:45" }, { b: 2, t: "7:45 - 8:30" }, { b: 3, t: "8:30 - 9:15" }, { b: 4, t: "9:15 - 10:00" },
+                                                            { b: 5, t: "10:00 - 10:45" }, { b: 6, t: "10:45 - 11:30" }, { b: 7, t: "11:30 - 12:15" }, { b: 8, t: "12:15 - 13:00" },
+                                                            { b: 9, t: "13:00 - 13:45" }, { b: 10, t: "13:45 - 14:30" }, { b: 11, t: "14:30 - 15:15" }, { b: 12, t: "15:15 - 16:00" },
+                                                            { b: 13, t: "16:00 - 16:45" }, { b: 14, t: "16:45 - 17:30" }
+                                                        ].map(item => (
+                                                            <option key={item.b} value={item.b}>Bloque {item.b} ({item.t})</option>
                                                         ))}
                                                     </select>
                                                 </div>
