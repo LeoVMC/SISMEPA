@@ -5225,3 +5225,13 @@ ValueError: Cannot query "Yelitza Martinez (V-25432542)": Must be "User" instanc
 [2026-01-02 19:50:03,350] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2026-01-02 19:50:22,327] WARNING django.request: Bad Request: /api/planificaciones/
 [2026-01-02 19:50:44,574] WARNING django.request: Bad Request: /api/planificaciones/
+[2026-01-02 20:16:31,281] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2026-01-02 20:16:31,959] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 20:16:54,464] INFO django.utils.autoreload: /app/gestion/signals.py changed, reloading.
+[2026-01-02 20:16:55,167] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 20:16:56,385] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-02 20:16:57,055] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 20:40:42,620] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 20:40:42,636] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 20:40:51,522] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 20:40:51,542] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/

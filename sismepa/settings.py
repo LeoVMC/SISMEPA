@@ -102,6 +102,19 @@ REST_FRAMEWORK = {
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
 
+# Configuración de Correo (Gmail SMTP por defecto)
+# Para usar Gmail, se necesita una 'Contraseña de Aplicación' si tienes 2FA activado.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    # Fallback para desarrollo sin credenciales: imprimir en consola
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Umbral para alertas tempranas de bajo rendimiento (porcentaje)
 LOW_PERFORMANCE_THRESHOLD = int(os.environ.get('LOW_PERFORMANCE_THRESHOLD', '50'))
 

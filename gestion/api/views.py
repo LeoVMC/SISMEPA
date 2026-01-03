@@ -768,6 +768,16 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
             defaults={'docente': docente_user}
         )
         
+        # Notificar al docente
+        try:
+            from gestion.models import Docente
+            from gestion.notifications import notify_docente_assignment
+            if docente_user and hasattr(docente_user, 'docente'):
+                 notify_docente_assignment(docente_user.docente, seccion)
+        except Exception as e:
+            print(f"Error enviando correo al docente: {e}")
+
+        
         # Handle Schedule Assignment
         if horario_data:
             dia = int(horario_data.get('dia'))
