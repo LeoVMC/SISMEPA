@@ -407,7 +407,7 @@ export default function PensumPage() {
 
     const handleUploadClick = (specificCode = null) => {
         if (fileInputRef.current) {
-            if (specificCode) {
+            if (specificCode && typeof specificCode === 'string') {
                 fileInputRef.current.dataset.specificCode = specificCode
             } else {
                 delete fileInputRef.current.dataset.specificCode
@@ -1122,7 +1122,7 @@ export default function PensumPage() {
                             {/* Carga: Solo Admin o Docente (Asignado) */}
                             {(isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
                                 <button
-                                    onClick={handleUploadClick}
+                                    onClick={() => handleUploadClick()}
                                     disabled={actionLoading}
                                     className="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                                 >
@@ -1133,7 +1133,7 @@ export default function PensumPage() {
 
                             {/* Descarga: Todos (si existe, manejado por lógica de botón pero visible a todos) */}
                             <button
-                                onClick={handleDownloadPlan}
+                                onClick={() => handleDownloadPlan()}
                                 disabled={actionLoading}
                                 className="flex-1 flex items-center justify-center gap-1 bg-green-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                             >
@@ -1144,7 +1144,7 @@ export default function PensumPage() {
                             {getSubjectStatus(selectedSubject?.code).hasPlan &&
                                 (isAdmin || (isDocente && getSubjectStatus(selectedSubject?.code).isAssignedToMe)) && (
                                     <button
-                                        onClick={handleDeletePlan}
+                                        onClick={() => handleDeletePlan()}
                                         disabled={actionLoading}
                                         className="flex items-center justify-center gap-1 bg-red-600 text-white py-2 px-3 text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                                         title="Eliminar Planificación"

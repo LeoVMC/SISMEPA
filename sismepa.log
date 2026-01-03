@@ -5209,3 +5209,19 @@ ValueError: Cannot query "Yelitza Martinez (V-25432542)": Must be "User" instanc
 [2026-01-02 07:49:41,295] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-01-02 07:52:29,692] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2026-01-02 07:52:30,392] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-02 18:18:32,885] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:18:32,904] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:18:34,650] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:18:34,667] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:18:36,475] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:18:36,492] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:20:50,765] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:20:50,782] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:20:51,646] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 18:20:51,663] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 19:49:50,325] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 19:49:50,341] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-02 19:50:03,329] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 19:50:03,350] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-02 19:50:22,327] WARNING django.request: Bad Request: /api/planificaciones/
+[2026-01-02 19:50:44,574] WARNING django.request: Bad Request: /api/planificaciones/
