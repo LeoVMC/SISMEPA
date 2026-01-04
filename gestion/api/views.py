@@ -681,6 +681,7 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             'porcentaje_avance': avance,
             'total_asignaturas': total_asignaturas,
             'aprobadas': aprobadas,
+            'uc_actuales': estudiante.get_uc_periodo_actual() if hasattr(estudiante, 'get_uc_periodo_actual') else 0
         })
 
 
@@ -2080,13 +2081,26 @@ class SeccionViewSet(viewsets.ModelViewSet):
             'estatus': detalle.estatus
         })
 
-    def _inscribir_estudiante_en_seccion(self, estudiante, seccion):
+        return {'detalle_id': detalle.id}
+
+    def _inscribir_estudiante_en_seccion(self, estudiante, seccion, allow_conflicts=False):
         """Método interno para realizar la inscripción con validaciones."""
-        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico, Asignatura
+        from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico, Asignatura, Horario
         from django.core.exceptions import ValidationError
         from django.db.models import Sum, Q
 
         asignatura = seccion.asignatura
+        user_requesting = self.request.user
+
+        # Determinar si se debe forzar la revisión de choques
+        # Estudiantes SIEMPRE revisan choques. Docentes/Admins pueden tener allow_conflicts=True (implícito si son ellos)
+        # En este caso, la regla es: Solo Docentes y Admins pueden saltarse la advertencia.
+        # Si el que solicita es Estudiante, check_conflicts = True.
+        # Si el que solicita es Docente/Admin, asumimos que ellos "saben lo que hacen" (Override).
+        
+        should_check_conflicts = True
+        if user_requesting.is_superuser or user_requesting.groups.filter(name='Administrador').exists() or user_requesting.groups.filter(name='Docente').exists():
+            should_check_conflicts = False
 
         # 0. Validación Especial: Servicio Comunitario (Taller o Proyecto)
         # Requiere 50% de Unidades de Crédito Aprobadas
@@ -2151,13 +2165,60 @@ class SeccionViewSet(viewsets.ModelViewSet):
             if not aprobada:
                 return {'error': f'No puedes inscribir esta materia. Requiere haber aprobado: {prereq.nombre_asignatura} ({prereq.codigo}).'}
 
-        # 5. Obtener o crear inscripción del estudiante en el período
+        # 5. VALIDAR LÍMITE DE UNIDADES DE CRÉDITO (UC) - Máximo 35
+        # Calcular UC ya inscritas en este periodo (sin importar estatus)
+        uc_inscritas = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=estudiante,
+            inscripcion__periodo=periodo
+        ).aggregate(total=Sum('asignatura__creditos'))['total'] or 0
+
+        uc_nueva = asignatura.creditos
+        
+        if (uc_inscritas + uc_nueva) > 35:
+            return {
+                'error': f'No puedes inscribir esta asignatura porque superarías el límite de 35 UC. (Tienes {uc_inscritas} UC + {uc_nueva} UC de esta materia = {uc_inscritas + uc_nueva})'
+            }
+
+        # 6. VERIFICACIÓN DE CHOQUE DE HORARIO
+        if should_check_conflicts:
+            # Obtener horarios de la sección a inscribir
+            horarios_nuevos = seccion.horarios.all() # QuerySet de Horario
+            if horarios_nuevos.exists():
+                # Obtener todas las secciones ya inscritas en este período (TODOS LOS ESTATUS)
+                inscripciones_actuales = DetalleInscripcion.objects.filter(
+                    inscripcion__estudiante=estudiante,
+                    inscripcion__periodo=periodo
+                ).select_related('seccion', 'asignatura')
+
+                for inscripcion_existente in inscripciones_actuales:
+                    seccion_existente = inscripcion_existente.seccion
+                    if not seccion_existente: continue
+                    
+                    horarios_existentes = seccion_existente.horarios.all()
+
+                    # Comparar horarios
+                    for h_nuevo in horarios_nuevos:
+                        for h_existente in horarios_existentes:
+                            if h_nuevo.dia == h_existente.dia:
+                                # Chequeo de superposición de intervalos
+                                if (h_nuevo.hora_inicio < h_existente.hora_fin) and (h_nuevo.hora_fin > h_existente.hora_inicio):
+                                    dia_str = h_nuevo.get_dia_display()
+                                    return {
+                                        'error': (
+                                            f"CHOQUE DE HORARIO: La asignatura '{asignatura.nombre_asignatura}' "
+                                            f"choca con '{seccion_existente.asignatura.nombre_asignatura}' "
+                                            f"el día {dia_str} ({h_nuevo.hora_inicio.strftime('%H:%M')} - {h_nuevo.hora_fin.strftime('%H:%M')}). "
+                                            f"Por favor comunica esta situación a un administrador."
+                                        )
+                                    }
+
+        # 6. Obtener o crear inscripción del estudiante en el período
         inscripcion, _ = Inscripcion.objects.get_or_create(
             estudiante=estudiante,
             periodo=periodo
         )
 
-        # 6. Crear detalle de inscripción con estatus inicial 'CURSANDO'
+        # 7. Crear detalle de inscripción con estatus inicial 'CURSANDO'
         detalle = DetalleInscripcion.objects.create(
             inscripcion=inscripcion,
             asignatura=asignatura,

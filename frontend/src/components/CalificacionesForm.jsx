@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function CalificacionesForm(){
+export default function CalificacionesForm() {
   const [resp, setResp] = useState(null)
   const token = localStorage.getItem('apiToken')
 

@@ -30,10 +30,30 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-mck48xvyndhn*x-#4ygso
 # DEBUG configurable vía variable de entorno; por defecto True en desarrollo
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '.loca.lt']
 
+# CSRF: Permitir orígenes de LocalTunnel
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.loca.lt',
+    'http://localhost:3000',
+    'http://localhost:5173',
+]
 
 # Definición de aplicaciones
+# ... (se mantiene igual) ...
+
+# ... (Middlewares se mantienen igual) ...
+
+# CORS: permitir el frontend de desarrollo y LocalTunnel
+CORS_ALLOW_ALL_ORIGINS = True  # Para facilitar el uso con túneles dinámicos
+
+# Importar headers por defecto para extenderlos
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'bypass-tunnel-reminder',
+]
+
 
 INSTALLED_APPS = [
     'corsheaders',

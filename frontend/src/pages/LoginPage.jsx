@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
+import api from '../services/api'
 
 export default function LoginPage() {
     const [cedulaPrefix, setCedulaPrefix] = useState('V')
     const [cedulaNumber, setCedulaNumber] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
@@ -25,11 +28,8 @@ export default function LoginPage() {
         const username = `${cedulaPrefix}-${cedulaNumber}`
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            })
+            // Usando el nuevo servicio: api.post maneja URL, headers y JSON stringify
+            const res = await api.post('/auth/login/', { username, password })
             const json = await res.json()
 
             if (res.ok) {
@@ -37,11 +37,9 @@ export default function LoginPage() {
                 if (token) {
                     localStorage.setItem('apiToken', token)
 
-                    // Obtener detalles del usuario para determinar el rol
+                    // Obtener detalles del usuario
                     try {
-                        const userRes = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/`, {
-                            headers: { 'Authorization': `Token ${token}` }
-                        })
+                        const userRes = await api.get('/auth/user/')
                         if (userRes.ok) {
                             const userData = await userRes.json()
                             localStorage.setItem('userData', JSON.stringify(userData))
@@ -50,7 +48,6 @@ export default function LoginPage() {
                             if (userData.username === 'admin' || userData.is_staff) {
                                 navigate('/dashboard')
                             } else {
-                                // Redirigir a dashboard para estudiante/docente
                                 navigate('/dashboard')
                             }
                         } else {
@@ -71,7 +68,10 @@ export default function LoginPage() {
                 }
             }
         } catch (err) {
-            setError('Error de conexión. Verifica que el servidor esté corriendo.')
+            console.error(err)
+            const apiUrl = import.meta.env.VITE_API_URL
+            const errMsg = err.message ? err.message : 'Error desconocido'
+            setError(`Error: ${errMsg} | Intento a: ${apiUrl}. Verifica que el backend esté corriendo y la URL sea correcta.`)
         } finally {
             setLoading(false)
         }
@@ -109,11 +109,11 @@ export default function LoginPage() {
                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="cedula">
                             Cédula
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full">
                             <select
                                 value={cedulaPrefix}
                                 onChange={(e) => setCedulaPrefix(e.target.value)}
-                                className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200 w-20"
+                                className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200 w-20 flex-shrink-0"
                             >
                                 <option value="V">V</option>
                                 <option value="E">E</option>
@@ -124,7 +124,7 @@ export default function LoginPage() {
                                 type="text"
                                 value={cedulaNumber}
                                 onChange={handleNumericInput}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200"
+                                className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200"
                                 placeholder="Número de Cédula"
                                 required
                             />
@@ -134,15 +134,24 @@ export default function LoginPage() {
                         <label className="block text-gray-700 dark:text-gray-300 text-sm font-semibold mb-2" htmlFor="password">
                             Contraseña
                         </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200"
-                            placeholder="Ingresa tu contraseña"
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-200 pr-10"
+                                placeholder="Ingresa tu contraseña"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     <button
                         type="submit"

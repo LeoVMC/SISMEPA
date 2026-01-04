@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import api from '../services/api'
 
 export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
     const navigate = useNavigate()
+    const [ucActuales, setUcActuales] = useState(0)
 
     const isActive = (path) => location.pathname === path
 
@@ -21,6 +23,29 @@ export default function Sidebar({ isOpen, onClose }) {
     const isTeacher = userData.groups?.some(g => g.name === 'Docente' || g.name === 'Profesor')
     const showMonitoring = isAdmin || isTeacher
     const dashboardLabel = showMonitoring ? 'Monitoreo' : 'Progreso'
+
+    // Fetch UC Info for students
+    useEffect(() => {
+        if (!isAdmin && !isTeacher) {
+            const fetchUC = async () => {
+                try {
+                    const response = await api.get('/estudiantes/mi-info/')
+                    if (response.ok) {
+                        const data = await response.json()
+                        if (data.uc_actuales !== undefined) {
+                            setUcActuales(data.uc_actuales)
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error fetching UC info", error)
+                }
+            }
+            fetchUC()
+
+            // Listen for enrollment events (if implied) or just polling?
+            // For now just on mount.
+        }
+    }, [isAdmin, isTeacher, location.pathname]) // Refresh on navigation changes (e.g. after enrollment)
 
     let panelLabel = 'Panel Estudiante'
     if (isAdmin) panelLabel = 'Panel Administrador'
@@ -95,8 +120,27 @@ export default function Sidebar({ isOpen, onClose }) {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-gray-800 space-y-4">
+            {/* UC Counter for Students */}
+            {!isAdmin && !isTeacher && ucActuales >= 0 && (
+                <div className="px-4 mb-4">
+                    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 border border-gray-700/50 shadow-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">UC Usadas</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ucActuales > 35 ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                {ucActuales} / 35
+                            </span>
+                        </div>
+                        <div className="w-full bg-gray-700/50 rounded-full h-1.5 overflow-hidden">
+                            <div
+                                className={`h-full rounded-full transition-all duration-500 ${ucActuales > 35 ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-purple-500'}`}
+                                style={{ width: `${Math.min((ucActuales / 35) * 100, 100)}%` }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
+            <div className="p-4 border-t border-gray-800 space-y-4">
 
                 <Link
                     to="/profile"
@@ -118,6 +162,8 @@ export default function Sidebar({ isOpen, onClose }) {
                     <span className="font-medium">Cerrar Sesión</span>
                 </button>
             </div>
+
+
         </div >
     )
 }

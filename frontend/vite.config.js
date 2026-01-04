@@ -6,5 +6,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: false,
+    host: true, // Escuchar en todas las IPs
+    allowedHosts: true, // Permitir cualquier host (para túneles)
   }
 })

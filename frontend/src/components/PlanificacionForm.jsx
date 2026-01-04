@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function PlanificacionForm(){
+export default function PlanificacionForm() {
   const [resp, setResp] = useState(null)
   const token = localStorage.getItem('apiToken')
 

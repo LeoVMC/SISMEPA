@@ -97,6 +97,24 @@ class Estudiante(models.Model):
         
         return round((aprobadas / total_asignaturas) * 100, 2)
 
+    def get_uc_periodo_actual(self):
+        """Calcula las UC inscritas en el período activo."""
+        from django.apps import apps
+        from django.db.models import Sum
+        DetalleInscripcion = apps.get_model('gestion', 'DetalleInscripcion')
+        PeriodoAcademico = apps.get_model('gestion', 'PeriodoAcademico')
+        
+        periodo = PeriodoAcademico.objects.filter(activo=True).first()
+        if not periodo:
+            return 0
+            
+        total = DetalleInscripcion.objects.filter(
+            inscripcion__estudiante=self,
+            inscripcion__periodo=periodo
+        ).aggregate(t=Sum('asignatura__creditos'))['t']
+        
+        return total or 0
+
 
 class Docente(models.Model):
     """Representa un docente/profesor."""
