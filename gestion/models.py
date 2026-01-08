@@ -162,22 +162,38 @@ class DetalleInscripcion(models.Model):
     nota3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     nota4 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     
+    # Nota de Reparación (Nota R) - Si se carga, sustituye la nota final
+    nota_reparacion = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True,
+        help_text="Nota de reparación. Si se carga, reemplaza por completo la nota final.")
+    
     nota_final = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     estatus = models.CharField(max_length=20, default='CURSANDO')
 
     def calcular_nota_final(self):
-        """Calcula la nota final como promedio de las 4 notas parciales."""
+        """
+        Calcula la nota final.
+        - Si hay nota_reparacion, esta sustituye completamente la nota final.
+        - Si no, calcula el promedio de las 4 notas parciales.
+        """
+        from decimal import Decimal
+        
+        # Si hay nota de reparación, esta sustituye la nota final
+        if self.nota_reparacion is not None:
+            self.nota_final = self.nota_reparacion
+            self.estatus = 'APROBADO' if self.nota_final >= 10 else 'REPROBADO'
+            return self.nota_final
+        
+        # Calcular promedio de las 4 notas parciales
         notas = [n for n in [self.nota1, self.nota2, self.nota3, self.nota4] if n is not None]
         if len(notas) == 4:
-            from decimal import Decimal
             self.nota_final = sum(notas) / Decimal(4)
             # Determinar estatus basado en nota final
             self.estatus = 'APROBADO' if self.nota_final >= 10 else 'REPROBADO'
         return self.nota_final
 
     def save(self, *args, **kwargs):
-        # Recalcular nota final antes de guardar si hay notas parciales
-        if any([self.nota1, self.nota2, self.nota3, self.nota4]):
+        # Recalcular nota final antes de guardar si hay notas parciales o nota de reparación
+        if any([self.nota1, self.nota2, self.nota3, self.nota4, self.nota_reparacion]):
             self.calcular_nota_final()
         super().save(*args, **kwargs)
 

@@ -30,11 +30,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-mck48xvyndhn*x-#4ygso
 # DEBUG configurable vía variable de entorno; por defecto True en desarrollo
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*', '.loca.lt']
+ALLOWED_HOSTS = ['*']
 
-# CSRF: Permitir orígenes de LocalTunnel
+# CSRF: Orígenes de confianza
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.loca.lt',
     'http://localhost:3000',
     'http://localhost:5173',
 ]
@@ -44,15 +43,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 # ... (Middlewares se mantienen igual) ...
 
-# CORS: permitir el frontend de desarrollo y LocalTunnel
-CORS_ALLOW_ALL_ORIGINS = True  # Para facilitar el uso con túneles dinámicos
-
-# Importar headers por defecto para extenderlos
-from corsheaders.defaults import default_headers
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'bypass-tunnel-reminder',
-]
+# CORS: permitir el frontend de desarrollo
+# CORS_ALLOW_ALL_ORIGINS se puede activar para desarrollo si es necesario
 
 
 INSTALLED_APPS = [
@@ -106,7 +98,7 @@ AUTHENTICATION_BACKENDS = (
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',  # Desactivado para evitar conflictos CSRF
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (

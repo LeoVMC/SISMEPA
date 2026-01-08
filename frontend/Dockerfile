@@ -5,8 +5,10 @@ WORKDIR /app
 # Copiar archivos de dependencias primero (mejor cache de Docker)
 COPY package*.json ./
 
-# Instalar dependencias con instalación limpia
-RUN npm ci --silent
+# Instalar dependencias y limpiar cache de esbuild
+RUN npm install --legacy-peer-deps && \
+    rm -rf node_modules/.cache && \
+    npm rebuild esbuild
 
 # Copiar el resto del código
 COPY . .

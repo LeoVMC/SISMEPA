@@ -234,7 +234,8 @@ export default function CalificacionesPage() {
                         nota1: notas.nota1 !== undefined ? notas.nota1 : est.nota1,
                         nota2: notas.nota2 !== undefined ? notas.nota2 : est.nota2,
                         nota3: notas.nota3 !== undefined ? notas.nota3 : est.nota3,
-                        nota4: notas.nota4 !== undefined ? notas.nota4 : est.nota4
+                        nota4: notas.nota4 !== undefined ? notas.nota4 : est.nota4,
+                        nota_reparacion: notas.nota_reparacion !== undefined ? notas.nota_reparacion : est.nota_reparacion
                     })
                 })
                 if (res.ok) {
@@ -262,16 +263,25 @@ export default function CalificacionesPage() {
         setSaving(false)
     }
 
-    const calcularPromedio = (est) => {
+    // Calcular nota final considerando nota de reparación
+    const calcularNotaFinal = (est) => {
+        const notaR = getNotaValue(est, 'nota_reparacion')
+
+        // Si hay nota de reparación, esta es la nota final
+        if (notaR !== null && notaR !== undefined && notaR !== '') {
+            return parseFloat(notaR).toFixed(2)
+        }
+
+        // Si no, calcular promedio de las 4 notas
         const n1 = getNotaValue(est, 'nota1')
         const n2 = getNotaValue(est, 'nota2')
         const n3 = getNotaValue(est, 'nota3')
         const n4 = getNotaValue(est, 'nota4')
 
         // Verificar si hay al menos una nota cargada
-        const agunaNota = [n1, n2, n3, n4].some(n => n !== null && n !== undefined && n !== '')
+        const algunaNota = [n1, n2, n3, n4].some(n => n !== null && n !== undefined && n !== '')
 
-        if (agunaNota) {
+        if (algunaNota) {
             // Si falta alguna nota, se asume 1 (nota mínima)
             const v1 = (n1 !== null && n1 !== undefined && n1 !== '') ? parseFloat(n1) : 1
             const v2 = (n2 !== null && n2 !== undefined && n2 !== '') ? parseFloat(n2) : 1
@@ -281,6 +291,12 @@ export default function CalificacionesPage() {
             return ((v1 + v2 + v3 + v4) / 4).toFixed(2)
         }
         return '--'
+    }
+
+    // Verificar si un estudiante tiene nota de reparación activa
+    const tieneNotaReparacion = (est) => {
+        const notaR = getNotaValue(est, 'nota_reparacion')
+        return notaR !== null && notaR !== undefined && notaR !== ''
     }
 
     // Obtener IDs de estudiantes ya inscritos en la sección actual
@@ -635,15 +651,17 @@ export default function CalificacionesPage() {
                                                                                 <th className="text-center p-2 text-gray-600 dark:text-gray-400">Nota 2</th>
                                                                                 <th className="text-center p-2 text-gray-600 dark:text-gray-400">Nota 3</th>
                                                                                 <th className="text-center p-2 text-gray-600 dark:text-gray-400">Nota 4</th>
-                                                                                <th className="text-center p-2 text-gray-600 dark:text-gray-400">Promedio</th>
+                                                                                <th className="text-center p-2 text-gray-600 dark:text-gray-400 bg-orange-50 dark:bg-orange-900/20">Nota R</th>
+                                                                                <th className="text-center p-2 text-gray-600 dark:text-gray-400">Nota Final</th>
                                                                                 <th className="text-center p-2 text-gray-600 dark:text-gray-400">Estado</th>
                                                                                 <th className="text-center p-2 text-gray-600 dark:text-gray-400">Acciones</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {seccion.estudiantes.map(est => {
-                                                                                const promedio = calcularPromedio(est)
-                                                                                const aprobado = promedio !== '--' && parseFloat(promedio) >= 10
+                                                                                const notaFinal = calcularNotaFinal(est)
+                                                                                const aprobado = notaFinal !== '--' && parseFloat(notaFinal) >= 10
+                                                                                const conNotaR = tieneNotaReparacion(est)
 
                                                                                 return (
                                                                                     <tr key={est.detalle_id} className="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -663,8 +681,55 @@ export default function CalificacionesPage() {
                                                                                                 />
                                                                                             </td>
                                                                                         ))}
-                                                                                        <td className={`p-2 text-center font-bold ${promedio !== '--' ? (aprobado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400') : 'text-gray-400'}`}>
-                                                                                            {promedio}
+                                                                                        {/* Columna Nota R - Reparación */}
+                                                                                        {(() => {
+                                                                                            // Determinar si puede tener nota de reparación
+                                                                                            const n1 = getNotaValue(est, 'nota1')
+                                                                                            const n2 = getNotaValue(est, 'nota2')
+                                                                                            const n3 = getNotaValue(est, 'nota3')
+                                                                                            const n4 = getNotaValue(est, 'nota4')
+                                                                                            const todasLasNotas = [n1, n2, n3, n4].every(n => n !== null && n !== undefined && n !== '')
+
+                                                                                            let promedioSinR = null
+                                                                                            if (todasLasNotas) {
+                                                                                                promedioSinR = (parseFloat(n1) + parseFloat(n2) + parseFloat(n3) + parseFloat(n4)) / 4
+                                                                                            }
+
+                                                                                            // Solo habilitar si tiene todas las notas Y está reprobado (promedio < 10) O ya tiene nota R
+                                                                                            const puedeNotaR = conNotaR || (todasLasNotas && promedioSinR < 10)
+
+                                                                                            return (
+                                                                                                <td className="p-2 text-center bg-orange-50/50 dark:bg-orange-900/10">
+                                                                                                    <input
+                                                                                                        type="number"
+                                                                                                        min="1"
+                                                                                                        max="20"
+                                                                                                        step="0.01"
+                                                                                                        value={getNotaValue(est, 'nota_reparacion') ?? ''}
+                                                                                                        onChange={(e) => handleNotaChange(est.detalle_id, 'nota_reparacion', e.target.value)}
+                                                                                                        disabled={!puedeNotaR}
+                                                                                                        className={`w-16 text-center border rounded px-2 py-1 focus:ring-2 focus:border-transparent ${puedeNotaR
+                                                                                                                ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-white focus:ring-orange-500'
+                                                                                                                : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 text-gray-400 cursor-not-allowed'
+                                                                                                            }`}
+                                                                                                        placeholder={puedeNotaR ? '--' : 'N/A'}
+                                                                                                        title={puedeNotaR
+                                                                                                            ? 'Nota de Reparación - Si se carga, reemplaza la nota final'
+                                                                                                            : 'Solo disponible para estudiantes reprobados con las 4 notas cargadas'}
+                                                                                                    />
+                                                                                                </td>
+                                                                                            )
+                                                                                        })()}
+                                                                                        {/* Nota Final */}
+                                                                                        <td className={`p-2 text-center font-bold ${notaFinal !== '--' ? (aprobado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400') : 'text-gray-400'}`}>
+                                                                                            <div className="flex flex-col items-center">
+                                                                                                <span>{notaFinal}</span>
+                                                                                                {conNotaR && (
+                                                                                                    <span className="text-[9px] px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded mt-0.5">
+                                                                                                        Reparación
+                                                                                                    </span>
+                                                                                                )}
+                                                                                            </div>
                                                                                         </td>
                                                                                         <td className="p-2 text-center">
                                                                                             {est.estatus === 'CURSANDO' ? (

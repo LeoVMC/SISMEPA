@@ -9,8 +9,14 @@ import threading
 logger = logging.getLogger(__name__)
 
 try:
+    import os
     from huey import RedisHuey
-    HUEY = RedisHuey('sismepa')
+    
+    redis_url = os.environ.get('REDIS_URL')
+    if redis_url:
+        HUEY = RedisHuey('sismepa', url=redis_url)
+    else:
+        HUEY = RedisHuey('sismepa')
 except Exception:
     HUEY = None
 

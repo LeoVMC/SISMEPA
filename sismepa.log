@@ -5399,3 +5399,202 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'password_reset_confirm' not 
 [2026-01-04 06:26:11,622] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
 [2026-01-04 06:26:12,330] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-01-04 06:37:10,712] WARNING django.request: Bad Request: /api/secciones/52/inscribirme/
+[2026-01-08 10:19:04,488] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 10:19:33,073] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 15:27:50,388] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 15:41:49,112] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 15:41:49,131] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 15:45:22,057] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2026-01-08 15:45:22,739] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 15:46:37,525] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 15:46:47,356] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 15:46:47,374] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 15:48:52,018] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 15:48:52,038] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:01:16,838] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:01:16,856] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:01:24,614] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:01:24,637] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:06:15,149] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:06:15,167] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:10:02,711] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2026-01-08 16:10:03,436] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 16:10:38,134] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-08 16:10:38,896] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 16:11:05,472] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-08 16:11:06,208] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 16:12:47,085] ERROR django.request: Internal Server Error: /api/secciones/mis-secciones/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/psycopg/cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedColumn: column gestion_detalleinscripcion.nota_reparacion does not exist
+LINE 1: ...n"."nota3", "gestion_detalleinscripcion"."nota4", "gestion_d...
+                                                             ^
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/gestion/api/views.py", line 1999, in mis_secciones
+    for detalle in detalles:
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 386, in __iter__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/psycopg/cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+django.db.utils.ProgrammingError: column gestion_detalleinscripcion.nota_reparacion does not exist
+LINE 1: ...n"."nota3", "gestion_detalleinscripcion"."nota4", "gestion_d...
+                                                             ^
+[2026-01-08 16:19:29,159] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-01-08 16:19:29,869] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 16:29:03,765] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:29:03,784] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-08 16:31:00,456] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 17:02:31,608] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 17:18:25,250] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 17:25:08,766] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 18:43:54,694] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 18:47:30,778] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 18:47:47,327] WARNING django.request: Not Found: /favicon.ico
+[2026-01-08 18:54:19,219] ERROR django.request: Internal Server Error: /admin/auth/user/
+Traceback (most recent call last):
+  File "/app/sismepa/middleware.py", line 37, in __call__
+    activity = request.user.activity
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 534, in __get__
+    raise self.RelatedObjectDoesNotExist(
+django.contrib.auth.models.User.activity.RelatedObjectDoesNotExist: User has no activity.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/psycopg/cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.ForeignKeyViolation: insert or update on table "gestion_useractivity" violates foreign key constraint "gestion_useractivity_user_id_1ef0324a_fk_auth_user_id"
+DETAIL:  Key (user_id)=(1) is not present in table "auth_user".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/app/sismepa/middleware.py", line 48, in __call__
+    UserActivity.objects.create(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/psycopg/cursor.py", line 97, in execute
+    raise ex.with_traceback(None)
+django.db.utils.IntegrityError: insert or update on table "gestion_useractivity" violates foreign key constraint "gestion_useractivity_user_id_1ef0324a_fk_auth_user_id"
+DETAIL:  Key (user_id)=(1) is not present in table "auth_user".
+[2026-01-08 19:00:32,027] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:01:04,601] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:01:42,193] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:01:47,640] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:06:03,873] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:06:29,850] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:06:30,609] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:06:31,250] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:07:19,041] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:07:19,736] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:10:03,223] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:12:00,303] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:12:01,029] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:17:29,613] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2026-01-08 19:18:00,305] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-08 19:18:56,629] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:19:40,389] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:19:47,867] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-08 19:22:31,529] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-08 19:22:31,545] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/

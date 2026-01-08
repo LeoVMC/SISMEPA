@@ -3,7 +3,6 @@
  * Maneja automáticamente:
  * - URL base desde variables de entorno
  * - Headers de autenticación (Token)
- * - Headers de LocalTunnel Bypass
  * - Errores de red comunes
  */
 
@@ -22,8 +21,6 @@ export async function apiCall(endpoint, options = {}) {
     // Configurar headers por defecto
     const defaultHeaders = {
         'Content-Type': 'application/json',
-        // HEADER CLAVE PARA LOCALTUNNEL:
-        'bypass-tunnel-reminder': 'true',
     };
 
     // Inyectar token si existe

@@ -1807,7 +1807,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws.merge_cells('B5:E5')
         
         # 3. Encabezados Tabla (Fila 7)
-        headers = ['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota Final', 'Estado']
+        headers = ['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota R', 'Nota Final', 'Estado']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=7, column=col, value=header)
             cell.font = header_font
@@ -1826,8 +1826,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=6, value=float(detalle.nota2) if detalle.nota2 is not None else '')
             ws.cell(row=row_num, column=7, value=float(detalle.nota3) if detalle.nota3 is not None else '')
             ws.cell(row=row_num, column=8, value=float(detalle.nota4) if detalle.nota4 is not None else '')
-            ws.cell(row=row_num, column=9, value=float(detalle.nota_final) if detalle.nota_final is not None else '')
-            ws.cell(row=row_num, column=10, value=detalle.estatus)
+            ws.cell(row=row_num, column=9, value=float(detalle.nota_reparacion) if detalle.nota_reparacion is not None else '')
+            ws.cell(row=row_num, column=10, value=float(detalle.nota_final) if detalle.nota_final is not None else '')
+            ws.cell(row=row_num, column=11, value=detalle.estatus)
             row_num += 1
             
         # Aplicar estilos globales
@@ -2006,6 +2007,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
                     'nota2': float(detalle.nota2) if detalle.nota2 else None,
                     'nota3': float(detalle.nota3) if detalle.nota3 else None,
                     'nota4': float(detalle.nota4) if detalle.nota4 else None,
+                    'nota_reparacion': float(detalle.nota_reparacion) if detalle.nota_reparacion else None,
                     'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
                     'estatus': detalle.estatus
                 })
@@ -2041,6 +2043,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
         nota2 = request.data.get('nota2')
         nota3 = request.data.get('nota3')
         nota4 = request.data.get('nota4')
+        nota_reparacion = request.data.get('nota_reparacion')
         
         if not detalle_id:
             return Response({'error': 'Se requiere detalle_id.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -2063,7 +2066,7 @@ class SeccionViewSet(viewsets.ModelViewSet):
             except (InvalidOperation, ValueError):
                 return None
         
-        # Actualizar notas
+        # Actualizar notas parciales
         if nota1 is not None:
             detalle.nota1 = parse_nota(nota1)
         if nota2 is not None:
@@ -2073,11 +2076,44 @@ class SeccionViewSet(viewsets.ModelViewSet):
         if nota4 is not None:
             detalle.nota4 = parse_nota(nota4)
         
+        # Actualizar nota de reparación (si se envía)
+        if nota_reparacion is not None:
+            # Permitir borrar la nota de reparación enviando '' o null
+            if nota_reparacion == '' or nota_reparacion is None:
+                detalle.nota_reparacion = None
+            else:
+                # Validar que el estudiante esté REPROBADO para cargar nota de reparación
+                # Primero verificar si tiene las 4 notas cargadas
+                notas_actuales = [
+                    detalle.nota1 if nota1 is None else parse_nota(nota1),
+                    detalle.nota2 if nota2 is None else parse_nota(nota2),
+                    detalle.nota3 if nota3 is None else parse_nota(nota3),
+                    detalle.nota4 if nota4 is None else parse_nota(nota4)
+                ]
+                
+                if all(n is not None for n in notas_actuales):
+                    # Calcular promedio temporal
+                    from decimal import Decimal
+                    promedio_temp = sum(notas_actuales) / Decimal(4)
+                    
+                    # Solo permitir nota de reparación si el promedio es < 10 (reprobado)
+                    if promedio_temp >= 10:
+                        return Response({
+                            'error': 'Solo se puede cargar Nota de Reparación para estudiantes reprobados (promedio < 10).'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({
+                        'error': 'Debe cargar las 4 notas parciales antes de asignar una Nota de Reparación.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                detalle.nota_reparacion = parse_nota(nota_reparacion)
+        
         detalle.save()  # El método save() calcula nota_final automáticamente
         
         return Response({
             'status': 'Calificaciones guardadas.',
             'nota_final': float(detalle.nota_final) if detalle.nota_final else None,
+            'nota_reparacion': float(detalle.nota_reparacion) if detalle.nota_reparacion else None,
             'estatus': detalle.estatus
         })
 
