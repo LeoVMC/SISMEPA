@@ -59,6 +59,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+    env_file:
+      - .env
     environment:
       - SECRET_KEY=docker-dev-secret-key-change-in-production
       - DJANGO_DEBUG=True
@@ -104,6 +107,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+    env_file:
+      - .env
     environment:
       - SECRET_KEY=docker-dev-secret-key-change-in-production
       - DJANGO_DEBUG=True
