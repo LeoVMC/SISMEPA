@@ -5728,3 +5728,23 @@ AttributeError: 'User' object has no attribute 'usuario'
 [2026-01-12 17:19:33,494] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2026-01-12 17:20:46,127] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2026-01-12 17:20:46,184] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-12 18:23:08,767] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
+[2026-01-12 18:23:09,903] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-12 18:23:24,767] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2026-01-12 18:23:25,901] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-12 18:29:36,707] ERROR gestion.notifications: Error enviando correo a ['emdrickd@gmail.com']: [Errno -3] Temporary failure in name resolution
+[2026-01-12 18:56:38,124] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Alerta de Rendimiento: MATEMÁTICA I
+[2026-01-12 18:56:59,989] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Notificación de Reprobación: MATEMÁTICA I
+[2026-01-12 18:57:01,608] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Resumen Vencimiento de Notas - Periodo 2-2025
+[2026-01-12 18:57:31,322] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Nota de Reparación Cargada: MATEMÁTICA I
+[2026-01-12 18:58:49,536] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
+[2026-01-12 18:58:50,597] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-12 19:00:14,528] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Alerta de Rendimiento: MATEMÁTICA I
+[2026-01-12 19:04:53,254] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
+[2026-01-12 19:04:54,372] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-12 19:06:31,998] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Alerta de Rendimiento: MATEMÁTICA I
+[2026-01-12 19:07:13,623] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Notificación de Reprobación: MATEMÁTICA I
+[2026-01-12 19:07:14,987] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Resumen Vencimiento de Notas - Periodo 2-2025
+[2026-01-12 19:07:56,526] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Nota de Reparación Cargada: MATEMÁTICA I
+[2026-01-12 19:09:21,182] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
+[2026-01-12 19:09:22,221] INFO django.utils.autoreload: Watching for file changes with StatReloader

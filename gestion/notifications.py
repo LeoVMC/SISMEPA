@@ -53,12 +53,15 @@ def notify_student_risk(estudiante, asignatura, nota_actual, nota_necesaria=None
     
     extra_msg = ""
     if nota_necesaria is not None:
-        extra_msg = f"\nPara aprobar con la nota mínima (10.00), necesitas obtener en tu próxima evaluación: {nota_necesaria:.2f} pts."
+        if nota_necesaria > 20:
+            extra_msg = "\n\nLamentablemente, el cálculo indica que incluso obteniendo la máxima calificación (20 ptos) en tu próxima evaluación, no alcanzarás la nota mínima aprobatoria (10.00). Es probable que debas repetir la asignatura."
+        else:
+            extra_msg = f"\n\nPara aprobar con la nota mínima (10.00), necesitas obtener en tu próxima evaluación: {nota_necesaria:.2f} pts."
 
     message = f"""Hola {nombre},
 
 Hemos detectado que tu rendimiento actual en la asignatura {asignatura.nombre_asignatura} presenta riesgo de reprobación.
-Tu nota parcial acumulada/reciente es: {nota_actual:.2f}{extra_msg}
+Tu nota parcial acumulada es: {nota_actual:.2f}{extra_msg}
 
 Te recomendamos contactar a tu docente o buscar asesoría académica.
 
@@ -82,6 +85,58 @@ Si consideras que hay un error, por favor contacta a Control de Estudios.
 
 Atentamente,
 Departamento de Evaluación - SISMEPA
+"""
+    if estudiante.usuario.email:
+        send_notification_email(subject, message, estudiante.usuario.email)
+
+def notify_student_repair_grade(estudiante, asignatura, nota_reparacion):
+    """Notificar al estudiante que se ha cargado una nota de reparación."""
+    nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
+    subject = f"Nota de Reparación Cargada: {asignatura.nombre_asignatura}"
+    
+    estatus = "APROBADO" if nota_reparacion >= 10 else "REPROBADO"
+    
+    message = f"""Hola {nombre},
+    
+Se ha cargado una Nota de Reparación para la asignatura {asignatura.nombre_asignatura}.
+
+Nota de Reparación: {nota_reparacion:.2f}
+Estatus Definitivo: {estatus}
+
+Esta nota sustituye cualquier calificación previa como nota final de la asignatura.
+
+Atentamente,
+Departamento de Evaluación - SISMEPA
+"""
+    if estudiante.usuario.email:
+        send_notification_email(subject, message, estudiante.usuario.email)
+
+def notify_student_period_completion(estudiante, periodo, detalles_inscripcion):
+    """Notificar al estudiante que todas sus calificaciones del periodo están listas."""
+    nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
+    subject = f"Resumen de Notas - Periodo {periodo.nombre_periodo}"
+    
+    # Construir tabla de notas
+    filas = []
+    for detalle in detalles_inscripcion:
+        nota = detalle.nota_final if detalle.nota_final is not None else 0.00
+        estado = detalle.estatus
+        filas.append(f"- {detalle.asignatura.nombre_asignatura}: {nota:.2f} ({estado})")
+    
+    tabla_notas = "\n".join(filas)
+    
+    message = f"""Hola {nombre},
+    
+Te informamos que se han cargado TODAS las calificaciones correspondientes a tus asignaturas inscritas en el periodo {periodo.nombre_periodo}.
+
+Tus notas definitivas son:
+
+{tabla_notas}
+
+Puedes consultar el detalle ingresando al sistema.
+
+Atentamente,
+Control de Estudios - SISMEPA
 """
     if estudiante.usuario.email:
         send_notification_email(subject, message, estudiante.usuario.email)

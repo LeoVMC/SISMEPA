@@ -193,10 +193,58 @@ class DetalleInscripcion(models.Model):
         return self.nota_final
 
     def save(self, *args, **kwargs):
+        from gestion.notifications import notify_student_repair_grade, notify_student_period_completion
+        
+        # Check previous state
+        old_instance = None
+        if self.pk:
+            try:
+                old_instance = DetalleInscripcion.objects.get(pk=self.pk)
+            except DetalleInscripcion.DoesNotExist:
+                pass
+
         # Recalcular nota final antes de guardar si hay notas parciales o nota de reparación
         if any([self.nota1, self.nota2, self.nota3, self.nota4, self.nota_reparacion]):
             self.calcular_nota_final()
+
         super().save(*args, **kwargs)
+
+        # Logic for Notifications (Post-save to ensure data is committed)
+        
+        # 1. Repair Grade Notification
+        # Trigger: If nota_reparacion was newly added (old was None, new is not None)
+        if self.nota_reparacion is not None:
+            is_new_repair = old_instance is None or old_instance.nota_reparacion is None
+            if is_new_repair:
+                notify_student_repair_grade(self.inscripcion.estudiante, self.asignatura, self.nota_reparacion)
+
+        # 2. Period Completion Notification
+        # Trigger: If nota_final changed or is new, AND all subjects in the current enrollment have a final grade
+        has_grade = self.nota_final is not None
+        
+        # Only check if we have a grade now
+        if has_grade:
+            # Check if all other subjects in this enrollment have a final grade
+            # We exclude 'self' from query to avoid race conditions, but effectively we check the whole set
+            # actually query all details for this inscripcion
+            all_details = self.inscripcion.detalles.all()
+            pending_grades = all_details.filter(nota_final__isnull=True).exists()
+            
+            if not pending_grades:
+                # To prevent spamming, we might want to check if we already sent it? 
+                # For simplicity, we send it every time the last grade is filled/updated to completion.
+                # Use a simple logic: If this specific save action "completed" the set.
+                
+                # Check if it was incomplete before? 
+                # If old_instance had no grade, and now we do, and now pending is 0 -> We completed it.
+                was_incomplete = old_instance is None or old_instance.nota_final is None
+                
+                # Or just checking if it is complete now is enough for the user request "when loaded... send notification"
+                # Ideally we don't want to resend if I fix a typo in a grade.
+                # So verify if we just transitioned to "Complete" state.
+                
+                if was_incomplete: 
+                     notify_student_period_completion(self.inscripcion.estudiante, self.inscripcion.periodo, all_details)
 
 
 class DocumentoCalificaciones(models.Model):
