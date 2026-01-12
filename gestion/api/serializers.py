@@ -194,7 +194,7 @@ class AsignaturaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asignatura
-        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'docente', 'secciones', 'has_assignments', 'has_plan', 'prelaciones', 'orden', 'tutores', 'is_assigned_to_current_user']
+        fields = ['id', 'codigo', 'nombre_asignatura', 'creditos', 'semestre', 'programa', 'secciones', 'has_assignments', 'has_plan', 'prelaciones', 'orden', 'tutores', 'is_assigned_to_current_user']
 
     def get_is_assigned_to_current_user(self, obj):
         request = self.context.get('request')

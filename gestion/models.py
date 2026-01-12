@@ -27,6 +27,9 @@ class Programa(models.Model):
     def __str__(self):
         return self.nombre_programa
 
+    class Meta:
+        ordering = ['nombre_programa']
+
 
 class Asignatura(models.Model):
     """Representa una asignatura/materia del pensum."""
@@ -38,7 +41,7 @@ class Asignatura(models.Model):
     prelaciones = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='es_requisito_de')
     orden = models.IntegerField(default=0)
     # Manteniendo docente por compatibilidad, aunque las asignaciones específicas se moverán a Sección
-    docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
+    # docente = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='asignaturas_asignadas')
     tutores = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='tutorias_asignadas')
 
     def __str__(self):
@@ -69,9 +72,7 @@ class Estudiante(models.Model):
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
     fecha_ingreso = models.DateField(auto_now_add=True)
-    nombre = models.CharField(max_length=100, blank=True)
-    apellido = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(blank=True)
+    fecha_ingreso = models.DateField(auto_now_add=True)
 
     def __str__(self):
         name = self.usuario.get_full_name()

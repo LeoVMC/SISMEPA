@@ -30,7 +30,7 @@ def send_notification_email(subject, message, recipient_list):
 
 def notify_student_period_start(estudiante, periodo):
     """Notificar al estudiante que ha iniciado un nuevo periodo académico."""
-    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
+    nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
     subject = f"Inicio del Periodo Académico {periodo.nombre_periodo} - SISMEPA"
     message = f"""Hola {nombre},
 
@@ -48,7 +48,7 @@ Administración SISMEPA
 
 def notify_student_risk(estudiante, asignatura, nota_actual, nota_necesaria=None):
     """Notificar al estudiante riesgo de reprobar."""
-    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
+    nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
     subject = f"Alerta de Rendimiento: {asignatura.nombre_asignatura}"
     
     extra_msg = ""
@@ -70,7 +70,7 @@ Sistema de Alerta Temprana - SISMEPA
 
 def notify_student_failure(estudiante, asignatura, nota_final):
     """Notificar al estudiante que ha reprobado la asignatura."""
-    nombre = estudiante.usuario.get_full_name() or estudiante.nombre
+    nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
     subject = f"Notificación de Reprobación: {asignatura.nombre_asignatura}"
     message = f"""Hola {nombre},
 

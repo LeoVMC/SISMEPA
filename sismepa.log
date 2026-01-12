@@ -5598,3 +5598,25 @@ DETAIL:  Key (user_id)=(1) is not present in table "auth_user".
 [2026-01-08 19:19:47,867] WARNING django.request: Bad Request: /api/auth/login/
 [2026-01-08 19:22:31,529] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2026-01-08 19:22:31,545] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 17:25:00,761] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-11 17:41:03,442] WARNING django.request: Not Found: /favicon.ico
+[2026-01-11 18:20:51,777] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2026-01-11 18:20:55,155] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-11 18:21:09,644] INFO django.utils.autoreload: /app/gestion/api/serializers.py changed, reloading.
+[2026-01-11 18:21:13,118] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-11 18:21:27,102] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
+[2026-01-11 18:21:30,245] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-11 20:34:07,814] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:34:07,908] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:34:11,465] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:34:11,568] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:34:50,448] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:34:50,522] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:39:14,053] INFO gestion.notifications: Correo enviado a ['sistemas1@unefa.edu.ve']: Inicio del Periodo Académico 2-2025 - SISMEPA
+[2026-01-11 20:39:14,060] INFO gestion.notifications: Correo enviado a ['telecom1@unefa.edu.ve']: Inicio del Periodo Académico 2-2025 - SISMEPA
+[2026-01-11 20:39:14,070] INFO gestion.notifications: Correo enviado a ['V-20000001@unefa.edu.ve']: Inicio del Periodo Académico 2-2025 - SISMEPA
+[2026-01-11 20:39:14,086] INFO gestion.notifications: Correo enviado a ['V-20000002@unefa.edu.ve']: Inicio del Periodo Académico 2-2025 - SISMEPA
+[2026-01-11 20:39:33,220] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:39:33,312] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-11 20:44:35,710] INFO django.utils.autoreload: /app/gestion/models.py changed, reloading.
+[2026-01-11 20:44:39,251] INFO django.utils.autoreload: Watching for file changes with StatReloader

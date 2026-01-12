@@ -76,7 +76,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
     return (
         <div className={`
-            fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 text-white flex flex-col transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
+            fixed inset-y-0 left-0 z-50 w-64 h-screen bg-gray-900 border-r border-gray-800 text-white flex flex-col transition-transform duration-300 ease-in-out overflow-y-auto lg:relative lg:translate-x-0
             ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
             <div className="p-6 border-b border-gray-800 flex justify-between items-center">
