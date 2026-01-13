@@ -540,22 +540,32 @@ Archivo: [notifications.py](file:///c:/Users/leona/Documents/GitHub/SISMEPA/gest
 | `notify_student_period_start` | Activación período | Estudiantes |
 | `notify_student_risk` | Nota parcial baja | Estudiante en riesgo |
 | `notify_student_failure` | nota_final < 10 | Estudiante reprobado |
+| `notify_student_repair_grade` | Carga de Nota R | Estudiante |
+| `notify_student_period_completion` | Todas las notas cargadas | Estudiante |
 | `notify_docente_assignment` | Asignación sección | Docente |
 | `notify_docente_period_end` | Fin período | Docentes |
 | `notify_admin_period_status` | Cierre/apertura | Administrador |
 
-**Ejemplo email de riesgo:**
-```
-Hola {nombre},
+**Ejemplo email de riesgo (Lógica Mejorada):**
+```python
+def notify_student_risk(estudiante, asignatura, nota_actual, nota_necesaria):
+    """Alerta al estudiante de riesgo de reprobación"""
+    
+    # Lógica de mensaje diferenciado
+    if nota_necesaria > 20:
+        texto_nota = "Lamentablemente... no alcanzarás la nota mínima aprobatoria."
+    else:
+        texto_nota = f"Necesitas obtener: {nota_necesaria:.2f} pts para aprobar."
 
-Hemos detectado que tu rendimiento actual en {asignatura} presenta riesgo.
-Tu nota parcial acumulada es: {nota_actual:.2f}
-Para aprobar necesitas obtener: {nota_necesaria:.2f} pts.
+    message = f"""Hola {estudiante.usuario.get_full_name()},
+
+Tu rendimiento en {asignatura.nombre_asignatura} presenta riesgo.
+Nota actual: {nota_actual:.2f}
+{texto_nota}
 
 Atentamente,
-Sistema de Alerta Temprana - SISMEPA
+Sistema de Alerta Temprana - SISMEPA"""
 ```
-
 ---
 
 ### Signals

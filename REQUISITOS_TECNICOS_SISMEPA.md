@@ -171,7 +171,7 @@ Operaciones completas de gestión de datos para todas las entidades.
 | Estudiantes | RegisterUserPage | ListadoPage | ProfilePage, ListadoPage | ListadoPage |
 | Docentes | RegisterUserPage | ListadoPage | ListadoPage | ListadoPage |
 | Administradores | RegisterUserPage | ListadoPage | ListadoPage | ListadoPage |
-| Períodos | Dashboard | Dashboard | Dashboard | Admin Django |
+| Períodos | Dashboard | Dashboard | Dashboard | Dashboard (Admin) |
 | Secciones | Admin Django | PensumPage | PensumPage | Admin Django |
 | Inscripciones | PensumPage | PensumPage | CalificacionesPage | PensumPage |
 
@@ -684,11 +684,18 @@ def send_notification_email(subject, message, recipient_list):
 def notify_student_risk(estudiante, asignatura, nota_actual, nota_necesaria):
     """Alerta al estudiante de riesgo de reprobación"""
     subject = f"Alerta de Rendimiento: {asignatura.nombre_asignatura}"
+    
+    extra_msg = ""
+    if nota_necesaria > 20:
+        extra_msg = "Lamentablemente, el cálculo indica que es improbable aprobar."
+    else:
+        extra_msg = f"Necesitas obtener: {nota_necesaria:.2f} pts para aprobar."
+
     message = f"""Hola {estudiante.usuario.get_full_name()},
 
 Tu rendimiento en {asignatura.nombre_asignatura} presenta riesgo.
 Nota actual: {nota_actual:.2f}
-Necesitas obtener: {nota_necesaria:.2f} pts para aprobar.
+{extra_msg}
 
 Atentamente,
 Sistema de Alerta Temprana - SISMEPA"""

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
 import axios from 'axios'
 import {
   Chart as ChartJS,
@@ -10,7 +11,7 @@ import {
   Legend,
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
-import { ChevronDown, ChevronRight, Users, Award, Download, Calendar, ToggleLeft, ToggleRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users, Award, Download, Calendar, ToggleLeft, ToggleRight, Loader2, CheckCircle, AlertCircle, Plus, X } from 'lucide-react'
 
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
@@ -38,6 +39,16 @@ const Dashboard = () => {
   const [periodos, setPeriodos] = useState([])
   const [periodosLoading, setPeriodosLoading] = useState(false)
   const [periodosMessage, setPeriodosMessage] = useState(null)
+
+  // Estado para modal de crear período
+  const [showCrearPeriodoModal, setShowCrearPeriodoModal] = useState(false)
+  const [nuevoPeriodo, setNuevoPeriodo] = useState({
+    nombre_periodo: '',
+    fecha_inicio: '',
+    fecha_fin: '',
+    anio: new Date().getFullYear()
+  })
+  const [creandoPeriodo, setCreandoPeriodo] = useState(false)
 
   const userData = JSON.parse(localStorage.getItem('userData') || '{}')
   const isAdmin = userData.username === 'admin' || userData.is_staff || userData.groups?.some(g => g.name === 'Administrador' || g.name === 'Admin')
@@ -220,6 +231,50 @@ const Dashboard = () => {
     }
   }
 
+  const handleCrearPeriodo = async (e) => {
+    e.preventDefault()
+
+    // Validar campos
+    if (!nuevoPeriodo.nombre_periodo || !nuevoPeriodo.fecha_inicio || !nuevoPeriodo.fecha_fin || !nuevoPeriodo.anio) {
+      setPeriodosMessage({ type: 'error', text: 'Todos los campos son requeridos.' })
+      return
+    }
+
+    // Validar que fecha_fin sea posterior a fecha_inicio
+    if (nuevoPeriodo.fecha_fin <= nuevoPeriodo.fecha_inicio) {
+      setPeriodosMessage({ type: 'error', text: 'La fecha de fin debe ser posterior a la fecha de inicio.' })
+      return
+    }
+
+    setCreandoPeriodo(true)
+    setPeriodosMessage(null)
+    try {
+      const token = localStorage.getItem('apiToken')
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/periodos/`,
+        {
+          nombre_periodo: nuevoPeriodo.nombre_periodo,
+          fecha_inicio: nuevoPeriodo.fecha_inicio,
+          fecha_fin: nuevoPeriodo.fecha_fin,
+          anio: parseInt(nuevoPeriodo.anio),
+          activo: false,
+          inscripciones_activas: false
+        },
+        { headers: { Authorization: `Token ${token}` } }
+      )
+      setPeriodosMessage({ type: 'success', text: `Período ${nuevoPeriodo.nombre_periodo} creado exitosamente.` })
+      setShowCrearPeriodoModal(false)
+      setNuevoPeriodo({ nombre_periodo: '', fecha_inicio: '', fecha_fin: '', anio: new Date().getFullYear() })
+      fetchPeriodos()
+    } catch (e) {
+      console.error('Error creando período:', e)
+      const errorMsg = e.response?.data?.nombre_periodo?.[0] || e.response?.data?.detail || 'Error al crear el período.'
+      setPeriodosMessage({ type: 'error', text: errorMsg })
+    } finally {
+      setCreandoPeriodo(false)
+    }
+  }
+
   const toRoman = (num) => {
     const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X' }
     return lookup[num] || num
@@ -295,11 +350,19 @@ const Dashboard = () => {
       {/* Panel de Control de Períodos Académicos (Solo Admin) */}
       {isAdmin && (
         <div className="bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-100 dark:border-gray-800 p-4 rounded-xl shadow-soft mb-6 transition-all duration-300 hover:shadow-soft-lg">
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-blue-600 dark:text-blue-400" size={24} />
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Control de Períodos Académicos</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="text-blue-600 dark:text-blue-400" size={24} />
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Control de Períodos Académicos</h2>
+            </div>
+            <button
+              onClick={() => setShowCrearPeriodoModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <Plus size={18} />
+              Nuevo Período
+            </button>
           </div>
-
           {periodosMessage && (
             <div className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${periodosMessage.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'}`}>
               {periodosMessage.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
@@ -383,6 +446,116 @@ const Dashboard = () => {
 
           )}
         </div>
+      )}
+
+      {/* Modal para crear período - Usando Portal para centrarse en viewport */}
+      {isAdmin && showCrearPeriodoModal && ReactDOM.createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowCrearPeriodoModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 dark:border-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+              <h3 className="font-bold text-lg text-gray-800 dark:text-white">Crear Nuevo Período Académico</h3>
+              <button
+                onClick={() => setShowCrearPeriodoModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              <form onSubmit={handleCrearPeriodo} className="space-y-4">
+                <div>
+                  <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                    Nombre del Período *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 1-2026"
+                    value={nuevoPeriodo.nombre_periodo}
+                    onChange={(e) => setNuevoPeriodo({ ...nuevoPeriodo, nombre_periodo: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                      Fecha Inicio *
+                    </label>
+                    <input
+                      type="date"
+                      value={nuevoPeriodo.fecha_inicio}
+                      onChange={(e) => setNuevoPeriodo({ ...nuevoPeriodo, fecha_inicio: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                      Fecha Fin *
+                    </label>
+                    <input
+                      type="date"
+                      value={nuevoPeriodo.fecha_fin}
+                      onChange={(e) => setNuevoPeriodo({ ...nuevoPeriodo, fecha_fin: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-2">
+                    Año *
+                  </label>
+                  <input
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    value={nuevoPeriodo.anio}
+                    onChange={(e) => setNuevoPeriodo({ ...nuevoPeriodo, anio: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white transition-colors"
+                  />
+                </div>
+
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg border border-amber-100 dark:border-amber-800/30">
+                  <strong>Nota:</strong> El período se creará como inactivo. Podrás activarlo posteriormente desde esta sección.
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setShowCrearPeriodoModal(false)}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creandoPeriodo}
+                    className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
+                  >
+                    {creandoPeriodo ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} />
+                        Creando...
+                      </>
+                    ) : (
+                      'Crear Período'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">

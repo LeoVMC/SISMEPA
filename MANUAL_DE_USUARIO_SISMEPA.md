@@ -31,7 +31,7 @@ SISMEPA es un sistema web diseñado para la gestión y monitoreo del avance acad
 - 📅 Consultar y descargar horarios de clases
 - 📝 Inscribir y desinscribir materias
 - 📈 Ver estadísticas académicas
-- 📧 Recibir alertas de rendimiento
+- 📧 Recibir alertas de rendimiento y resumen de notas
 
 ### Roles de Usuario
 
@@ -309,6 +309,7 @@ La Nota R es una quinta nota especial para estudiantes que reprobaron y desean s
 > - El sistema envía alertas a estudiantes en riesgo (cuando necesitan 15+ en la 4ta nota)
 > - El estatus cambia a APROBADO (≥10) o REPROBADO (<10) al completar las 4 notas
 > - Si hay Nota R, la nota final es igual a la Nota R (no el promedio de las 4 notas)
+> - **Nuevo:** El estudiante recibirá un correo automático notificando la carga de la Nota R.
 
 **Descargar listado:**
 
@@ -496,28 +497,47 @@ Como administrador, tiene acceso completo al sistema.
 
 ### 6.5 Gestión de Períodos Académicos
 
-**Ver períodos:**
-1. En el Dashboard, verá la sección de **Períodos Académicos**
+Desde el **Panel de Control de Períodos** en el Dashboard, puede gestionar todo el ciclo de vida de los semestres.
 
-**Activar período:**
-1. Haga clic en **"Activar"** en el período deseado
-2. Se desactivará el período anterior automáticamente
+**Crear un Nuevo Período:**
 
-**Abrir/Cerrar inscripciones:**
-1. Haga clic en el toggle de **"Inscripciones"**
-2. Los estudiantes podrán/no podrán inscribirse según el estado
+1. Haga clic en el botón azul **"+ Nuevo Período"**.
+2. Complete el formulario emergente:
+   - **Nombre:** Ej: "2-2026"
+   - **Fecha Inicio/Fin:** Defina el rango temporal.
+   - **Año:** Año calendario.
+3. El período se creará como **Inactivo**.
+
+**Activar un Período:**
+
+1. Localice el período en la grilla (borde gris si es nuevo).
+2. Haga clic en **"Activar Período"**.
+3. Esto desactivará automáticamente el período activo anterior. El borde cambiará a **azul**.
+
+**Abrir/Cerrar Inscripciones:**
+
+1. Use el botón de interruptor en la tarjeta del período activo.
+2. **Verde:** Inscripciones Abiertas.
+3. **Gris:** Inscripciones Cerradas.
+
+**Estados del Período:**
+- 🔵 **Activo:** Período en curso.
+- 🟡 **Próximo:** Fecha futura.
+- ⚪ **Finalizado:** Fecha pasada.
+- 🔘 **Inscripciones Abiertas/Cerradas:** Controla si los estudiantes pueden inscribir materias.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  PERÍODOS ACADÉMICOS                                         │
+│  CONTROL DE PERÍODOS ACADÉMICOS             [+ Nuevo Período]│
 ├──────────────────────────────────────────────────────────────┤
-│  ┌─────────┬──────────────────┬────────────┬───────────────┐│
-│  │ Período │ Fechas           │ Activo     │ Inscripciones ││
-│  ├─────────┼──────────────────┼────────────┼───────────────┤│
-│  │ 2025-1  │ Ene-May 2025     │ ✅ Activo  │ [🔘 Abiertas] ││
-│  │ 2024-2  │ Sep-Dic 2024     │ ⬜ Inactivo│ ⬜ Cerradas   ││
-│  │ 2024-1  │ Ene-May 2024     │ ⬜ Inactivo│ ⬜ Cerradas   ││
-│  └─────────┴──────────────────┴────────────┴───────────────┘│
+│  ┌──────────────────┐  ┌──────────────────┐                  │
+│  │ 2026-1           │  │ 2025-2           │                  │
+│  │ Ene - May 2026   │  │ Sep - Dic 2025   │                  │
+│  │ [🔵 Activo]      │  │ [⚪ Finalizado]  │                  │
+│  │                  │  │                  │                  │
+│  │ [🔘 Abiertas]    │  │ [Inscripciones]  │                  │
+│  │                  │  │ [Cerradas    ]   │                  │
+│  └──────────────────┘  └──────────────────┘                  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -565,6 +585,10 @@ R: Hasta que el administrador cierre las inscripciones del período actual.
 **P: ¿Cómo veo mi promedio actual?**
 
 R: En el Dashboard puede ver el gráfico de progreso. Para ver notas específicas, consulte con Control de Estudios.
+    
+**P: ¿No recibí el correo de mis notas?**
+
+R: Verifique su carpeta de SPAM. El correo se envía automáticamente solo cuando **todas** sus notas del periodo han sido cargadas.
 
 ### Docentes
 
@@ -584,7 +608,7 @@ R: El sistema calcula automáticamente la nota final y el estatus (Aprobado/Repr
 
 **P: ¿Cómo creo un nuevo período académico?**
 
-R: Actualmente, los períodos se crean desde el panel de administración de Django (/admin/).
+R: Desde el Dashboard de Administrador, use el botón "+ Nuevo Período" en el panel de Control de Períodos.
 
 **P: ¿Puedo restaurar un usuario eliminado?**
 

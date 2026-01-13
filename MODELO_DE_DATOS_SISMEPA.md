@@ -234,8 +234,14 @@ Estudiante
 | Modelo | Descripción | Campos Principales |
 |--------|-------------|-------------------|
 | **User** | Usuario de Django (autenticación) | username, email, password |
-| **Estudiante** | Perfil de estudiante | cedula, telefono, programa |
-| **Docente** | Perfil de profesor | cedula, telefono, tipo_contratacion |
+| **Estudiante** | Perfil de estudiante |
+| `usuario` | OneToOne(User) | Usuario del sistema |
+| `programa` | FK(Programa) | Carrera inscrita |
+| `cedula` | CharField(20) | Documento de identidad (único) |
+| `telefono` | CharField(20) | Teléfono de contacto |
+| `fecha_ingreso` | DateField | Fecha automática |
+| `(Normalizado)` | - | Nombre/Apellido/Email se consultan desde `usuario` |
+| **Docente** | Perfil de profesor | tipo_contratacion |
 | **Administrador** | Perfil de admin | cedula, telefono |
 | **Programa** | Carrera universitaria | nombre, titulo_otorgado, duracion |
 | **Asignatura** | Materia del pensum | codigo, nombre, creditos, semestre, prelaciones |
@@ -244,3 +250,4 @@ Estudiante
 | **PeriodoAcademico** | Semestre académico | nombre, fecha_inicio, fecha_fin, activo |
 | **Inscripcion** | Registro de inscripción | estudiante, periodo |
 | **DetalleInscripcion** | Materia inscrita con notas | asignatura, seccion, nota1-4, nota_final, estatus |
+```

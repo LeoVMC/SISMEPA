@@ -35,6 +35,7 @@ cd SISMEPA
 
 # 2. Copiar archivo de variables de entorno
 cp .env.example .env
+# IMPORTANTE: Configurar variables EMAIL_HOST_USER y EMAIL_HOST_PASSWORD en .env para notificaciones
 
 # 3. Construir y levantar servicios
 docker compose up --build
@@ -42,9 +43,8 @@ docker compose up --build
 # 4. (Primera vez) Crear superusuario
 docker compose exec backend python manage.py createsuperuser
 
-# 5. (Opcional) Poblar datos de prueba
-docker compose exec backend python scripts/populate_telecom.py
-docker compose exec backend python scripts/recreate_pensum.py
+# 5. Poblado de Datos Completo (Sistemas + Telecom + Usuarios + Inscripciones)
+docker compose exec backend python scripts/populate_full_system.py
 ```
 
 **Acceder a:**
