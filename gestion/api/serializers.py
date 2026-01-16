@@ -34,6 +34,22 @@ class CreateUserSerializer(serializers.Serializer):
     programa = serializers.PrimaryKeyRelatedField(queryset=Programa.objects.all(), required=False, allow_null=True)
     tipo_contratacion = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
+    def validate_cedula(self, value):
+        """Validar que la cédula no esté registrada previamente."""
+        if value and User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                f"Ya existe un usuario registrado con la cédula {value}."
+            )
+        return value
+
+    def validate_email(self, value):
+        """Validar que el correo no esté registrado previamente."""
+        if value and User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                f"Ya existe un usuario registrado con el correo {value}."
+            )
+        return value
+
     def create(self, validated_data):
         role = validated_data.pop('role', 'Estudiante')
         password = validated_data.pop('password')
@@ -69,7 +85,6 @@ class CreateUserSerializer(serializers.Serializer):
 
         return user
 
-        return user
 
 
 class ProgramaSerializer(serializers.ModelSerializer):

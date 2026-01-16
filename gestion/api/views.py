@@ -28,13 +28,20 @@ class EstudianteViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list']:
             return [IsDocenteOrAdmin()]
-        if self.action in ['create', 'destroy']:
+        if self.action in ['create', 'destroy', 'update', 'partial_update']:
             return [IsAdmin()]
         if self.action in ['retrieve', 'progreso', 'descargar_progreso_academico']:
             return [IsDocenteOrAdminOrOwner()]
         if self.action in ['mis_inscripciones', 'mi_info', 'descargar_progreso_academico']:
             return [IsEstudiante()]
         return []
+
+    def perform_destroy(self, instance):
+        """Al eliminar un estudiante, también elimina el usuario de Django asociado."""
+        user = instance.usuario
+        instance.delete()
+        user.delete()
+
 
     @action(detail=False, methods=['get'], url_path='descargar-progreso-academico')
     def descargar_progreso_academico(self, request):
@@ -844,6 +851,12 @@ class DocenteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin]
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
+    def perform_destroy(self, instance):
+        """Al eliminar un docente, también elimina el usuario de Django asociado."""
+        user = instance.usuario
+        instance.delete()
+        user.delete()
+
     @action(detail=False, methods=['get'])
     @action(detail=False, methods=['get'])
     def reporte_excel(self, request):
@@ -888,6 +901,12 @@ class AdminViewSet(viewsets.ModelViewSet):
     serializer_class = AdministradorSerializer
     permission_classes = [IsAdmin]
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
+
+    def perform_destroy(self, instance):
+        """Al eliminar un administrador, también elimina el usuario de Django asociado."""
+        user = instance.usuario
+        instance.delete()
+        user.delete()
 
     @action(detail=False, methods=['get'])
     @action(detail=False, methods=['get'])
