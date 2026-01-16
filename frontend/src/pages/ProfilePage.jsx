@@ -7,7 +7,6 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
 
-    // Estados del Formulario
     const [personalForm, setPersonalForm] = useState({
         first_name: '',
         last_name: '',
@@ -28,7 +27,6 @@ export default function ProfilePage() {
             if (!token) return
 
             try {
-                // Primero cargar de cache para mostrar algo rápido
                 const storedUser = localStorage.getItem('userData')
                 if (storedUser) {
                     const parsed = JSON.parse(storedUser)
@@ -42,7 +40,6 @@ export default function ProfilePage() {
                     })
                 }
 
-                // Luego obtener datos frescos del backend
                 const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/`, {
                     headers: { 'Authorization': `Token ${token}` }
                 })
@@ -73,14 +70,12 @@ export default function ProfilePage() {
         setLoading(true)
         setMessage(null)
 
-        // Validar
         if (!personalForm.first_name || !personalForm.last_name || !personalForm.email) {
             setMessage({ type: 'error', text: 'Por favor complete los campos obligatorios.' })
             setLoading(false)
             return
         }
 
-        // Simular llamada API
         setTimeout(() => {
             const updatedUser = { ...userData, ...personalForm }
             localStorage.setItem('userData', JSON.stringify(updatedUser))
@@ -107,7 +102,6 @@ export default function ProfilePage() {
             return
         }
 
-        // Simular llamada API
         setTimeout(() => {
             setMessage({ type: 'success', text: 'Contraseña actualizada exitosamente.' })
             setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })

@@ -5,7 +5,6 @@ Ejecutar desde la raíz del proyecto: python scripts/recreate_pensum.py
 import os
 import sys
 
-# Agregar directorio raíz del proyecto al path (funciona desde cualquier ubicación)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, PROJECT_ROOT)
@@ -21,7 +20,6 @@ def run():
     print("Iniciando recreación del Pensum de Ingeniería de Sistemas (Orden Estricto y Nombres Completos)...")
 
     with transaction.atomic():
-        # 1. Obtener o Crear Programa
         programa, created = Programa.objects.get_or_create(
             nombre_programa="Ingeniería de Sistemas",
             defaults={"duracion_anios": 5, "titulo_otorgado": "Ingeniero de Sistemas"}
@@ -31,15 +29,10 @@ def run():
         else:
             print("Programa encontrado: Ingeniería de Sistemas")
 
-        # 2. Eliminar asignaturas existentes
         deleted_count, _ = Asignatura.objects.filter(programa=programa).delete()
         print(f"Eliminadas {deleted_count} asignaturas existentes.")
 
-        # 3. Definir Datos
-        # Formato: (Código, Nombre, UC, Semestre, [Códigos_Prelaciones])
-        # El orden refleja la posición vertical en las columnas del flujograma
         subjects_data = [
-            # SEMESTRE I
             ("MAT-21215", "MATEMÁTICA I", 5, 1, []),
             ("MAT-21524", "GEOMETRÍA ANALÍTICA", 4, 1, []),
             ("ADG-25123", "HOMBRE, SOCIEDAD, CIENCIA Y TECNOLOGÍA", 3, 1, []), # Nombre completo actualizado
@@ -50,7 +43,6 @@ def run():
             ("ADG-25131", "SEMINARIO I", 1, 1, []),
             ("DIN-21113", "DEFENSA INTEGRAL DE LA NACIÓN I", 3, 1, []),
 
-            # SEMESTRE II
             ("MAT-21225", "MATEMÁTICA II", 5, 2, ["MAT-21215", "MAT-21524"]),
             ("QUF-23015", "FÍSICA I", 5, 2, ["MAT-21215", "MAT-21524"]),
             ("ACT-DEP01", "ACTIVIDAD COMPLEMENTARIA (DEPORTIVA)", 0, 2, []),
@@ -61,7 +53,6 @@ def run():
             ("ADG-25141", "SEMINARIO II", 1, 2, ["ADG-25131"]),
             ("DIN-21123", "DEFENSA INTEGRAL DE LA NACIÓN II", 3, 2, ["DIN-21113"]),
 
-            # SEMESTRE III
             ("MAT-21235", "MATEMÁTICA III", 5, 3, ["MAT-21225"]),
             ("QUF-23025", "FÍSICA II", 5, 3, ["QUF-23015", "MAT-21225"]),
             ("MAT-21414", "PROBABILIDAD Y ESTADÍSTICA", 4, 3, ["MAT-21225"]),
@@ -69,7 +60,6 @@ def run():
             ("AGG-22313", "SISTEMAS ADMINISTRATIVOS", 4, 3, []),
             ("DIN-21133", "DEFENSA INTEGRAL DE LA NACIÓN III", 3, 3, ["DIN-21123"]),
 
-            # SEMESTRE IV
             ("MAT-31714", "CÁLCULO NUMÉRICO", 4, 4, ["MAT-21235"]),
             ("SYC-32114", "TEORÍA DE LOS SISTEMAS", 4, 4, []),
             ("MAT-31214", "LÓGICA MATEMÁTICA", 4, 4, ["MAT-21114"]),
@@ -79,7 +69,6 @@ def run():
             ("AGL-30214", "SISTEMAS DE PRODUCCIÓN", 4, 4, ["AGG-22313"]),
             ("DIN-31143", "DEFENSA INTEGRAL DE LA NACIÓN IV", 3, 4, ["DIN-21133"]),
 
-            # SEMESTRE V
             ("MAT-30925", "INVESTIGACIÓN DE OPERACIONES", 5, 5, ["MAT-31714"]),
             ("MAT-31104", "TEORÍA DE GRAFOS", 4, 5, ["MAT-31214", "MAT-21414"]), # Lógica + Prob
             ("SYC-32514", "ANÁLISIS DE SISTEMAS", 4, 5, ["SYC-32114"]), # Flecha desde Teoría
@@ -89,7 +78,6 @@ def run():
             ("CAT-BOL01", "CÁTEDRA BOLIVARIANA I", 0, 5, []),
             ("DIN-31153", "DEFENSA INTEGRAL DE LA NACIÓN V", 3, 5, ["DIN-31143"]),
 
-            # SEMESTRE VI
             ("MAT-30935", "OPTIMIZACIÓN NO LINEAL", 5, 6, ["MAT-30925"]),
             ("MAT-31414", "PROCESOS ESTOCÁSTICOS", 4, 6, ["MAT-30925", "MAT-31104"]),
             ("SYC-32524", "DISEÑO DE SISTEMAS", 4, 6, ["SYC-32514"]),
@@ -99,7 +87,6 @@ def run():
             ("CAT-BOL02", "CÁTEDRA BOLIVARIANA II", 0, 6, []),
             ("DIN-31163", "DEFENSA INTEGRAL DE LA NACIÓN VI", 3, 6, ["DIN-31153"]),
 
-             # SEMESTRE VII
             ("MAT-30945", "SIMULACIÓN Y MODELOS", 5, 7, ["MAT-30935", "MAT-31414"]),
             ("ADG-30214", "METODOLOGÍA DE LA INVESTIGACIÓN", 4, 7, []),
             ("SYC-32714", "IMPLANTACIÓN DE SISTEMAS", 4, 7, ["SYC-32524"]),
@@ -110,7 +97,6 @@ def run():
             ("ELE-NOTEC01", "ELECTIVA NO TÉCNICA", 3, 7, []),
             ("DIN-31173", "DEFENSA INTEGRAL DE LA NACIÓN VII", 3, 7, ["DIN-31163"]),
 
-            # SEMESTRE VIII
             ("MAT-31314", "TEORÍA DE DECISIONES", 4, 8, ["MAT-30945"]),
             ("CJU-37314", "MARCO LEGAL PARA EL EJERCICIO DE LA INGENIERÍA", 4, 8, []), # Nombre completo actualizado
             ("SYC-32814", "AUDITORÍA DE SISTEMAS", 4, 8, ["SYC-32714"]),
@@ -120,11 +106,9 @@ def run():
             ("ELE-NOTEC02", "ELECTIVA NO TÉCNICA", 3, 8, []),
             ("DIN-31183", "DEFENSA INTEGRAL DE LA NACIÓN VIII", 3, 8, ["DIN-31173"]),
 
-            # SEMESTRE IX
             ("PSI-30010", "PASANTÍA || TRABAJO ESPECIAL DE GRADO", 10, 9, []), # Requiere todos los créditos previos
         ]
 
-        # 4. Insertar Asignaturas
         created_subjects = {}
         for idx, (code, name, uc, sem, _) in enumerate(subjects_data, 1):
             subj = Asignatura.objects.create(
@@ -138,7 +122,6 @@ def run():
             created_subjects[code] = subj
             print(f"Creada {code}: {name} (Orden: {idx})")
 
-        # 5. Vincular Prelaciones
         print("Vinculando prelaciones...")
         for code, _, _, _, prereqs in subjects_data:
             if prereqs:

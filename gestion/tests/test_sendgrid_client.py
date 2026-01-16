@@ -2,7 +2,6 @@ from gestion.utils import sendgrid_utils
 
 
 def test_sendgrid_client_success(monkeypatch):
-    # Simulate SendGridAPIClient available and returning 202
     class FakeResponse:
         status_code = 202
 
@@ -14,7 +13,6 @@ def test_sendgrid_client_success(monkeypatch):
             return FakeResponse()
 
     monkeypatch.setattr(sendgrid_utils, 'SendGridAPIClient', FakeSG)
-    # Monkeypatch Mail to a simple callable that constructs minimal message
     class FakeMail:
         def __init__(self, from_email, to_emails, subject, html_content):
             self.from_email = from_email
@@ -24,7 +22,6 @@ def test_sendgrid_client_success(monkeypatch):
 
     monkeypatch.setattr(sendgrid_utils, 'Mail', FakeMail)
 
-    # Ensure environment/config is present
     import os
     os.environ['SENDGRID_API_KEY'] = 'fake-key'
 

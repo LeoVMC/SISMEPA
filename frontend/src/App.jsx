@@ -12,7 +12,6 @@ import HorarioPage from './pages/HorarioPage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
-// Componente de Ruta Privada: Verifica si existe un token
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('apiToken')
   return token ? children : <Navigate to="/login" />

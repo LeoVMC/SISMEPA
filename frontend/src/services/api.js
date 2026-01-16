@@ -14,22 +14,18 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
  * @param {object} options - Opciones estándar de fetch (method, body, headers, etc)
  */
 export async function apiCall(endpoint, options = {}) {
-    // Asegurar que el endpoint empiece con / si no lo tiene
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = `${BASE_URL}${path}`;
 
-    // Configurar headers por defecto
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
 
-    // Inyectar token si existe
     const token = localStorage.getItem('apiToken');
     if (token) {
         defaultHeaders['Authorization'] = `Token ${token}`;
     }
 
-    // Combinar headers
     const config = {
         ...options,
         headers: {
@@ -41,11 +37,7 @@ export async function apiCall(endpoint, options = {}) {
     try {
         const response = await fetch(url, config);
 
-        // Manejo básico de respuesta
         if (response.status === 401) {
-            // Opcional: Auto-logout si el token expira
-            // localStorage.removeItem('apiToken');
-            // window.location.href = '/login';
         }
 
         return response;

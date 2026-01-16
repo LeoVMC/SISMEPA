@@ -14,37 +14,25 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Construir rutas dentro del proyecto así: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno desde un archivo .env en desarrollo (opcional)
 load_dotenv()
 
 
-# Configuración rápida de desarrollo - no apta para producción
-# Ver https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SEGURIDAD: leer `SECRET_KEY` desde la variable de entorno en vez de dejarlo hardcodeado
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-mck48xvyndhn*x-#4ygsos_kyra@!mam1ibh$lyt@28c+7wkhu')
 
-# DEBUG configurable vía variable de entorno; por defecto True en desarrollo
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
-# CSRF: Orígenes de confianza
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:5173',
 ]
 
-# Definición de aplicaciones
-# ... (se mantiene igual) ...
 
-# ... (Middlewares se mantienen igual) ...
 
-# CORS: permitir el frontend de desarrollo
-# CORS_ALLOW_ALL_ORIGINS se puede activar para desarrollo si es necesario
 
 
 INSTALLED_APPS = [
@@ -79,26 +67,21 @@ MIDDLEWARE = [
     'sismepa.middleware.UpdateLastActivityMiddleware',
 ]
 
-# CORS: permitir el frontend de desarrollo
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:3000',
 ]
 
-# Sitios (requerido por django-allauth)
 SITE_ID = 1
 
-# Backends de autenticación (permite autenticación con allauth)
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-# Configuración mínima de REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',  # Desactivado para evitar conflictos CSRF
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -110,12 +93,9 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Email / SendGrid
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
 
-# Configuración de Correo (Gmail SMTP por defecto)
-# Para usar Gmail, se necesita una 'Contraseña de Aplicación' si tienes 2FA activado.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
@@ -124,31 +104,24 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
-    # Fallback para desarrollo sin credenciales: imprimir en consola
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Umbral para alertas tempranas de bajo rendimiento (porcentaje)
 LOW_PERFORMANCE_THRESHOLD = int(os.environ.get('LOW_PERFORMANCE_THRESHOLD', '50'))
 
-# Configuración mínima de django-allauth para desarrollo
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_USERNAME_REQUIRED = True
 
-# Configuración heredada
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'gestion.api.serializers.UserSerializer',
 }
 
-# Configuración moderna (dj-rest-auth >= 2.1.0)
 REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'gestion.api.serializers.UserSerializer',
     'USE_JWT': False,
 }
 
-# En desarrollo, si prefieres permitir todos los orígenes usa:
-# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'sismepa.urls'
 
@@ -170,8 +143,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sismepa.wsgi.application'
 
 
-# Base de datos
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -185,8 +156,6 @@ DATABASES = {
 }
 
 
-# Validación de contraseñas
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -204,8 +173,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internacionalización
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'es-ve'
 
@@ -216,24 +183,17 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Archivos estáticos (CSS, JavaScript, Imágenes)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# Archivos de medios (subidas de usuarios)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Tamaño máximo de subida (bytes) - opcional
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
-# Tipo de campo de clave primaria por defecto
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Registro de logs: consola + archivo para desarrollo
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

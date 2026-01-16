@@ -12,7 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
         depth = 1
 
     def get_telefono(self, obj):
-        # Intentar obtener teléfono de perfiles relacionados
         if hasattr(obj, 'estudiante'):
             return obj.estudiante.telefono
         if hasattr(obj, 'docente'):
@@ -30,7 +29,6 @@ class CreateUserSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False, allow_blank=True)
     role = serializers.ChoiceField(choices=['Estudiante', 'Docente', 'Administrador'], default='Estudiante')
 
-    # Campos específicos para Estudiante
     cedula = serializers.CharField(required=False, allow_blank=True)
     telefono = serializers.CharField(required=False, allow_blank=True)
     programa = serializers.PrimaryKeyRelatedField(queryset=Programa.objects.all(), required=False, allow_null=True)
@@ -53,13 +51,11 @@ class CreateUserSerializer(serializers.Serializer):
         user.set_password(password)
         user.save()
 
-        # asignar grupo
         from django.contrib.auth.models import Group
         group, _ = Group.objects.get_or_create(name=role)
         user.groups.add(group)
 
         if role == 'Estudiante':
-            # crear registro de Estudiante
             Estudiante.objects.create(usuario=user, programa=programa, cedula=cedula, telefono=telefono)
         elif role == 'Docente':
             from gestion.models import Docente
@@ -105,7 +101,6 @@ class PeriodoAcademicoSerializer(serializers.ModelSerializer):
     def get_es_activable(self, obj):
         from datetime import date
         hoy = date.today()
-        # No se puede activar si ya está activo, ya pasó, o aún no ha comenzado
         if obj.activo:
             return False
         if obj.fecha_fin < hoy:
@@ -147,13 +142,11 @@ class SeccionSerializer(serializers.ModelSerializer):
 
     def get_docente_nombre(self, obj):
         if obj.docente:
-            # obj.docente es una instancia de User
             name = obj.docente.get_full_name()
             return name if name else obj.docente.username
         return None
 
     def get_estudiantes_count(self, obj):
-        # Contar inscritos en periodos activos (independiente del estatus CURSANDO/INSCRITO)
         return obj.estudiantes_inscritos.filter(inscripcion__periodo__activo=True).count()
 
 
@@ -200,11 +193,9 @@ class AsignaturaSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return False
-        # El docente está asignado si su ID de Usuario coincide con el campo docente de cualquier sección
         return obj.secciones.filter(docente=request.user).exists()
 
     def get_has_assignments(self, obj):
-        # Retornar verdadero si alguna sección tiene un docente asignado
         return obj.secciones.filter(docente__isnull=False).exists()
 
     def get_has_plan(self, obj):
@@ -217,7 +208,6 @@ class EstudianteSerializer(serializers.ModelSerializer):
     usuario = UserSerializer(read_only=True)
     nombre_completo = serializers.SerializerMethodField()
 
-    # Campos de escritura para actualizar información del usuario
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(write_only=True, required=False)
@@ -234,7 +224,6 @@ class EstudianteSerializer(serializers.ModelSerializer):
             return str(obj.usuario)
 
     def update(self, instance, validated_data):
-        # Actualizar campos del Usuario si se proporcionan
         user = instance.usuario
         user_changed = False
         if 'first_name' in validated_data:
@@ -250,7 +239,6 @@ class EstudianteSerializer(serializers.ModelSerializer):
         if user_changed:
             user.save()
 
-        # Actualizar campos de Estudiante
         return super().update(instance, validated_data)
 
 
@@ -284,7 +272,6 @@ class DocenteSerializer(serializers.ModelSerializer):
             user_changed = True
         if user_changed: user.save()
         
-        # tipo_contratacion es manejado automáticamente por super().update si está en validated_data
         return super().update(instance, validated_data)
 
 
@@ -326,13 +313,11 @@ class PensumSerializer(serializers.ModelSerializer):
         fields = ['id', 'programa', 'archivo', 'uploaded_at']
 
     def validate_archivo(self, value):
-        # Validar tamaño
         from django.conf import settings
         max_size = getattr(settings, 'MAX_UPLOAD_SIZE', 10 * 1024 * 1024)
         if value.size > max_size:
             raise serializers.ValidationError(f"Archivo demasiado grande (máx {max_size} bytes)")
 
-        # preferir detección MIME vía python-magic cuando esté disponible
         allowed_ext = ['.pdf', '.docx', '.doc']
         allowed_mimes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
         try:
@@ -343,7 +328,6 @@ class PensumSerializer(serializers.ModelSerializer):
             if mime not in allowed_mimes:
                 raise serializers.ValidationError("Tipo de archivo no permitido (mime)")
         except Exception:
-            # alternativa: verificar extensión
             import os
             ext = os.path.splitext(value.name)[1].lower()
             if ext not in allowed_ext:

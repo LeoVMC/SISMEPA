@@ -5,7 +5,6 @@ Ejecutar desde la raíz del proyecto: python scripts/init_subjects.py
 import os
 import sys
 
-# Agregar directorio raíz del proyecto al path (funciona desde cualquier ubicación)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, PROJECT_ROOT)
@@ -24,7 +23,6 @@ def create_subjects():
         return
 
     subjects_data = [
-        # Semestre I
         {'code': 'MAT-21215', 'name': 'MATEMÁTICA I', 'uc': 5, 'semestre': 1},
         {'code': 'MAT-21524', 'name': 'GEOMETRÍA ANALÍTICA', 'uc': 4, 'semestre': 1},
         {'code': 'ADG-25123', 'name': 'HOMBRE, SOCIEDAD, CIENCIA Y TEC.', 'uc': 3, 'semestre': 1},
@@ -34,7 +32,6 @@ def create_subjects():
         {'code': 'AC-1', 'name': 'ACTIVIDAD COMPLEMENTARIA (CULTURAL)', 'uc': 0, 'semestre': 1},
         {'code': 'ADG-25131', 'name': 'SEMINARIO I', 'uc': 1, 'semestre': 1},
         {'code': 'DIN-21113', 'name': 'DEFENSA INTEGRAL DE LA NACIÓN I', 'uc': 3, 'semestre': 1},
-        # Semestre II
         {'code': 'MAT-21225', 'name': 'MATEMÁTICA II', 'uc': 5, 'semestre': 2},
         {'code': 'QUF-23015', 'name': 'FÍSICA I', 'uc': 5, 'semestre': 2},
         {'code': 'AC-2', 'name': 'ACTIVIDAD COMPLEMENTARIA (DEPORTIVA)', 'uc': 0, 'semestre': 2},

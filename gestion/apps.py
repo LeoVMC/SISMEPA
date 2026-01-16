@@ -7,9 +7,7 @@ class GestionConfig(AppConfig):
     verbose_name = 'Gestion'
     
     def ready(self):
-        # Register signal handlers (creates groups on post_migrate and assigns group on signup)
         try:
             from . import signals  # noqa: F401
         except Exception:
-            # ignore import errors during some early operations
             pass

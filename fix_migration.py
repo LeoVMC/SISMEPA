@@ -8,16 +8,13 @@ from django.contrib.auth.models import User, Group
 from gestion.models import Docente, Administrador
 
 def migrate_users():
-    # Migrate Docentes
     try:
         docente_group = Group.objects.get(name='Docente')
         users = User.objects.filter(groups=docente_group)
         print(f"Found {users.count()} Docentes to migrate.")
         for u in users:
-            # Check if exists (using related name or query)
             if not Docente.objects.filter(usuario=u).exists():
                 cedula = u.username
-                # Handle potential duplicate cedulas
                 if Docente.objects.filter(cedula=cedula).exists():
                     cedula = f"{u.username}-DUP-{u.id}"
                 
@@ -28,7 +25,6 @@ def migrate_users():
     except Group.DoesNotExist:
         print("Group 'Docente' not found.")
 
-    # Migrate Admins
     try:
         admin_group = Group.objects.get(name='Administrador')
         users = User.objects.filter(groups=admin_group)

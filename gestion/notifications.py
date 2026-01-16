@@ -26,7 +26,6 @@ def send_notification_email(subject, message, recipient_list):
         logger.error(f"Error enviando correo a {recipient_list}: {e}")
         return False
 
-# --- Estudiantes ---
 
 def notify_student_period_start(estudiante, periodo):
     """Notificar al estudiante que ha iniciado un nuevo periodo académico."""
@@ -116,7 +115,6 @@ def notify_student_period_completion(estudiante, periodo, detalles_inscripcion):
     nombre = estudiante.usuario.get_full_name() or estudiante.usuario.username
     subject = f"Resumen de Notas - Periodo {periodo.nombre_periodo}"
     
-    # Construir tabla de notas
     filas = []
     for detalle in detalles_inscripcion:
         nota = detalle.nota_final if detalle.nota_final is not None else 0.00
@@ -141,7 +139,6 @@ Control de Estudios - SISMEPA
     if estudiante.usuario.email:
         send_notification_email(subject, message, estudiante.usuario.email)
 
-# --- Docentes ---
 
 def notify_docente_assignment(docente, seccion):
     """Notificar al docente de una nueva asignación."""
@@ -185,7 +182,6 @@ Control de Estudios - SISMEPA
     if docente.usuario.email:
         send_notification_email(subject, message, docente.usuario.email)
 
-# --- Administradores ---
 
 def notify_admin_period_status(admin_email, periodo, tipo="cierre"):
     """Notificar al administrador sobre estatus del periodo."""

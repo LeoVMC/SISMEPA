@@ -16,7 +16,6 @@ def test_prelacion_rechaza_si_no_aprobo():
     periodo = PeriodoAcademico.objects.create(nombre_periodo='1-2025', fecha_inicio='2025-01-01', fecha_fin='2025-06-01')
     ins = Inscripcion.objects.create(estudiante=est, periodo=periodo)
 
-    # intentar inscribir en dep sin haber aprobado req
     detalle = DetalleInscripcion(inscripcion=ins, asignatura=dep)
     with pytest.raises(ValidationError):
         detalle.full_clean()
@@ -34,10 +33,8 @@ def test_prelacion_permite_si_aprobo():
     periodo = PeriodoAcademico.objects.create(nombre_periodo='1-2025', fecha_inicio='2025-01-01', fecha_fin='2025-06-01')
     ins = Inscripcion.objects.create(estudiante=est, periodo=periodo)
 
-    # crear detalle de req con nota aprobatoria
     ins2 = Inscripcion.objects.create(estudiante=est, periodo=periodo)
     detalle_req = DetalleInscripcion.objects.create(inscripcion=ins2, asignatura=req, nota_final=12.0, estatus='APROBADO')
 
     detalle_dep = DetalleInscripcion(inscripcion=ins, asignatura=dep)
-    # full_clean no debe lanzar
     detalle_dep.full_clean()

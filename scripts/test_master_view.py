@@ -3,12 +3,7 @@ import sys
 import django
 from django.conf import settings
 
-# Modify this to match a KNOWN Docente credentials from debug_docente output
-# V-25432542 (ID: 11) is assigned to 'D1 (EDUCACIN AMBIENTAL)'
 USERNAME = "V-25432542"
-# We need the password. Debug output doesn't give it.
-# Assuming default password if created by seed? 
-# If not, let's create a temporary Docente user, assign a section, and test.
 
 def setup_django():
      sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,7 +17,6 @@ def create_test_docente_and_check():
     from rest_framework.test import APIClient
     from rest_framework.authtoken.models import Token
     
-    # 1. Create Test Docente
     username = "test_docente_debug"
     password = "testpassword123"
     email = "testdoc@debug.com"
@@ -31,19 +25,15 @@ def create_test_docente_and_check():
     user.set_password(password)
     user.save()
     
-    # Add to Docente Group
     g_docente, _ = Group.objects.get_or_create(name='Docente')
     user.groups.add(g_docente)
     
-    # Ensure NOT Admin
     g_admin = Group.objects.filter(name='Administrador').first()
     if g_admin:
         user.groups.remove(g_admin)
         
     print(f"Created Docente: {user.username} (ID: {user.id})")
     
-    # 2. Assign Section
-    # Find a section or create one
     asignatura = Asignatura.objects.first()
     if not asignatura:
         print("No assignments found to test.")
@@ -58,8 +48,6 @@ def create_test_docente_and_check():
     sec.save()
     print(f"Assigned Section: {sec}")
     
-    # Create Horario
-    # Delete existing
     Horario.objects.filter(seccion=sec).delete()
     import datetime
     h = Horario.objects.create(
@@ -71,7 +59,6 @@ def create_test_docente_and_check():
     )
     print(f"Created Horario: {h}")
     
-    # 3. Test Endpoint as Docente
     client = APIClient()
     client.force_authenticate(user=user)
     
@@ -88,7 +75,6 @@ def create_test_docente_and_check():
     else:
         print("❌ FAILURE: Docente received EMPTY list.")
 
-    # 4. Test as Admin for comparison
     admin_user = User.objects.filter(is_superuser=True).first()
     if admin_user:
         client.force_authenticate(user=admin_user)
@@ -96,9 +82,6 @@ def create_test_docente_and_check():
         print(f"\n--- API Response for Admin ---")
         print(f"Data Length: {len(resp_admin.json())}")
         
-    # Cleanup
-    # user.delete()
-    # sec.delete()
 
 if __name__ == "__main__":
     create_test_docente_and_check()

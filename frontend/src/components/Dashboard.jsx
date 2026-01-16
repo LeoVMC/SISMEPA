@@ -21,26 +21,21 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [studentId, setStudentId] = useState(1)
 
-  // Estado de Admin/Profesor
   const [programs, setPrograms] = useState([])
   const [selectedProgram, setSelectedProgram] = useState('')
   const [adminData, setAdminData] = useState(null) // Datos para el acordeón
   const [expandedSemester, setExpandedSemester] = useState(null)
   const [expandedSubject, setExpandedSubject] = useState(null)
 
-  // Estado para gráfico dinámico
   const [chartLabels, setChartLabels] = useState([])
   const [chartValues, setChartValues] = useState([])
 
-  // Estado para estudiante (desglose personal)
   const [studentDesglose, setStudentDesglose] = useState(null)
 
-  // Estado para Períodos Académicos
   const [periodos, setPeriodos] = useState([])
   const [periodosLoading, setPeriodosLoading] = useState(false)
   const [periodosMessage, setPeriodosMessage] = useState(null)
 
-  // Estado para modal de crear período
   const [showCrearPeriodoModal, setShowCrearPeriodoModal] = useState(false)
   const [nuevoPeriodo, setNuevoPeriodo] = useState({
     nombre_periodo: '',
@@ -57,7 +52,6 @@ const Dashboard = () => {
   const dashboardTitle = showMonitoring ? 'Monitoreo de Avance Educativo' : 'Mi Progreso Educativo'
 
 
-  // Obtener datos para Vista Estudiante
   useEffect(() => {
     if (!showMonitoring) {
       const fetchStudentData = async () => {
@@ -72,7 +66,6 @@ const Dashboard = () => {
             setChartLabels(miProgresoRes.data.labels || [])
             setChartValues(miProgresoRes.data.data || [])
             setStudentDesglose(miProgresoRes.data.desglose || [])
-            // Usar datos de estudiante del endpoint unificado
             if (miProgresoRes.data.estudiante) {
               setDataEstudiante(miProgresoRes.data.estudiante)
             }
@@ -87,7 +80,6 @@ const Dashboard = () => {
     }
   }, [showMonitoring])
 
-  // Obtener Programas para Vista Admin
   useEffect(() => {
     if (showMonitoring) {
       const fetchPrograms = async () => {
@@ -106,7 +98,6 @@ const Dashboard = () => {
     }
   }, [showMonitoring])
 
-  // Obtener y Procesar Datos del Pensum (Vista Admin)
   useEffect(() => {
     if (showMonitoring && selectedProgram) {
       fetchAndProcessPensum()
@@ -127,7 +118,6 @@ const Dashboard = () => {
     }
   }
 
-  // Obtener Períodos Académicos (solo Admin)
   useEffect(() => {
     if (isAdmin) {
       fetchPeriodos()
@@ -173,7 +163,6 @@ const Dashboard = () => {
   const handleDownloadReport = async () => {
     try {
       const token = localStorage.getItem('apiToken')
-      // Usar endpoint de desglose-excel con filtro de programa
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/descargar-desglose-excel/`, {
         headers: { Authorization: `Token ${token}` },
         params: { programa: selectedProgram },
@@ -234,13 +223,11 @@ const Dashboard = () => {
   const handleCrearPeriodo = async (e) => {
     e.preventDefault()
 
-    // Validar campos
     if (!nuevoPeriodo.nombre_periodo || !nuevoPeriodo.fecha_inicio || !nuevoPeriodo.fecha_fin || !nuevoPeriodo.anio) {
       setPeriodosMessage({ type: 'error', text: 'Todos los campos son requeridos.' })
       return
     }
 
-    // Validar que fecha_fin sea posterior a fecha_inicio
     if (nuevoPeriodo.fecha_fin <= nuevoPeriodo.fecha_inicio) {
       setPeriodosMessage({ type: 'error', text: 'La fecha de fin debe ser posterior a la fecha de inicio.' })
       return
@@ -284,12 +271,10 @@ const Dashboard = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('apiToken')
-      // Llamar al endpoint de estadísticas reales
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/estadisticas/desglose/?programa=${selectedProgram}`, {
         headers: { Authorization: token ? `Token ${token}` : undefined }
       })
 
-      // Los datos ya vienen formateados del backend
       const semestresData = res.data.map(sem => ({
         id: `sem-${sem.id}`,
         name: `${toRoman(sem.id)} SEMESTRE`,
@@ -317,7 +302,6 @@ const Dashboard = () => {
     }
   }
 
-  // Datos dinámicos para radar
   const chartData = {
     labels: chartLabels.length > 0 ? chartLabels : ['Sin datos'],
     datasets: [

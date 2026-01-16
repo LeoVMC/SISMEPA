@@ -10,7 +10,6 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
-        # Permitir superusuario de Django o miembros del grupo Administrador
         if request.user.is_superuser:
             return True
         return request.user.groups.filter(name='Administrador').exists()
@@ -41,7 +40,6 @@ class IsDocenteOrAdminOrOwner(permissions.BasePermission):
     """
     
     def has_object_permission(self, request, view, obj):
-        # Se espera que obj sea una instancia de Estudiante
         if request.user.is_superuser:
             return True
         if request.user.groups.filter(name='Docente').exists():

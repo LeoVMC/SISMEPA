@@ -5,7 +5,6 @@ Ejecutar desde la raíz del proyecto: python scripts/debug_plans.py
 import os
 import sys
 
-# Agregar directorio raíz del proyecto al path (funciona desde cualquier ubicación)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, PROJECT_ROOT)
@@ -20,7 +19,6 @@ from django.contrib.auth.models import User
 def debug_plans():
     print("--- Debugging Planificacion ---")
     
-    # 1. Check Math I (MAT-21215)
     try:
         math_i = Asignatura.objects.get(codigo='MAT-21215')
         print(f"Asignatura found: {math_i}")
@@ -31,7 +29,6 @@ def debug_plans():
     except Asignatura.DoesNotExist:
         print("Math I not found!")
 
-    # 2. Check all plans
     print("\n--- All Plans ---")
     all_plans = Planificacion.objects.all()
     for p in all_plans:

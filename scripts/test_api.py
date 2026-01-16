@@ -7,7 +7,6 @@ import requests
 
 def test_api():
     try:
-        # Iniciar sesión para obtener token
         resp = requests.post('http://localhost:8000/api/auth/login/', json={'username': 'admin', 'password': 'password123'})
         if resp.status_code != 200:
             print(f"Error de login: {resp.status_code} {resp.text}")
@@ -16,7 +15,6 @@ def test_api():
         token = resp.json()['key']
         print(f"Token: {token}")
 
-        # Obtener docentes
         headers = {'Authorization': f'Token {token}'}
         resp = requests.get('http://localhost:8000/api/docentes/', headers=headers)
         print(f"Estado Docentes: {resp.status_code}")

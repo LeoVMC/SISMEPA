@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { Calendar, Clock, MapPin, Download, Search, Filter, Loader2, BookOpen, ChevronDown, ArrowRight, GraduationCap, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, RadioTower } from 'lucide-react'
 
 export default function HorarioPage() {
-    // User Data & Role
     const [userData, setUserData] = useState(null)
     const [viewMode, setViewMode] = useState('student') // 'student' | 'master'
 
-    // Student View State
     const [horarioData, setHorarioData] = useState(null)
     const [loading, setLoading] = useState(true)
 
-    // Master View State (Admin/Docente)
     const [availablePrograms, setAvailablePrograms] = useState([])
     const [selectedProgram, setSelectedProgram] = useState(null)
     const [filters, setFilters] = useState({
-        // programa removed from filters
         semestre: '1',
         seccion: 'D1'
     })
@@ -30,7 +26,6 @@ export default function HorarioPage() {
             const parsed = JSON.parse(storedUser)
             setUserData(parsed)
 
-            // Determine initial mode
             const isAdmin = parsed.is_superuser || (parsed.groups && parsed.groups.some(g => g.name === 'Administrador'))
             const isDocente = parsed.groups && parsed.groups.some(g => g.name === 'Docente')
 
@@ -45,7 +40,6 @@ export default function HorarioPage() {
         }
     }, [])
 
-    // Debounce Section Search
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSection(filters.seccion)
@@ -53,20 +47,17 @@ export default function HorarioPage() {
         return () => clearTimeout(timer)
     }, [filters.seccion])
 
-    // Load selectedProgram from sessionStorage on initial mount
     useEffect(() => {
         const sessionProgram = sessionStorage.getItem('horarioSelectedProgram')
         if (sessionProgram) {
             setSelectedProgram(JSON.parse(sessionProgram))
         } else {
-            // If no program is stored, and we are in master view, fetch programs to allow selection
             if (viewMode === 'master') {
                 fetchPrograms()
             }
         }
     }, [viewMode]) // Depend on viewMode to ensure it runs after viewMode is set
 
-    // Save selectedProgram to sessionStorage when it changes
     useEffect(() => {
         if (selectedProgram) {
             sessionStorage.setItem('horarioSelectedProgram', JSON.stringify(selectedProgram))
@@ -75,7 +66,6 @@ export default function HorarioPage() {
         }
     }, [selectedProgram])
 
-    // Fetch Master Horario on Filter Change
     useEffect(() => {
         const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
         const isDocente = userData && (userData.groups && userData.groups.some(g => g.name === 'Docente'))
@@ -119,7 +109,6 @@ export default function HorarioPage() {
         }
     }
 
-    // Helper for Program Icons
     const getProgramIcon = (name) => {
         if (!name) return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
 
@@ -142,7 +131,6 @@ export default function HorarioPage() {
             const query = new URLSearchParams()
             if (selectedProgram) query.append('programa', selectedProgram.id)
 
-            // Only apply filters if Admin
             const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
             if (isAdmin) {
                 if (filters.semestre) query.append('semestre', filters.semestre)
@@ -189,7 +177,6 @@ export default function HorarioPage() {
             const query = new URLSearchParams()
             if (selectedProgram) query.append('programa', selectedProgram.id)
 
-            // Only apply filters if Admin
             const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
             if (isAdmin) {
                 if (filters.semestre) query.append('semestre', filters.semestre)
@@ -220,7 +207,6 @@ export default function HorarioPage() {
         }
     }
 
-    // Shared Definitions
     const bloques = [
         { id: 1, hora: "07:00 - 07:45" },
         { id: 2, hora: "07:45 - 08:30" },
@@ -247,7 +233,6 @@ export default function HorarioPage() {
         { id: 6, nombre: "SÁBADO" },
     ]
 
-    // Color Palette for Master View
     const getCourseColor = (courseCode) => {
         const colors = [
             'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
@@ -271,7 +256,6 @@ export default function HorarioPage() {
         }
         const startTime = timeMap[bloqueId]
 
-        // Helper to convert "HH:MM" to minutes
         const toMinutes = (t) => {
             const [h, m] = t.split(':').map(Number)
             return h * 60 + m
@@ -280,13 +264,6 @@ export default function HorarioPage() {
         const currentBlockStart = toMinutes(startTime)
         const currentBlockEnd = currentBlockStart + 45
 
-        // 1. Check if this block is COVERED by a class starting earlier
-        // We need to check all classes to see if any of them span OVER this block.
-        // A class covers this block if: dia matches, AND start < current, AND end > current
-        // BUT we need to be careful about conflicts.
-        // If Class A spans over this, and Class B starts here... HTML table can't show both.
-        // We will prioritize the SPAN (standard table behavior).
-        // So checking coverage first is correct.
 
         const isCovered = masterHorarioData.some(h => {
             if (h.dia !== diaId) return false
@@ -297,7 +274,6 @@ export default function HorarioPage() {
 
         if (isCovered) return 'covered'
 
-        // 2. Check if a class STARTS here
         const startingClasses = masterHorarioData.filter(h => {
             if (h.dia !== diaId) return false
             return toMinutes(h.hora_inicio) === currentBlockStart
@@ -305,9 +281,6 @@ export default function HorarioPage() {
 
         if (startingClasses.length === 0) return null // Let the default empty TD render
 
-        // 3. Render Starting Classes
-        // If multiple classes start here (Conflict), we stack them inside the TD.
-        // We use the MAX duration for the rowSpan to encompass the longest one.
 
         let maxRowSpan = 1
         startingClasses.forEach(clase => {
@@ -350,12 +323,10 @@ export default function HorarioPage() {
         )
     }
 
-    // --- RENDER STUDENT VIEW ---
     if (viewMode === 'student') {
         if (loading) return <div className="p-8 text-center text-gray-500"><Loader2 className="animate-spin inline mr-2" />Cargando horario...</div>
         if (!horarioData) return <div className="p-8 text-center text-gray-500">No hay información de horario disponible.</div>
 
-        // Mapeo Student Logic (RowSpan)
         const studentRenderCell = (diaId, bloqueId) => {
             const timeMap = {
                 1: "07:00", 2: "07:45", 3: "08:30", 4: "09:15", 5: "10:00", 6: "10:45",
@@ -364,7 +335,6 @@ export default function HorarioPage() {
             }
             const startTime = timeMap[bloqueId]
 
-            // Check coverage
             if (horarioData.horario.some(h => h.dia === diaId && h.hora_inicio < startTime && h.hora_fin > startTime)) {
                 return 'covered'
             }
@@ -372,7 +342,6 @@ export default function HorarioPage() {
             const clase = horarioData.horario.find(h => h.dia === diaId && h.hora_inicio === startTime)
             if (!clase) return null
 
-            // Calc RowSpan
             const timeToMinutes = (t) => {
                 const [h, m] = t.split(':').map(Number)
                 return h * 60 + m
@@ -481,10 +450,7 @@ export default function HorarioPage() {
         )
     }
 
-    // --- MASTER VIEW (ADMIN/DOCENTE) ---
 
-    // 1. Program Selection View
-    // Bypass for Docente Only (shows all their schedule)
     const isAdmin = userData && (userData.is_superuser || (userData.groups && userData.groups.some(g => g.name === 'Administrador')))
     const isDocente = userData && (userData.groups && userData.groups.some(g => g.name === 'Docente'))
     const isDocenteOnly = isDocente && !isAdmin
@@ -546,7 +512,6 @@ export default function HorarioPage() {
         )
     }
 
-    // 2. Schedule View (Filtered by Selected Program)
     const headerTitle = isDocenteOnly ? "Horario de Docencia" : (selectedProgram ? selectedProgram.nombre_programa : "Mi Horario")
     const headerSubtitle = (selectedProgram && !isDocenteOnly)
         ? "Visualización global y filtrado de secciones académicas"

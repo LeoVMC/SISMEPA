@@ -3,7 +3,6 @@ import sys
 import django
 from django.db.models import Sum
 
-# Setup Django environment
 sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sismepa.settings')
 django.setup()
@@ -13,8 +12,6 @@ from gestion.models import Estudiante, DetalleInscripcion, PeriodoAcademico
 def run_debug():
     print("--- DEBUG UC COUNT ---")
     
-    # Obtener el último estudiante que reportó problemas (o el último modificado)
-    # Por defecto usaremos el mismo del script anterior: ID 2 (Emdrick)
     estudiante = Estudiante.objects.get(id=2)
     periodo = PeriodoAcademico.objects.filter(activo=True).first()
     
@@ -25,7 +22,6 @@ def run_debug():
         print("FATAL: No periodo activo.")
         return
 
-    # 1. Ejecutar el query EXACTO del metodo get_uc_periodo_actual
     total_query = DetalleInscripcion.objects.filter(
         inscripcion__estudiante=estudiante,
         inscripcion__periodo=periodo
@@ -33,7 +29,6 @@ def run_debug():
     
     print(f"\nQUERY RESULT (Total UC): {total_query}")
     
-    # 2. Desglosar elementos
     detalles = DetalleInscripcion.objects.filter(
         inscripcion__estudiante=estudiante,
         inscripcion__periodo=periodo

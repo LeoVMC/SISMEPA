@@ -46,13 +46,11 @@ class Command(BaseCommand):
             self.stdout.write("No hay periodo activo.")
             return
 
-        # 1. Verificar Cierre de Periodo (7 días antes o menos)
         dias_restantes = (periodo_activo.fecha_fin - hoy).days
         
         if 0 <= dias_restantes <= 7:
             self.stdout.write(f"Periodo próximo a cerrar. Días restantes: {dias_restantes}")
             
-            # Notificar Docentes (Recordatorio de Carga)
             docentes = Docente.objects.all()
             count = 0
             for doc in docentes:
@@ -60,22 +58,18 @@ class Command(BaseCommand):
                 count += 1
             self.stdout.write(f"Recordatorio enviado a {count} docentes.")
 
-            # Notificar Administradores
             admins = Administrador.objects.all()
             for admin in admins:
                 if admin.usuario.email:
                     notify_admin_period_status(admin.usuario.email, periodo_activo, "cierre")
                     notify_admin_period_status(admin.usuario.email, periodo_activo, "inicio_proximo")
 
-        # 2. Verificar si todas las calificaciones están cargadas (solo si estamos cerca del cierre o ya cerró?)
-        # Lo haremos general por ahora.
         pending_grades = DetalleInscripcion.objects.filter(
             inscripcion__periodo=periodo_activo, 
             nota_final__isnull=True
         ).exists()
         
         if not pending_grades:
-            # Todas cargadas
             admins = Administrador.objects.all()
             for admin in admins:
                 if admin.usuario.email:

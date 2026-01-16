@@ -90,7 +90,6 @@ export default function PensumPage() {
     const [subjectsMap, setSubjectsMap] = useState({}) // código -> datos del backend
     const [misInscripciones, setMisInscripciones] = useState({}) // código -> datos de inscripción del estudiante
 
-    // Schedule Assignment States
     const [selectedDia, setSelectedDia] = useState('')
     const [selectedBloqueInicio, setSelectedBloqueInicio] = useState('')
     const [selectedBloqueFin, setSelectedBloqueFin] = useState('')
@@ -103,15 +102,11 @@ export default function PensumPage() {
     const fileInputRef = useRef(null)
     const [token] = useState(localStorage.getItem('apiToken') || '')
 
-    // ... (rest of effects)
 
-    // Ayudante para obtener nombre formateado para sección/opción
     const getOptionLabel = (code) => {
-        // Buscar en todas las listas
         const allOptions = [...ELECTIVAS_TECNICAS_SISTEMAS, ...ELECTIVAS_TECNICAS_TELECOM, ...ELECTIVAS_NO_TECNICAS, ...ACTIVIDADES_CULTURALES, ...ACTIVIDADES_DEPORTIVAS]
         const found = allOptions.find(opt => opt.code === code)
         if (found) return found.name
-        // Por defecto Sección Estándar
         return `Sección ${code}`
     }
 
@@ -122,7 +117,6 @@ export default function PensumPage() {
             setUserData(JSON.parse(storedUser))
         }
 
-        // Verificar session storage para el programa
         const sessionProgram = sessionStorage.getItem('selectedProgram')
         if (sessionProgram) {
             setSelectedProgram(JSON.parse(sessionProgram))
@@ -137,7 +131,6 @@ export default function PensumPage() {
         }
     }, [selectedProgram, token])
 
-    // Obtener docentes al abrir modal si es administrador
     useEffect(() => {
         const isAdmin = isAdminUser()
         if (isModalOpen && isAdmin) {
@@ -145,7 +138,6 @@ export default function PensumPage() {
         }
     }, [isModalOpen])
 
-    // Cargar inscripciones del estudiante
     useEffect(() => {
         fetchMisInscripciones()
     }, [token])
@@ -161,7 +153,6 @@ export default function PensumPage() {
                 setMisInscripciones(data.inscripciones || {})
             }
         } catch (e) {
-            // Silently fail - not a student or no enrollments
             console.log('No student enrollments found')
         }
     }
@@ -170,14 +161,12 @@ export default function PensumPage() {
         return userData?.is_staff || userData?.username === 'admin' || (userData?.groups && userData.groups.some(g => g.name === 'Administrador'))
     }
 
-    // Obtener estado de inscripción para una asignatura
     const getEnrollmentStatus = (subjectCode) => {
         const inscripcion = misInscripciones[subjectCode]
         if (!inscripcion) return null
         return inscripcion.estatus // 'CURSANDO', 'APROBADO', 'REPROBADO'
     }
 
-    // Obtener estilo de borde para asignatura basado en inscripción
     const getEnrollmentBorderClass = (subjectCode) => {
         const status = getEnrollmentStatus(subjectCode)
         switch (status) {
@@ -203,7 +192,6 @@ export default function PensumPage() {
                 const data = await res.json()
                 setAvailablePrograms(data)
 
-                // Auto-seleccionar programa para estudiantes si aplica
                 if (userData?.programa) {
                     const studentProg = data.find(p => p.nombre_programa === userData.programa)
                     if (studentProg) {
@@ -238,14 +226,12 @@ export default function PensumPage() {
             if (res.ok) {
                 const data = await res.json()
 
-                // Mapa para búsquedas
                 const map = {}
                 data.forEach(sub => {
                     map[sub.codigo] = sub
                 })
                 setSubjectsMap(map)
 
-                // Agrupar por semestre para la vista
                 const semesters = {}
                 data.forEach(sub => {
                     if (!semesters[sub.semestre]) {
@@ -260,7 +246,6 @@ export default function PensumPage() {
                     semesters[sub.semestre].uc += sub.creditos
                 })
 
-                // Convertir a array y ordenar
                 const sortedSemesters = Object.keys(semesters).sort((a, b) => a - b).map(k => semesters[k])
                 setPensumData(sortedSemesters)
             }
@@ -295,14 +280,12 @@ export default function PensumPage() {
         setIsModalOpen(true)
         setActionMessage(null)
         setSelectedDocenteId('')
-        // Reset schedule
         setSelectedDia('')
         setSelectedBloqueInicio('')
         setSelectedBloqueFin('')
         setSelectedAula('')
         setIsEditingSection(false)
 
-        // selección por defecto precisa
         if (subject.code.startsWith('ELE-TEC')) {
             const isTelecom = selectedProgram?.nombre_programa?.toLowerCase().includes('telecom')
             const list = isTelecom ? ELECTIVAS_TECNICAS_TELECOM : ELECTIVAS_TECNICAS_SISTEMAS
@@ -322,9 +305,6 @@ export default function PensumPage() {
     }
 
     const handleAssignDocente = async () => {
-        // Validation: If deleting section (no docente selected in edit mode), allow it via different handler or here?
-        // User asked for "Simply delete section" button.
-        // If Assigning/Updating, Docente is required.
         if (!selectedDocenteId || !selectedSeccion) return
         setActionLoading(true)
         setActionMessage(null)
@@ -416,19 +396,16 @@ export default function PensumPage() {
         }
     }
 
-    // Acción al seleccionar archivo
     const handleFileChange = async (e) => {
         const file = e.target.files[0]
         if (!file || !selectedSubject) return
 
-        // Determinar código específico desde atributo del input o estado temporal
         const specificCode = fileInputRef.current?.dataset?.specificCode || null
 
         const formData = new FormData()
         formData.append('archivo', file)
         formData.append('asignatura', selectedSubject.code) // El serializer esperará el ID, ajustaremos esto con subjectsMap
 
-        // Buscar ID real de la asignatura
         const backendData = subjectsMap[selectedSubject.code]
         if (backendData) {
             formData.set('asignatura', backendData.id)
@@ -487,7 +464,6 @@ export default function PensumPage() {
             if (plans.results) plans = plans.results
 
             if (plans && plans.length > 0) {
-                // Filtrar lo más reciente del código específico si aplica (aunque el backend ya filtra, aseguramos orden)
                 const latestPlan = plans[plans.length - 1]
                 const backendOrigin = new URL(import.meta.env.VITE_API_URL).origin
                 const url = latestPlan.archivo.startsWith('http')
@@ -517,7 +493,6 @@ export default function PensumPage() {
         const queryParam = specificCode ? `asignatura__codigo=${selectedSubject.code}&codigo_especifico=${specificCode}` : `asignatura__codigo=${selectedSubject.code}`
 
         try {
-            // primero obtener el id del plan
             const res = await fetch(`${import.meta.env.VITE_API_URL}/planificaciones/?${queryParam}`, {
                 headers: { Authorization: `Token ${token}` }
             })
@@ -578,8 +553,6 @@ export default function PensumPage() {
     }
 
     const handleRemoveDocenteFromSection = async (seccionCode) => {
-        // Legacy: Used for "Remove Docente" button. Now integrated into Edit -> Delete Section logic mostly.
-        // We will keep this function generic but maybe rename or adapt to "Delete Section"
         if (!confirm(`¿Eliminar la sección ${seccionCode}? Esta acción es irreversible.`)) return
         setActionLoading(true)
         const backendSubject = subjectsMap[selectedSubject.code]
@@ -620,8 +593,6 @@ export default function PensumPage() {
         setIsEditingSection(true)
         setSelectedSeccion(section.codigo_seccion)
 
-        // Match section.docente (User ID) to Docente ID in our list
-        // Docente list format: { id: 1, usuario: { id: 5, ... }, ... }
         if (section.docente) {
             const matchedDocente = docentes.find(d => d.usuario.id === section.docente)
             if (matchedDocente) {
@@ -634,13 +605,10 @@ export default function PensumPage() {
             setSelectedDocenteId('')
         }
 
-        // Parse Schedule
         if (section.horarios && section.horarios.length > 0) {
             const h = section.horarios[0]
             setSelectedDia(h.dia)
             setSelectedAula(h.aula || '')
-            // Reverse Map Time to Block
-            // "07:00" -> 1. Simple lookup or switch.
             const TIME_TO_BLOCK = {
                 "07:00:00": 1, "07:00": 1,
                 "07:45:00": 2, "07:45": 2,
@@ -657,7 +625,6 @@ export default function PensumPage() {
                 "16:00:00": 13, "16:00": 13,
                 "16:45:00": 14, "16:45": 14
             }
-            // End Time Map
             const END_TIME_TO_BLOCK = {
                 "07:45:00": 1, "07:45": 1,
                 "08:30:00": 2, "08:30": 2,
@@ -695,17 +662,12 @@ export default function PensumPage() {
         setActionMessage(null)
     }
 
-    // === FUNCIONES DE INSCRIPCIÓN DE ESTUDIANTES ===
 
     const isEstudianteUser = () => {
         return userData?.groups && userData.groups.some(g => g.name === 'Estudiante')
     }
 
     const canStudentEnroll = () => {
-        // Siempre permitir mostrar el formulario de inscripción para estudiantes.
-        // La validación de programa se hace en el backend, que tiene acceso a los datos correctos.
-        // Si el estudiante intenta inscribirse en un programa diferente, 
-        // el backend devolverá el error apropiado.
         return isEstudianteUser()
     }
 
@@ -775,7 +737,6 @@ export default function PensumPage() {
         const backendSubject = subjectsMap[selectedSubject?.code]
         const subjectCode = selectedSubject?.code || ''
 
-        // Determinar si es tipo especial
         let optionsList = null
         let isActivity = false
 
@@ -841,7 +802,6 @@ export default function PensumPage() {
                                     {/* Si es una lista de opciones genéricas (Electivas/Tesis) */}
                                     {optionsList ? (
                                         optionsList.map(opt => {
-                                            // Find assigned teacher if exists for this option
                                             const sec = backendSubject?.secciones?.find(s => s.codigo_seccion === opt.code)
 
                                             return (
@@ -1178,7 +1138,6 @@ export default function PensumPage() {
         )
     }
 
-    // Verificando estado para estilo de tarjeta
     const getSubjectStatus = (code) => {
         const backendData = subjectsMap[code]
         return {
@@ -1189,7 +1148,6 @@ export default function PensumPage() {
         }
     }
 
-    // Ayudante para obtener ícono basado en nombre del programa
     const getProgramIcon = (name) => {
         if (!name) return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
 
@@ -1206,7 +1164,6 @@ export default function PensumPage() {
         return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
     }
 
-    // --- VISTA SELECTOR DE PROGRAMA ---
     if (!selectedProgram) {
         return (
             <div className="space-y-6 animate-in fade-in duration-500">
@@ -1261,10 +1218,8 @@ export default function PensumPage() {
         )
     }
 
-    // Bloquear scroll del body cuando el modal está abierto
 
 
-    // --- VISTA DIAGRAMA DE FLUJO PENSUM ---
     return (
         <div className="h-full flex flex-col">
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1349,19 +1304,15 @@ export default function PensumPage() {
                                 </div>
 
                                 {semester.subjects.map((subject, subIndex) => {
-                                    // Admins ven todas las asignaciones, Docentes solo las suyas
                                     const status = getSubjectStatus(subject.code)
                                     const isAdmin = isAdminUser()
-                                    // Admins ven todas las asignaciones, Docentes solo las suyas
                                     const isDocente = userData?.role === 'Docente' || (userData?.groups && userData.groups.some(g => g.name === 'Docente'))
                                     const isEstudiante = isEstudianteUser()
 
                                     const showAssignedBorder = (isAdmin && (status.assigned || status.hasTutors)) || (isDocente && status.isAssignedToMe)
 
-                                    // Para estudiantes, priorizar el estado de inscripción
                                     const enrollmentBorder = getEnrollmentBorderClass(subject.code)
 
-                                    // Determinar clase de borde final
                                     let borderClass = 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-500'
                                     if (isEstudiante && enrollmentBorder) {
                                         borderClass = enrollmentBorder

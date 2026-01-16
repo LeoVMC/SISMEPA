@@ -2,7 +2,6 @@ import os
 import sys
 import django
 
-# Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sismepa.settings')
 django.setup()
@@ -30,7 +29,6 @@ def debug_docente():
     for s in secciones[:10]:
         docente = s.docente
         print(f"Section {s.codigo_seccion} ({s.asignatura.nombre_asignatura}): Assigned to {docente.username} (ID: {docente.id})")
-        # Check if this docente is in 'Docente' group
         if docente.groups.filter(name='Docente').exists():
              print(f"   -> User {docente.username} IS in 'Docente' group.")
         else:
@@ -38,7 +36,6 @@ def debug_docente():
              print(f"      Groups: {[g.name for g in docente.groups.all()]}")
              
     print("\n--- 3. Checking for mismatched ID logic ---")
-    # Sometimes ID mismatch happens if migration was messy?
     pass
 
 if __name__ == "__main__":

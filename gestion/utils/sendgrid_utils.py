@@ -46,12 +46,10 @@ def send_alert_email(to_email, subject, html_content, async_send=True):
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@example.com')
 
     if not api_key or SendGridAPIClient is None or Mail is None:
-        # Silent fail for dev envs; calling code should handle/log as needed.
         logger.debug('SendGrid not configured or client missing; skipping send')
         return False
 
     if async_send:
-        # schedule background thread and return True for scheduling success
         thread = threading.Thread(
             target=_send_sync,
             args=(api_key, from_email, to_email, subject, html_content),
@@ -62,7 +60,6 @@ def send_alert_email(to_email, subject, html_content, async_send=True):
             return True
         except Exception as e:
             logger.exception('Failed to start send thread: %s', e)
-            # fallback to sync attempt
             return _send_sync(api_key, from_email, to_email, subject, html_content)
     else:
         return _send_sync(api_key, from_email, to_email, subject, html_content)

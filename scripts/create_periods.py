@@ -9,7 +9,6 @@ django.setup()
 from gestion.models import PeriodoAcademico
 from datetime import date
 
-# Crear períodos académicos
 periodos_data = [
     {
         'nombre_periodo': '1-2025',

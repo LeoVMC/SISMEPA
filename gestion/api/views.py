@@ -26,7 +26,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__username', 'cedula']
 
     def get_permissions(self):
-        # admin: acceso total; listado permitido a admin y docentes
         if self.action in ['list']:
             return [IsDocenteOrAdmin()]
         if self.action in ['create', 'destroy']:
@@ -51,16 +50,13 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         except Estudiante.DoesNotExist:
             return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Crear libro y hoja
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = f"Progreso - {estudiante.usuario.first_name}"
 
-        # Estilos (opcional, simple)
         from openpyxl.styles import Font
         header_font = Font(bold=True)
 
-        # Encabezado con información del estudiante
         ws['A1'] = "REPORTE DE PROGRESO ACADÉMICO"
         ws['A1'].font = header_font
         ws.merge_cells('A1:F1')
@@ -71,13 +67,11 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws['A3'] = "Cédula:"
         ws['B3'] = estudiante.cedula
         
-        # Fila de Títulos de Tabla
         headers = ['Código', 'Asignatura', 'Semestre', 'Créditos', 'Nota', 'Estatus']
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=5, column=col_num, value=header)
             cell.font = header_font
 
-        # Datos
         detalles = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante
         ).select_related('asignatura').order_by('asignatura__semestre', 'asignatura__codigo')
@@ -92,7 +86,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=6, value=det.estatus)
             row_num += 1
 
-        # Aplicar estilos globales
         apply_excel_styling(ws, 5, custom_widths={'A': 13.0, 'B': 42.0})
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -118,7 +111,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ).select_related('seccion', 'asignatura', 'seccion__docente')
 
         horario_data = []
-        # Paleta de colores suaves para el horario
         colores = [
             {'bg': 'bg-blue-100 dark:bg-blue-900/30', 'border': 'border-blue-200 dark:border-blue-800', 'text': 'text-blue-800 dark:text-blue-200'},
             {'bg': 'bg-green-100 dark:bg-green-900/30', 'border': 'border-green-200 dark:border-green-800', 'text': 'text-green-800 dark:text-green-200'},
@@ -137,14 +129,12 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             if not detalle.seccion:
                 continue
             
-            # Asignar color consistente a la asignatura
             if detalle.asignatura.codigo not in asignatura_color_map:
                 asignatura_color_map[detalle.asignatura.codigo] = colores[color_index % len(colores)]
                 color_index += 1
             
             estilos = asignatura_color_map[detalle.asignatura.codigo]
 
-            # Obtener horarios de la sección
             horarios = detalle.seccion.horarios.all()
             for h in horarios:
                 horario_data.append({
@@ -159,7 +149,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                     'docente': detalle.seccion.docente.get_full_name() if detalle.seccion.docente else 'Sin asignar',
                 })
 
-            # Si no tiene horarios (Caso asignaturas especiales), agregar entrada placeholder para la lista
             if not horarios.exists():
                 horario_data.append({
                     'id': f'placeholder-{detalle.id}',
@@ -193,22 +182,15 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         periodo_actual = PeriodoAcademico.objects.filter(activo=True).first()
         periodo_str = periodo_actual.nombre_periodo if periodo_actual else "N/A"
 
-        # Datos
         inscripciones = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             inscripcion__periodo=periodo_actual
         ).select_related('seccion', 'asignatura', 'seccion__docente').prefetch_related('seccion__horarios')
 
-        # --- PREPARACIÓN DE DATOS ---
-        # 1. Grilla: Necesitamos saber qué celdas unir.
-        # Estructura: grid_data[day][block] = { 'text': ..., 'uid': ... }
-        # uid es único por (asignatura, sección) para detectar contigüidad.
         grid_data = {day: {} for day in range(1, 7)}
         
-        # 2. Lista de Materias (para tabla inferior)
         subjects_list = {}
         
-        # Definición de horas (Hardcoded para coincidir con frontend)
         bloques_data = [
             (1, '07:00 - 07:45'), (2, '07:45 - 08:30'), (3, '08:30 - 09:15'),
             (4, '09:15 - 10:00'), (5, '10:00 - 10:45'), (6, '10:45 - 11:30'),
@@ -217,7 +199,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             (13, '16:00 - 16:45'), (14, '16:45 - 17:30')
         ]
 
-        # Mapa rápido para inicio de bloque
         start_to_block = { label.split(' - ')[0]: bid for bid, label in bloques_data }
 
         for det in inscripciones:
@@ -236,8 +217,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             for h in det.seccion.horarios.all():
                 start_str = h.hora_inicio.strftime('%H:%M')
                 
-                # 1. Identificar Bloque Inicial
-                # Usar start_to_block con fallback
                 start_block = start_to_block.get(start_str)
                 if not start_block:
                      for bid, label in bloques_data:
@@ -246,11 +225,9 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                             break
                 
                 if start_block:
-                    # 2. Calcular Duración en Bloques (aprox 45 min c/u)
                     h_total = (h.hora_fin.hour * 60 + h.hora_fin.minute) - (h.hora_inicio.hour * 60 + h.hora_inicio.minute)
                     num_blocks = max(1, round(h_total / 45))
                     
-                    # 3. Llenar Bloques Consecutivos (para merge automatico posterior)
                     room_info = f"({h.aula})" if h.aula else "(N/A)"
                     cell_text = f"{det.asignatura.nombre_asignatura}\n{room_info}"
 
@@ -259,7 +236,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                         if current_block > 14: break 
                         grid_data[h.dia][current_block] = {'text': cell_text, 'uid': uid}
 
-        # --- CREACIÓN EXCEL ---
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = f"Horario {estudiante.cedula}"
@@ -268,7 +244,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
         from openpyxl.utils import get_column_letter
 
-        # Colores y Estilos
         COLOR_HEADER_BG = "4472C4" # Azul Oscuro (Títulos)
         COLOR_HEADER_TXT = "FFFFFF"
         COLOR_GRID_HEADER_BG = "4472C4" 
@@ -289,16 +264,12 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
         align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
 
-        # --- 1. ENCABEZADO SUPERIOR (Row 1-3) ---
-        # Row 1: Título Grande
         ws['A1'] = "HORARIO DE CLASES"
         ws['A1'].font = font_title
         ws['A1'].fill = fill_header
         ws['A1'].alignment = align_center
         ws.merge_cells('A1:H1')
 
-        # Row 2: Estudiante | Periodo
-        # A2 merged hasta D2? E2 merged hasta H2?
         ws['A2'] = f"Estudiante: {estudiante.usuario.get_full_name()}"
         ws['A2'].alignment = align_left
         ws['A2'].border = border_all
@@ -309,7 +280,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws['E2'].border = border_all
         ws.merge_cells('E2:H2') # E,F,G,H
 
-        # Row 3: Cédula | Carrera
         ws['A3'] = f"Cédula: {estudiante.cedula}"
         ws['A3'].alignment = align_left
         ws['A3'].border = border_all
@@ -320,10 +290,7 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws['E3'].border = border_all
         ws.merge_cells('E3:H3')
         
-        # Bordes para las celdas merged (tienes que bordear el rango completo o la celda izq)
-        # OpenPyXL bordes en merged cells son tricky. Aplicaremos border_all a todas las celdas implicadas luego.
 
-        # --- 2. GRILLA (Header Row 5) ---
         headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
         for col, text in enumerate(headers, 1):
             cell = ws.cell(row=5, column=col, value=text)
@@ -332,32 +299,25 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             cell.alignment = align_center
             cell.border = border_all
 
-        # --- Contenido Grilla (Rows 6-19) ---
         start_row = 6
         
-        # Primero, llenar Bloque y Horas (Cols A, B)
         for i, (bid, time_label) in enumerate(bloques_data):
             row = start_row + i
-            # Block ID
             c1 = ws.cell(row=row, column=1, value=bid)
             c1.font = font_cell_bold
             c1.alignment = align_center
             c1.border = border_all
             
-            # Hora
             c2 = ws.cell(row=row, column=2, value=time_label)
             c2.font = font_cell
             c2.alignment = align_center
             c2.border = border_all
 
-        # Llenar Días (Cols C-H -> 3-8) y MERGE VERTICAL
-        # Iterar por día (Columna)
         for d_idx in range(1, 7): # Dias 1 a 6
             col_idx = 2 + d_idx # Lunes es col 3 (C)
             current_uid = None
             merge_start_row = None
             
-            # Recorrer bloques del 1 al 14
             for b_idx in range(1, 15):
                 current_row = start_row + (b_idx - 1)
                 cell = ws.cell(row=current_row, column=col_idx)
@@ -365,23 +325,17 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                 
                 data = grid_data[d_idx].get(b_idx)
                 
-                # Lógica de Inicio de Bloquee
                 if data:
                     new_uid = data['uid']
                     text = data['text']
                     
                     if new_uid == current_uid:
-                        # Continuación del mismo bloque: no escribimos texto, solo continuamos
                         pass
                     else:
-                        # Cambio de bloque (o inicio): 
-                        # 1. Cerrar anterior si existía
                         if current_uid is not None:
-                            # Merge desde merge_start_row hasta current_row - 1
                             if merge_start_row < current_row - 1:
                                 ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
 
-                        # 2. Iniciar nuevo
                         cell.value = text
                         cell.font = font_cell_bold
                         cell.fill = fill_class
@@ -389,30 +343,21 @@ class EstudianteViewSet(viewsets.ModelViewSet):
                         current_uid = new_uid
                         merge_start_row = current_row
                         
-                    # Aplicar estilo a celda actual (siempre parte del bloque)
                     cell.fill = fill_class
                 else:
-                    # Celda vacía
                     if current_uid is not None:
-                         # Cerrar bloque anterior
                          if merge_start_row < current_row: # end was prev row
                              ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=current_row-1, end_column=col_idx)
                          current_uid = None
                          merge_start_row = None
             
-            # Al final del día, cerrar si quedó abierto
             if current_uid is not None:
                  if merge_start_row < (start_row + 14):
                      ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=start_row+13, end_column=col_idx)
 
-        # --- 3. DETALLE INFERIOR (Row 21) ---
         det_head_row = 21
         
-        # Headers Detalle
-        # A: N°, B: Código, C-D: Asignatura, E: Semestre, F: Sección, G-H: Docente
         
-        # Configurar anchos de columna globales para que calce todo
-        # A: small, B: med, C-H dynamic
         ws.column_dimensions['A'].width = 9.50   # N
         ws.column_dimensions['B'].width = 13.50  # Codigo / Horas
         ws.column_dimensions['C'].width = 18  # Lunes / Asig pt1
@@ -422,64 +367,49 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws.column_dimensions['G'].width = 18  # Viernes / Docente pt1
         ws.column_dimensions['H'].width = 18  # Sabado / Docente pt2
 
-        # Header Row Layout
-        # N°
         c = ws.cell(row=det_head_row, column=1, value="N°")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         
-        # CÓDIGO
         c = ws.cell(row=det_head_row, column=2, value="CÓDIGO")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         
-        # ASIGNATURA (Merged C-D)
         c = ws.cell(row=det_head_row, column=3, value="ASIGNATURA")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         ws.merge_cells(start_row=det_head_row, start_column=3, end_row=det_head_row, end_column=4)
-        # Apply border to merged cells manually (D21)
         ws.cell(row=det_head_row, column=4).border = border_all
 
-        # SEMESTRE
         c = ws.cell(row=det_head_row, column=5, value="SEMESTRE")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         
-        # SECCIÓN
         c = ws.cell(row=det_head_row, column=6, value="SECCIÓN")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         
-        # DOCENTE (Merged G-H)
         c = ws.cell(row=det_head_row, column=7, value="DOCENTE")
         c.fill = fill_header; c.font = font_header_row; c.alignment = align_center; c.border = border_all
         ws.merge_cells(start_row=det_head_row, start_column=7, end_row=det_head_row, end_column=8)
         ws.cell(row=det_head_row, column=8).border = border_all
 
-        # Content Rows
         sorted_subs = sorted(subjects_list.values(), key=lambda x: (x['semestre'], x['codigo']))
         row_idx = det_head_row + 1
         
         for idx, sub in enumerate(sorted_subs, 1):
-            # N
             ws.cell(row=row_idx, column=1, value=idx).border = border_all
             ws.cell(row=row_idx, column=1).alignment = align_center
             
-            # Codigo
             ws.cell(row=row_idx, column=2, value=sub['codigo']).border = border_all
             ws.cell(row=row_idx, column=2).alignment = align_center
             
-            # Asignatura (Merged)
             ws.cell(row=row_idx, column=3, value=sub['asignatura']).border = border_all
             ws.cell(row=row_idx, column=3).alignment = align_center
             ws.merge_cells(start_row=row_idx, start_column=3, end_row=row_idx, end_column=4)
             ws.cell(row=row_idx, column=4).border = border_all
             
-            # Semestre
             ws.cell(row=row_idx, column=5, value=sub['semestre']).border = border_all
             ws.cell(row=row_idx, column=5).alignment = align_center
             
-            # Sección
             ws.cell(row=row_idx, column=6, value=sub['seccion']).border = border_all
             ws.cell(row=row_idx, column=6).alignment = align_center
             
-            # Docente (Merged)
             ws.cell(row=row_idx, column=7, value=sub['docente']).border = border_all
             ws.cell(row=row_idx, column=7).alignment = align_center
             ws.merge_cells(start_row=row_idx, start_column=7, end_row=row_idx, end_column=8)
@@ -496,7 +426,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Horario de Clases"
 
-        # Estilos
         from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
         align_center = Alignment(horizontal='center', vertical='center', wrap_text=True)
         font_bold = Font(bold=True)
@@ -504,7 +433,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         fill_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid") # Azul similar al frontend
         font_white = Font(color="FFFFFF", bold=True)
 
-        # Encabezado General
         ws['A1'] = "HORARIO DE CLASES"
         ws.merge_cells('A1:H1')
         ws['A1'].font = Font(size=14, bold=True)
@@ -515,13 +443,11 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws['D2'] = f"Periodo: {periodo_actual.nombre_periodo}"
         ws['D3'] = f"Carrera: {estudiante.programa.nombre_programa if estudiante.programa else ''}"
 
-        # Configurar anchos
         ws.column_dimensions['A'].width = 8   # Bloque
         ws.column_dimensions['B'].width = 15  # Hora
         for col in ['C', 'D', 'E', 'F', 'G', 'H']:
             ws.column_dimensions[col].width = 25 # Días
 
-        # Encabezados de Tabla (Fila 5)
         headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
         for col_idx, text in enumerate(headers, 1):
             cell = ws.cell(row=5, column=col_idx, value=text)
@@ -530,7 +456,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             cell.alignment = align_center
             cell.border = border_thin
 
-        # Definición de Bloques (Mismos que frontend)
         bloques = [
             (1, "07:00", "07:45"), (2, "07:45", "08:30"), (3, "08:30", "09:15"), (4, "09:15", "10:00"),
             (5, "10:00", "10:45"), (6, "10:45", "11:30"), (7, "11:30", "12:15"), (8, "12:15", "13:00"),
@@ -538,40 +463,29 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             (13, "16:00", "16:45"), (14, "16:45", "17:30")
         ]
         
-        # Mapeo de Dias a Columnas (1=Lunes -> Col 3, etc.)
-        # Backend 1=Lunes, 2=Martes... 6=Sábado.
-        # Columnas: A=1, B=2, C=3(Lun), D=4(Mar), E=5(Mie), F=6(Jue), G=7(Vie), H=8(Sab)
         dia_col_map = {1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8}
 
         current_row = 6
         for b_id, b_start, b_end in bloques:
-            # Columna A: ID Bloque
             c_id = ws.cell(row=current_row, column=1, value=b_id)
             c_id.alignment = align_center
             c_id.border = border_thin
             c_id.font = font_bold
             
-            # Columna B: Hora
             c_time = ws.cell(row=current_row, column=2, value=f"{b_start} - {b_end}")
             c_time.alignment = align_center
             c_time.border = border_thin
 
-            # Días (C a H)
             for dia_iso in range(1, 7):
                 col_idx = dia_col_map[dia_iso]
                 cell = ws.cell(row=current_row, column=col_idx)
                 cell.border = border_thin
                 cell.alignment = align_center
                 
-                # Buscar clase
-                # Nota: b_start es "07:00". schedule_map keys tienen formato "07:00".
-                # Ajuste: el frontend mapea "01:00" visual a "13:00" backend.
-                # Aquí 'bloques' usa formato 24h directamente.
                 
                 clase_info = schedule_map.get((dia_iso, b_start))
                 if clase_info:
                     cell.value = f"{clase_info['asignatura']}\n({clase_info['aula']})"
-                    # cell.fill = PatternFill(...) # Opcional: colorear si se desea
                 else:
                     cell.value = ""
 
@@ -587,7 +501,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         estudiante = self.get_object()
         avance = estudiante.calcular_avance()
 
-        # Datos adicionales: total/aprobadas para mostrar en dashboard
         total_asignaturas = Estudiante.objects.filter(pk=estudiante.pk).exists() and estudiante.programa and estudiante.programa and estudiante.programa.asignatura_set.count() or 0
         aprobadas = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
@@ -621,16 +534,13 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         except Estudiante.DoesNotExist:
             return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Obtener todos los detalles de inscripción del estudiante
         detalles = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante
         ).select_related('asignatura', 'seccion')
         
-        # Mapear por código de asignatura
         inscripciones_map = {}
         for detalle in detalles:
             codigo = detalle.asignatura.codigo
-            # Si hay múltiples inscripciones (por ejemplo, repitió), tomar la más reciente/relevante
             if codigo not in inscripciones_map or detalle.id > inscripciones_map[codigo]['id']:
                 inscripciones_map[codigo] = {
                     'id': detalle.id,
@@ -691,23 +601,19 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Listado Estudiantes"
         
-        # Estilos
         from openpyxl.styles import Font
         header_font = Font(bold=True)
         title_font = Font(bold=True, size=14)
 
-        # Título Principal
         ws['A1'] = "LISTADO GENERAL DE ESTUDIANTES"
         ws['A1'].font = title_font
         ws.merge_cells('A1:G1')
 
-        # Encabezados
         headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Carrera', 'Avance (%)']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=3, column=col, value=header)
             cell.font = header_font
 
-        # Datos
         row_num = 4
         for est in Estudiante.objects.select_related('usuario', 'programa').all():
             ws.cell(row=row_num, column=1, value=est.usuario.first_name)
@@ -719,7 +625,6 @@ class EstudianteViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=7, value=f"{est.calcular_avance()}")
             row_num += 1
 
-        # Aplicar estilos globales
         apply_excel_styling(ws, 3)
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -740,26 +645,21 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         codigo_seccion = request.data.get('codigo_seccion')
         docente_id = request.data.get('docente') # User ID
         
-        # Schedule Data (Optional)
         horario_data = request.data.get('horario') # { dia: 1, bloque_inicio: 1, bloque_fin: 2 }
 
         if not codigo_seccion:
             return Response({'error': 'Código de sección requerido'}, status=400)
         
-        # Validate docente exists if provided
         docente_user = None
         if docente_id:
             from gestion.models import Docente
             try:
-                # docente_id viene del frontend seleccionando un objeto Docente
-                # así que debemos buscar el modelo Docente, y luego obtener su usuario
                 docente_obj = Docente.objects.get(pk=docente_id)
                 docente_user = docente_obj.usuario
             except Docente.DoesNotExist:
                 return Response({'error': 'Docente no encontrado'}, status=404)
 
         if not docente_user:
-            # Si se está eliminando el docente (docente_id vacío), eliminar la sección para que desaparezca de la lista
             Seccion.objects.filter(asignatura=asignatura, codigo_seccion=codigo_seccion).delete()
             return Response({'status': 'deleted'})
 
@@ -770,7 +670,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         )
         
         
-        # Handle Schedule Assignment
         if horario_data:
             dia = int(horario_data.get('dia'))
             bloque_inicio = int(horario_data.get('bloque_inicio')) # 1-14
@@ -780,14 +679,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                 from gestion.models import Horario
                 from datetime import time
                 
-                # Definitions of Blocks (Start Times)
-                # 1: 07:00, 2: 07:45, ...
-                # Block duration: 45 min.
-                # Start Time Calculation:
-                # Block 1 starts at 07:00.
-                # Block 2 starts at 07:45.
-                # Etc.
-                # Using a map for precision matches frontend
                 BLOCK_MAP = {
                     1: "07:00", 2: "07:45", 3: "08:30", 4: "09:15", 
                     5: "10:00", 6: "10:45", 7: "11:30", 8: "12:15", 
@@ -795,9 +686,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                     13: "16:00", 14: "16:45"
                 }
                 
-                # End Time Calculation: 
-                # Block 1 Ends at 07:45
-                # Block 14 Ends at 17:30
                 BLOCK_END_MAP = {
                     1: "07:45", 2: "08:30", 3: "09:15", 4: "10:00", 
                     5: "10:45", 6: "11:30", 7: "12:15", 8: "13:00", 
@@ -811,7 +699,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                 aula = horario_data.get('aula', '')
 
                 if t_start_str and t_end_str:
-                     # Parse to Time objects
                      h_start = int(t_start_str.split(':')[0])
                      m_start = int(t_start_str.split(':')[1])
                      h_end = int(t_end_str.split(':')[0])
@@ -820,12 +707,8 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                      start_time = time(h_start, m_start)
                      end_time = time(h_end, m_end)
                      
-                     # Clear existing schedule for this section (Assuming 1 main block per section or overwrite)
-                     # User request: "Una vez asignado eso...". 
-                     # Strategy: Wipe old schedules for this section to avoid conflicts.
                      Horario.objects.filter(seccion=seccion).delete()
                      
-                     # Create new
                      Horario.objects.update_or_create(
                          seccion=seccion,
                          dia=dia,
@@ -836,7 +719,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
                          }
                      )
 
-        # Notificar al docente (Después de asignar horario)
         try:
             from gestion.models import Docente
             from gestion.notifications import notify_docente_assignment
@@ -856,8 +738,6 @@ class AsignaturaViewSet(viewsets.ModelViewSet):
         if not docente_id:
             return Response({'error': 'Docente ID requerido'}, status=400)
         
-        # docente_id viene del frontend seleccionando un objeto Docente
-        # así que debemos buscar el modelo Docente, y luego obtener su usuario
         from gestion.models import Docente
         try:
             docente_obj = Docente.objects.get(pk=docente_id)
@@ -921,18 +801,15 @@ from datetime import timedelta
 
 class OnlineUsersView(APIView):
     """Devuelve usuarios activos en los últimos 5 minutos."""
-    # permission_classes = [IsAuthenticated] # Opcional: IsAdmin si es restringido
 
     def get(self, request):
         time_threshold = timezone.now() - timedelta(minutes=5)
-        # Filtrar actividades recientes y unirse con User
         active_users = UserActivity.objects.filter(last_activity__gte=time_threshold).select_related('user')
         
         data = []
         for activity in active_users:
             user = activity.user
             
-            # Determinar rol
             role = 'Desconocido'
             if user.is_superuser or user.is_staff or user.groups.filter(name='Administrador').exists():
                 role = 'Administrador'
@@ -941,11 +818,8 @@ class OnlineUsersView(APIView):
             elif hasattr(user, 'estudiante'):
                 role = 'Estudiante'
 
-            # Nombre completo
             name = user.get_full_name() or user.username
             
-            # ID específico para mapeo (Estudiante ID vs User ID)
-            # Para facilitar el mapeo en el frontend, enviamos ambos
             student_id = user.estudiante.id if hasattr(user, 'estudiante') else None
             
             data.append({
@@ -977,23 +851,19 @@ class DocenteViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Listado Docentes"
 
-        # Estilos
         from openpyxl.styles import Font
         header_font = Font(bold=True)
         title_font = Font(bold=True, size=14)
 
-        # Título
         ws['A1'] = "LISTADO GENERAL DE DOCENTES"
         ws['A1'].font = title_font
         ws.merge_cells('A1:F1')
 
-        # Encabezados
         headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo', 'Contratación']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=3, column=col, value=header)
             cell.font = header_font
 
-        # Datos
         row_num = 4
         for docente in self.filter_queryset(self.get_queryset()):
             ws.cell(row=row_num, column=1, value=docente.usuario.first_name)
@@ -1026,23 +896,19 @@ class AdminViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Listado Administradores"
 
-        # Estilos
         from openpyxl.styles import Font
         header_font = Font(bold=True)
         title_font = Font(bold=True, size=14)
 
-        # Título
         ws['A1'] = "LISTADO DE ADMINISTRADORES"
         ws['A1'].font = title_font
         ws.merge_cells('A1:F1')
 
-        # Encabezados
         headers = ['Nombres', 'Apellidos', 'Cédula', 'Teléfono', 'Correo']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=3, column=col, value=header)
             cell.font = header_font
 
-        # Datos
         row_num = 4
         for admin in self.filter_queryset(self.get_queryset()):
             ws.cell(row=row_num, column=1, value=admin.usuario.first_name)
@@ -1052,7 +918,6 @@ class AdminViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=5, value=admin.usuario.email)
             row_num += 1
 
-        # Aplicar estilos globales
         apply_excel_styling(ws, 3)
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -1085,7 +950,6 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
         asignatura = serializer.validated_data.get('asignatura')
         user = self.request.user
         
-        # Si el usuario es Docente (y no admin/superuser), asegurar que esté asignado a esta asignatura
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if not Seccion.objects.filter(asignatura=asignatura, docente=user).exists():
                  from rest_framework.exceptions import PermissionDenied
@@ -1095,7 +959,6 @@ class PlanificacionViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         user = self.request.user
-        # Si el usuario es Docente (y no admin/superuser), asegurar que esté asignado a esta asignatura
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if not Seccion.objects.filter(asignatura=instance.asignatura, docente=user).exists():
                  from rest_framework.exceptions import PermissionDenied
@@ -1121,16 +984,13 @@ class DocumentoCalificacionesViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create']:
             return [IsEstudiante()]
-        # allow students to list their own docs and admin/docente to view
         return []
 
     def perform_create(self, serializer):
-        # ensure estudiante belongs to requesting user
         estudiante = serializer.validated_data.get('estudiante')
         if estudiante.usuario != self.request.user and not self.request.user.is_superuser and not self.request.user.groups.filter(name='Docente').exists():
             raise PermissionError('No autorizado')
         doc = serializer.save()
-        # trigger recalculation (and potential alerts)
         try:
             doc.estudiante.calcular_avance()
         except Exception:
@@ -1151,26 +1011,22 @@ class SeccionViewSet(viewsets.ModelViewSet):
         """
         user = request.user
         
-        # Verificar permisos (Docente o Admin)
         is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
         is_docente = user.groups.filter(name='Docente').exists()
         
         if not is_admin and not is_docente:
             return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Filtros
         programa_id = request.query_params.get('programa')
         semestre = request.query_params.get('semestre')
         codigo_seccion = request.query_params.get('seccion')
         
-        # Base Query
         secciones = Seccion.objects.all().select_related(
             'asignatura', 
             'asignatura__programa', 
             'docente'
         ).prefetch_related('horarios')
         
-        # Aplicar Filtros
         if programa_id:
             secciones = secciones.filter(asignatura__programa_id=programa_id)
         
@@ -1180,11 +1036,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
         if codigo_seccion:
             secciones = secciones.filter(codigo_seccion__icontains=codigo_seccion)
             
-        # Restricción para Docentes (si NO es admin)
         if is_docente and not is_admin:
             secciones = secciones.filter(docente=user)
             
-        # Construir respuesta
         horario_data = []
         
         for sec in secciones:
@@ -1210,26 +1064,22 @@ class SeccionViewSet(viewsets.ModelViewSet):
         """Genera Excel del Horario Master con filtros (Diseño Exacto Imagen)."""
         user = request.user
         
-        # Verificar permisos
         is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
         is_docente = user.groups.filter(name='Docente').exists()
         
         if not is_admin and not is_docente:
             return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Filtros
         programa_id = request.query_params.get('programa')
         semestre = request.query_params.get('semestre')
         codigo_seccion = request.query_params.get('seccion')
         
-        # Base Query
         secciones = Seccion.objects.all().select_related(
             'asignatura', 
             'asignatura__programa', 
             'docente'
         ).prefetch_related('horarios')
         
-        # Aplicar Filtros y Obtener Metadata
         program_name = "TODOS LOS PROGRAMAS"
         if programa_id:
             secciones = secciones.filter(asignatura__programa_id=programa_id)
@@ -1250,7 +1100,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             secciones = secciones.filter(docente=user)
             docente_filter_text = f"DOCENTE: {user.get_full_name()}"
             
-        # --- PREPARACIÓN DE DATOS ---
         grid_data = {day: {} for day in range(1, 7)}
         subjects_list = {}
         
@@ -1286,11 +1135,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
                             break
                 
                 if start_block:
-                    # Calc Blocks
                     h_total = (h.hora_fin.hour * 60 + h.hora_fin.minute) - (h.hora_inicio.hour * 60 + h.hora_inicio.minute)
                     num_blocks = max(1, round(h_total / 45))
                     
-                    # Fill
                     cell_text = f"{sec.asignatura.nombre_asignatura}\n({h.aula or 'N/A'})"
                     
                     for i in range(num_blocks):
@@ -1298,14 +1145,12 @@ class SeccionViewSet(viewsets.ModelViewSet):
                         if current_block > 14: break
                         
                         if current_block in grid_data[h.dia]:
-                            # Collision Logic
                             existing = grid_data[h.dia][current_block]
                             if existing['uid'] != uid: # Avoid duplicating self if somehow overlap
                                 grid_data[h.dia][current_block] = {'text': existing['text'] + "\n-----\n" + cell_text, 'uid': 'COLLISION'}
                         else:
                             grid_data[h.dia][current_block] = {'text': cell_text, 'uid': uid}
 
-        # --- CREACIÓN EXCEL ---
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Horario Maestro"
@@ -1314,7 +1159,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
         from openpyxl.utils import get_column_letter
 
-        # Colores (Mismos que estudiante)
         COLOR_HEADER_BG = "4472C4"
         COLOR_HEADER_TXT = "FFFFFF"
         COLOR_CLASS_BG = "CCC0DA"
@@ -1334,22 +1178,18 @@ class SeccionViewSet(viewsets.ModelViewSet):
         align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
         align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
 
-        # --- 1. ENCABEZADO ---
         if is_docente and not is_admin:
-            # --- HEADER DOCENTE CUSTOM --
             ws['A1'] = "HORARIO ACADÉMICO"
             ws['A1'].font = font_title
             ws['A1'].fill = fill_header
             ws['A1'].alignment = align_center
             ws.merge_cells('A1:H1')
 
-            # Get Docente specific info
             try:
                 from gestion.models import PeriodoAcademico
                 periodo_obj = PeriodoAcademico.objects.filter(activo=True).first()
                 periodo_str = periodo_obj.nombre_periodo if periodo_obj else "Periodo Actual"
                 
-                # Try to get extended profile
                 docente_profile = user.docente
                 cedula = docente_profile.cedula
                 tipo_contratacion = docente_profile.tipo_contratacion
@@ -1358,7 +1198,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 tipo_contratacion = "N/A"
                 periodo_str = "Periodo Actual"
 
-            # Row 2: Nombre Completo | Periodo
             ws['A2'] = f"DOCENTE: {user.get_full_name().upper()}"
             ws['A2'].alignment = align_left
             ws['A2'].border = border_all
@@ -1369,7 +1208,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws['E2'].border = border_all
             ws.merge_cells('E2:H2')
 
-            # Row 3: Cédula | Condición
             ws['A3'] = f"C.I.: {cedula}"
             ws['A3'].alignment = align_left
             ws['A3'].border = border_all
@@ -1381,14 +1219,12 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws.merge_cells('E3:H3')
 
         else:
-            # --- HEADER ADMIN (Original) ---
             ws['A1'] = "HORARIO MAESTRO DE CLASES"
             ws['A1'].font = font_title
             ws['A1'].fill = fill_header
             ws['A1'].alignment = align_center
             ws.merge_cells('A1:H1')
 
-            # Row 2: Programa | Semestre
             ws['A2'] = f"Programa: {program_name}"
             ws['A2'].alignment = align_left
             ws['A2'].border = border_all
@@ -1400,7 +1236,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws['E2'].border = border_all
             ws.merge_cells('E2:H2')
 
-            # Row 3: Sección/Filtros | Info Docente
             sec_text = f"Sección: {codigo_seccion}" if codigo_seccion else "Sección: TODAS"
             ws['A3'] = sec_text
             ws['A3'].alignment = align_left
@@ -1413,7 +1248,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws['E3'].border = border_all
             ws.merge_cells('E3:H3')
 
-        # --- 2. GRILLA ---
         headers = ["BLOQUE", "HORAS", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"]
         for col, text in enumerate(headers, 1):
             cell = ws.cell(row=5, column=col, value=text)
@@ -1423,7 +1257,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             cell.border = border_all
 
         start_row = 6
-        # Generar Bloque/Hora
         for i, (bid, time_label) in enumerate(bloques_data):
             row = start_row + i
             c1 = ws.cell(row=row, column=1, value=bid)
@@ -1431,7 +1264,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             c2 = ws.cell(row=row, column=2, value=time_label)
             c2.font = font_cell; c2.alignment = align_center; c2.border = border_all
 
-        # Llenar Días
         for d_idx in range(1, 7):
             col_idx = 2 + d_idx
             current_uid = None
@@ -1474,7 +1306,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
                  if merge_start_row < (start_row + 14):
                      ws.merge_cells(start_row=merge_start_row, start_column=col_idx, end_row=start_row+13, end_column=col_idx)
 
-        # --- 3. DETALLE INFERIOR ---
         det_head_row = 21
         
         ws.column_dimensions['A'].width = 9.50
@@ -1486,7 +1317,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws.column_dimensions['G'].width = 18
         ws.column_dimensions['H'].width = 18
         
-        # Headers: N, Código, Asignatura (C-D), Semestre, Sección, Docente (G-H)
         headers_def = [
             (1, "N°"), (2, "CÓDIGO"), (3, "ASIGNATURA"), (5, "SEMESTRE"), (6, "SECCIÓN"), (7, "DOCENTE")
         ]
@@ -1506,18 +1336,12 @@ class SeccionViewSet(viewsets.ModelViewSet):
         row_idx = det_head_row + 1
         
         for idx, sub in enumerate(sorted_subs, 1):
-            # N
             ws.cell(row=row_idx, column=1, value=idx).border = border_all; ws.cell(row=row_idx, column=1).alignment = align_center
-            # Cod
             ws.cell(row=row_idx, column=2, value=sub['codigo']).border = border_all; ws.cell(row=row_idx, column=2).alignment = align_center
-            # Asig
             ws.cell(row=row_idx, column=3, value=sub['asignatura']).border = border_all; ws.cell(row=row_idx, column=3).alignment = align_center
             ws.merge_cells(start_row=row_idx, start_column=3, end_row=row_idx, end_column=4); ws.cell(row=row_idx, column=4).border = border_all
-            # Sem
             ws.cell(row=row_idx, column=5, value=sub['semestre']).border = border_all; ws.cell(row=row_idx, column=5).alignment = align_center
-            # Sec
             ws.cell(row=row_idx, column=6, value=sub['seccion']).border = border_all; ws.cell(row=row_idx, column=6).alignment = align_center
-            # Doc
             ws.cell(row=row_idx, column=7, value=sub['docente']).border = border_all; ws.cell(row=row_idx, column=7).alignment = align_center
             ws.merge_cells(start_row=row_idx, start_column=7, end_row=row_idx, end_column=8); ws.cell(row=row_idx, column=8).border = border_all
             
@@ -1530,7 +1354,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Horario Maestro"
         
-        # --- ESTILOS ---
         from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
         from openpyxl.utils import get_column_letter
 
@@ -1545,7 +1368,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         fill_header = PatternFill("solid", fgColor="E0E0E0")
         fill_block = PatternFill("solid", fgColor="F5F5F5")
 
-        # --- 1. ENCABEZADO ---
         ws['A1'] = "REPÚBLICA BOLIVARIANA DE VENEZUELA"
         ws['A2'] = program_name
         ws['A3'] = "HORARIO MAESTRO DE CLASES"
@@ -1562,7 +1384,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws[f'A{i}'].font = title_font if i == 3 else header_font
             ws[f'A{i}'].alignment = align_center
 
-        # --- 2. GRILLA ---
         headers = ['BLOQUE', 'HORA', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=6, column=col, value=header)
@@ -1588,7 +1409,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         subjects_list = {}
 
         for sec in secciones:
-            # Info detallada
             uid = f"{sec.asignatura.codigo}-{sec.codigo_seccion}"
             if uid not in subjects_list:
                 subjects_list[uid] = {
@@ -1599,7 +1419,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
                     'docente': sec.docente.get_full_name() if sec.docente else "SIN ASIGNAR"
                 }
 
-            # Llenar Grilla
             for h in sec.horarios.all():
                 start_str = h.hora_inicio.strftime('%H:%M')
                 block_id = 0
@@ -1619,12 +1438,10 @@ class SeccionViewSet(viewsets.ModelViewSet):
                     
                     grid_map[key].append(entry)
 
-        # Renderizar Filas
         start_row = 7
         for i, (block_id, time_label) in enumerate(bloques_data):
             row_num = start_row + i
             
-            # Bloque/Hora
             ws.cell(row=row_num, column=1, value=f"BLOQUE {block_id}").border = border_all
             ws.cell(row=row_num, column=1).fill = fill_block
             ws.cell(row=row_num, column=1).alignment = align_center
@@ -1644,7 +1461,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 if entries:
                     cell.fill = PatternFill("solid", fgColor="E6E6FA")
 
-        # --- 3. DETALLE DE ASIGNATURAS ---
         detail_start_row = start_row + 15
         
         ws[f'A{detail_start_row}'] = "DETALLE DE SECCIONES ENCONTRADAS"
@@ -1660,12 +1476,8 @@ class SeccionViewSet(viewsets.ModelViewSet):
             cell.font = header_font
             cell.border = border_all
             cell.fill = fill_header
-            # Be careful overwriting widths, grid depends on them. 
-            # Columns A (10) and B (15) are fine. C (35) is wider than Grid C (25).
-            # We'll stick to Grid widths or accept resizing. Grid is priority.
             
         r_idx = detail_header_row + 1
-        # Ordenar lista por Semestre -> Código -> Sección
         sorted_subs = sorted(subjects_list.values(), key=lambda x: (x['semestre'], x['codigo'], x['seccion']))
         
         for idx, sub in enumerate(sorted_subs, 1):
@@ -1689,25 +1501,18 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = "Horario Maestro"
         
-        # Estilos
         from openpyxl.styles import Font, Alignment
         header_font = Font(bold=True)
         
-        # Títulos
         headers = ['Día', 'Hora Inicio', 'Hora Fin', 'Código', 'Asignatura', 'Sección', 'Semestre', 'Programa', 'Aula', 'Docente']
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_num, value=header)
             cell.font = header_font
             
-        # Datos
         row_num = 2
         for sec in secciones:
             for h in sec.horarios.all():
                 time_map = {1: '07:00', 2: '07:45', 3: '08:30', 4: '09:15', 5: '10:00', 6: '10:45', 7: '11:30', 8: '12:15', 9: '13:00', 10: '13:45', 11: '14:30', 12: '15:15', 13: '16:00', 14: '16:45'}
-                # Si h.hora_inicio es time object, usarlo. Si es bloque ID (int), mapearlo?
-                # master_horario usa h.hora_inicio.strftime('%H:%M'), asumiendo que es TimeField.
-                # Pero en HorarioPage logic vimos mapeo manual.
-                # Validemos modelo Horario. Pero asumo TimeField por strftime usage en master_horario.
                 
                 day_map = {1: 'LUNES', 2: 'MARTES', 3: 'MIÉRCOLES', 4: 'JUEVES', 5: 'VIERNES', 6: 'SÁBADO'}
                 dia_str = day_map.get(h.dia, str(h.dia))
@@ -1724,7 +1529,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 ws.cell(row=row_num, column=10, value=sec.docente.get_full_name() if sec.docente else 'Sin Asignar')
                 row_num += 1
                 
-        # Ajustar anchos
         dims = {'A': 15, 'B': 10, 'C': 10, 'D': 12, 'E': 40, 'F': 10, 'G': 10, 'H': 30, 'I': 15, 'J': 25}
         for col, width in dims.items():
             ws.column_dimensions[col].width = width
@@ -1761,7 +1565,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         seccion = self.get_object()
         user = request.user
         
-        # Verificar permisos
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if not user.groups.filter(name='Docente').exists():
                 return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
@@ -1772,18 +1575,15 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws = wb.active
         ws.title = f"Listado {seccion.codigo_seccion}"
 
-        # Estilos
         from openpyxl.styles import Font, Alignment
         header_font = Font(bold=True)
         title_font = Font(bold=True, size=14)
         
-        # 1. Título
         ws['A1'] = "PLANILLA DE EVALUACIÓN"
         ws['A1'].font = title_font
         ws.merge_cells('A1:J1')
         ws['A1'].alignment = Alignment(horizontal='center')
 
-        # 2. Metadata (Asignatura, Sección, Docente)
         ws['A2'] = "Asignatura:"
         ws['B2'] = f"{seccion.asignatura.nombre_asignatura} ({seccion.asignatura.codigo})"
         ws['A2'].font = header_font
@@ -1798,7 +1598,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws['A4'].font = header_font
         ws.merge_cells('B4:E4')
 
-        # Nuevo: Periodo
         from gestion.models import PeriodoAcademico
         periodo = PeriodoAcademico.objects.filter(activo=True).first()
         ws['A5'] = "Período:"
@@ -1806,13 +1605,11 @@ class SeccionViewSet(viewsets.ModelViewSet):
         ws['A5'].font = header_font
         ws.merge_cells('B5:E5')
         
-        # 3. Encabezados Tabla (Fila 7)
         headers = ['Cédula', 'Nombre', 'Apellido', 'Correo', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4', 'Nota R', 'Nota Final', 'Estado']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=7, column=col, value=header)
             cell.font = header_font
         
-        # 4. Datos (Fila 8)
         row_num = 8
         detalles = seccion.estudiantes_inscritos.select_related('inscripcion__estudiante__usuario').order_by('inscripcion__estudiante__usuario__last_name')
         
@@ -1831,7 +1628,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             ws.cell(row=row_num, column=11, value=detalle.estatus)
             row_num += 1
             
-        # Aplicar estilos globales
         apply_excel_styling(ws, 7)
         
         filename = f"listado_{seccion.asignatura.codigo}_{seccion.codigo_seccion}.xlsx"
@@ -1846,7 +1642,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         seccion = self.get_object()
         user = request.user
         
-        # Verificar que el docente esté asignado a esta sección (o sea admin)
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if seccion.docente != user:
                 return Response(
@@ -1863,14 +1658,12 @@ class SeccionViewSet(viewsets.ModelViewSet):
         except Estudiante.DoesNotExist:
             return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Validar que el estudiante pertenece al mismo programa de la asignatura
         if estudiante.programa_id != seccion.asignatura.programa_id:
             return Response(
                 {'error': 'El estudiante no pertenece al programa de esta asignatura.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Realizar inscripción
         result = self._inscribir_estudiante_en_seccion(estudiante, seccion)
         if result.get('error'):
             return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
@@ -1883,20 +1676,17 @@ class SeccionViewSet(viewsets.ModelViewSet):
         seccion = self.get_object()
         user = request.user
 
-        # Obtener el estudiante asociado al usuario
         try:
             estudiante = Estudiante.objects.get(usuario=user)
         except Estudiante.DoesNotExist:
             return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validar que la asignatura es del programa del estudiante
         if estudiante.programa_id != seccion.asignatura.programa_id:
             return Response(
                 {'error': 'Esta asignatura no pertenece a tu programa.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Realizar inscripción
         result = self._inscribir_estudiante_en_seccion(estudiante, seccion)
         if result.get('error'):
             return Response({'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)
@@ -1914,7 +1704,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         except Estudiante.DoesNotExist:
             return Response({'error': 'No tienes perfil de estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Buscar el detalle de inscripción
         from gestion.models import Inscripcion, DetalleInscripcion, PeriodoAcademico
         
         detalle = DetalleInscripcion.objects.filter(
@@ -1935,7 +1724,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         seccion = self.get_object()
         user = request.user
 
-        # Verificar permisos
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if seccion.docente != user:
                 return Response(
@@ -1964,28 +1752,22 @@ class SeccionViewSet(viewsets.ModelViewSet):
         """Devuelve las secciones asignadas al docente autenticado con sus estudiantes."""
         user = request.user
         
-        # Verificar que sea docente
         if not user.groups.filter(name='Docente').exists() and not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             return Response({'error': 'Solo los docentes y administradores pueden acceder a este recurso.'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Códigos especiales que solo gestiona el ADMINISTRADOR
         SPECIAL_CODES = ['TAI-01', 'PRO-01', 'PSI-30010']
         if user.is_superuser or user.groups.filter(name='Administrador').exists():
-            # Para administrador: Asegurar que existan secciones para las materias especiales
             from gestion.models import Asignatura
             for code in SPECIAL_CODES:
                 asig = Asignatura.objects.filter(codigo=code).first()
                 if asig:
-                    # Crear sección por defecto '01' si no existe ninguna
                     if not Seccion.objects.filter(asignatura=asig).exists():
                          Seccion.objects.create(asignatura=asig, codigo_seccion='01', docente=None)
 
             secciones = Seccion.objects.all().select_related('asignatura', 'asignatura__programa', 'docente')
         else:
-            # Para docentes: Mostrar sus secciones pero EXCLUIR explícitamente las especiales
             secciones = Seccion.objects.filter(docente=user).exclude(asignatura__codigo__in=SPECIAL_CODES).select_related('asignatura', 'asignatura__programa', 'docente')
 
-        # Filtrar por Programa si se especifica
         programa_id = request.query_params.get('programa')
         if programa_id:
             secciones = secciones.filter(asignatura__programa_id=programa_id)
@@ -2033,7 +1815,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         seccion = self.get_object()
         user = request.user
         
-        # Verificar que sea el docente asignado o admin
         if not user.is_superuser and not user.groups.filter(name='Administrador').exists():
             if seccion.docente != user:
                 return Response({'error': 'No estás asignado a esta sección.'}, status=status.HTTP_403_FORBIDDEN)
@@ -2053,7 +1834,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         except DetalleInscripcion.DoesNotExist:
             return Response({'error': 'Detalle de inscripción no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Validar notas (1-20)
         from decimal import Decimal, InvalidOperation
         def parse_nota(val):
             if val is None or val == '':
@@ -2066,7 +1846,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             except (InvalidOperation, ValueError):
                 return None
         
-        # Actualizar notas parciales
         if nota1 is not None:
             detalle.nota1 = parse_nota(nota1)
         if nota2 is not None:
@@ -2076,14 +1855,10 @@ class SeccionViewSet(viewsets.ModelViewSet):
         if nota4 is not None:
             detalle.nota4 = parse_nota(nota4)
         
-        # Actualizar nota de reparación (si se envía)
         if nota_reparacion is not None:
-            # Permitir borrar la nota de reparación enviando '' o null
             if nota_reparacion == '' or nota_reparacion is None:
                 detalle.nota_reparacion = None
             else:
-                # Validar que el estudiante esté REPROBADO para cargar nota de reparación
-                # Primero verificar si tiene las 4 notas cargadas
                 notas_actuales = [
                     detalle.nota1 if nota1 is None else parse_nota(nota1),
                     detalle.nota2 if nota2 is None else parse_nota(nota2),
@@ -2092,11 +1867,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 ]
                 
                 if all(n is not None for n in notas_actuales):
-                    # Calcular promedio temporal
                     from decimal import Decimal
                     promedio_temp = sum(notas_actuales) / Decimal(4)
                     
-                    # Solo permitir nota de reparación si el promedio es < 10 (reprobado)
                     if promedio_temp >= 10:
                         return Response({
                             'error': 'Solo se puede cargar Nota de Reparación para estudiantes reprobados (promedio < 10).'
@@ -2128,47 +1901,34 @@ class SeccionViewSet(viewsets.ModelViewSet):
         asignatura = seccion.asignatura
         user_requesting = self.request.user
 
-        # Determinar si se debe forzar la revisión de choques
-        # Estudiantes SIEMPRE revisan choques. Docentes/Admins pueden tener allow_conflicts=True (implícito si son ellos)
-        # En este caso, la regla es: Solo Docentes y Admins pueden saltarse la advertencia.
-        # Si el que solicita es Estudiante, check_conflicts = True.
-        # Si el que solicita es Docente/Admin, asumimos que ellos "saben lo que hacen" (Override).
         
         should_check_conflicts = True
         if user_requesting.is_superuser or user_requesting.groups.filter(name='Administrador').exists() or user_requesting.groups.filter(name='Docente').exists():
             should_check_conflicts = False
 
-        # 0. Validación Especial: Servicio Comunitario (Taller o Proyecto)
-        # Requiere 50% de Unidades de Crédito Aprobadas
         nombre_upper = asignatura.nombre_asignatura.upper()
         if "SERVICIO COMUNITARIO" in nombre_upper:
-            # Calcular Total de Créditos del Programa
             total_creditos = Asignatura.objects.filter(programa=estudiante.programa).aggregate(total=Sum('creditos'))['total'] or 0
             
-            # Calcular Créditos Aprobados por el Estudiante
             creditos_aprobados = DetalleInscripcion.objects.filter(
                 inscripcion__estudiante=estudiante
             ).filter(
                 Q(estatus='APROBADO') | Q(nota_final__gte=10)
             ).aggregate(total=Sum('asignatura__creditos'))['total'] or 0
 
-            # Validar 50%
             if creditos_aprobados < (total_creditos * 0.5):
                 porcentaje_actual = (creditos_aprobados / total_creditos * 100) if total_creditos > 0 else 0
                 return {
                     'error': f'Requisito no cumplido: Para cursar Servicio Comunitario debes tener aprobado el 50% de las Unidades de Crédito. (Tienes: {creditos_aprobados} UC - {porcentaje_actual:.1f}%)'
                 }
 
-        # 1. Obtener período activo con inscripciones abiertas
         periodo = PeriodoAcademico.objects.filter(activo=True, inscripciones_activas=True).first()
         if not periodo:
-            # Verificar si hay período activo pero inscripciones cerradas
             periodo_cerrado = PeriodoAcademico.objects.filter(activo=True).first()
             if periodo_cerrado:
                 return {'error': f'Las inscripciones están cerradas para el período {periodo_cerrado.nombre_periodo}.'}
             return {'error': 'No hay período académico activo.'}
 
-        # 2. Verificar si ya está inscrito en esta asignatura EN ESTE PERIODO
         ya_inscrito_periodo = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             inscripcion__periodo=periodo,
@@ -2178,7 +1938,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
         if ya_inscrito_periodo:
             return {'error': 'El estudiante ya está inscrito en esta asignatura en el período actual.'}
 
-        # 3. Verificar si ya aprobó esta asignatura (histórico)
         ya_aprobo = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             asignatura=asignatura,
@@ -2188,10 +1947,8 @@ class SeccionViewSet(viewsets.ModelViewSet):
         if ya_aprobo:
             return {'error': 'El estudiante ya aprobó esta asignatura anteriormente.'}
 
-        # 4. Verificar prelaciones
         prelaciones = asignatura.prelaciones.all()
         for prereq in prelaciones:
-            # Buscar si aprobó la prelación (Por nota o por estatus explícito)
             from django.db.models import Q
             aprobada = DetalleInscripcion.objects.filter(
                 inscripcion__estudiante=estudiante,
@@ -2201,8 +1958,6 @@ class SeccionViewSet(viewsets.ModelViewSet):
             if not aprobada:
                 return {'error': f'No puedes inscribir esta materia. Requiere haber aprobado: {prereq.nombre_asignatura} ({prereq.codigo}).'}
 
-        # 5. VALIDAR LÍMITE DE UNIDADES DE CRÉDITO (UC) - Máximo 35
-        # Calcular UC ya inscritas en este periodo (sin importar estatus)
         uc_inscritas = DetalleInscripcion.objects.filter(
             inscripcion__estudiante=estudiante,
             inscripcion__periodo=periodo
@@ -2215,12 +1970,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
                 'error': f'No puedes inscribir esta asignatura porque superarías el límite de 35 UC. (Tienes {uc_inscritas} UC + {uc_nueva} UC de esta materia = {uc_inscritas + uc_nueva})'
             }
 
-        # 6. VERIFICACIÓN DE CHOQUE DE HORARIO
         if should_check_conflicts:
-            # Obtener horarios de la sección a inscribir
             horarios_nuevos = seccion.horarios.all() # QuerySet de Horario
             if horarios_nuevos.exists():
-                # Obtener todas las secciones ya inscritas en este período (TODOS LOS ESTATUS)
                 inscripciones_actuales = DetalleInscripcion.objects.filter(
                     inscripcion__estudiante=estudiante,
                     inscripcion__periodo=periodo
@@ -2232,11 +1984,9 @@ class SeccionViewSet(viewsets.ModelViewSet):
                     
                     horarios_existentes = seccion_existente.horarios.all()
 
-                    # Comparar horarios
                     for h_nuevo in horarios_nuevos:
                         for h_existente in horarios_existentes:
                             if h_nuevo.dia == h_existente.dia:
-                                # Chequeo de superposición de intervalos
                                 if (h_nuevo.hora_inicio < h_existente.hora_fin) and (h_nuevo.hora_fin > h_existente.hora_inicio):
                                     dia_str = h_nuevo.get_dia_display()
                                     return {
@@ -2248,13 +1998,11 @@ class SeccionViewSet(viewsets.ModelViewSet):
                                         )
                                     }
 
-        # 6. Obtener o crear inscripción del estudiante en el período
         inscripcion, _ = Inscripcion.objects.get_or_create(
             estudiante=estudiante,
             periodo=periodo
         )
 
-        # 7. Crear detalle de inscripción con estatus inicial 'CURSANDO'
         detalle = DetalleInscripcion.objects.create(
             inscripcion=inscripcion,
             asignatura=asignatura,
@@ -2291,13 +2039,11 @@ class PeriodoAcademicoViewSet(viewsets.ModelViewSet):
         periodo = self.get_object()
         hoy = date.today()
         
-        # No permitir modificar inscripciones de períodos pasados
         if periodo.fecha_fin < hoy:
             return Response({
                 'error': 'No se pueden modificar inscripciones de un período que ya finalizó.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Toggle del estado
         periodo.inscripciones_activas = not periodo.inscripciones_activas
         periodo.save()
         return Response({
@@ -2313,21 +2059,17 @@ class PeriodoAcademicoViewSet(viewsets.ModelViewSet):
         periodo = self.get_object()
         hoy = date.today()
         
-        # No permitir activar períodos pasados
         if periodo.fecha_fin < hoy:
             return Response({
                 'error': 'No se puede activar un período que ya finalizó.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # No permitir activar períodos futuros antes de su fecha de inicio
         if periodo.fecha_inicio > hoy:
             return Response({
                 'error': f'Este período no puede activarse hasta {periodo.fecha_inicio}.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Desactivar todos los períodos
         PeriodoAcademico.objects.update(activo=False)
-        # Activar este período
         periodo.activo = True
         periodo.save()
         return Response({
@@ -2356,14 +2098,12 @@ class EstadisticasViewSet(viewsets.ViewSet):
         programa_id = request.query_params.get('programa')
         user = request.user
         
-        # Determinar roles
         is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
         is_docente = user.groups.filter(name='Docente').exists()
         
         if not is_admin and not is_docente:
             return Response({'error': 'No autorizado.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Obtener asignaturas
         asignaturas = Asignatura.objects.all().order_by('semestre', 'orden')
         if programa_id:
             asignaturas = asignaturas.filter(programa_id=programa_id)
@@ -2378,17 +2118,14 @@ class EstadisticasViewSet(viewsets.ViewSet):
         ws = wb.active
         ws.title = "Desglose Académico"
         
-        # Estilos
         title_font = Font(bold=True, size=14)
         header_font = Font(bold=True)
         
-        # Título
         ws['A1'] = "MONITOREO DE AVANCE EDUCATIVO"
         ws['A1'].font = title_font
         ws.merge_cells('A1:I1')
         ws['A1'].alignment = Alignment(horizontal='center')
         
-        # Metadata
         ws['A2'] = "Carrera:"
         ws['B2'] = programa_nombre
         ws['A2'].font = header_font
@@ -2398,9 +2135,7 @@ class EstadisticasViewSet(viewsets.ViewSet):
         ws['A3'] = "Período:"
         ws['B3'] = str(periodo_actual) if periodo_actual else "N/A"
         ws['A3'].font = header_font
-        # ws.merge_cells('B3:E3') # Handled by apply_excel_styling
         
-        # Encabezados
         headers = ['Semestre', 'Código', 'Asignatura', 'Sección', 'Docente', 'Inscritos', 'Promedio', 'Máxima', 'Mínima', 'Estado']
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=5, column=col, value=header)
@@ -2409,10 +2144,8 @@ class EstadisticasViewSet(viewsets.ViewSet):
         row_num = 6
         
         for asig in asignaturas:
-            # Replicar lógica de desglose: obtener secciones con docente
             secciones = asig.secciones.filter(docente__isnull=False).select_related('docente')
             
-            # Filtro para docente
             if is_docente and not is_admin:
                 secciones = secciones.filter(docente=user)
                 
@@ -2424,9 +2157,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                     min=Min('nota_final')
                 )
                 
-                # Solo mostrar si hay datos o si es docente (aunque no tenga alumnos, ve su sección)
-                # La lógica original de desglose filtra si no hay secciones pero en el loop itera.
-                # Aquí listaremos todas las que cumplan.
                 
                 count = stats['count'] or 0
                 avg = round(float(stats['avg']), 2) if stats['avg'] else 0
@@ -2445,7 +2175,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                 ws.cell(row=row_num, column=10, value="Activo" if count > 0 else "Sin Estudiantes") # Estado derivado simple
                 row_num += 1
 
-        # Aplicar estilos globales (Asignatura=C, Docente=E)
         apply_excel_styling(ws, 5, custom_widths={'A': 10.0, 'B': 14.0, 'C': 42.0, 'E': 42.0})
         
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -2461,11 +2190,9 @@ class EstadisticasViewSet(viewsets.ViewSet):
         programa_id = request.query_params.get('programa')
         user = request.user
         
-        # Determinar si es admin o docente
         is_admin = user.is_superuser or user.groups.filter(name='Administrador').exists()
         is_docente = user.groups.filter(name='Docente').exists()
         
-        # Obtener asignaturas agrupadas por semestre
         asignaturas = Asignatura.objects.all().order_by('semestre', 'orden')
         if programa_id:
             asignaturas = asignaturas.filter(programa_id=programa_id)
@@ -2480,16 +2207,13 @@ class EstadisticasViewSet(viewsets.ViewSet):
                     'subjects': []
                 }
             
-            # Obtener secciones con docente asignado
             secciones_data = []
             secciones = asig.secciones.filter(docente__isnull=False).select_related('docente')
             
-            # Si es docente (no admin), filtrar solo sus secciones
             if is_docente and not is_admin:
                 secciones = secciones.filter(docente=user)
             
             for seccion in secciones:
-                # Obtener estadísticas de notas
                 stats = DetalleInscripcion.objects.filter(
                     seccion=seccion
                 ).aggregate(
@@ -2517,7 +2241,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                     'sections': secciones_data
                 })
         
-        # Filtrar semestres vacíos (sin asignaturas con secciones)
         result = [sem for sem in sorted(semestres.values(), key=lambda x: x['id']) if sem['subjects']]
         return Response(result)
 
@@ -2534,12 +2257,10 @@ class EstadisticasViewSet(viewsets.ViewSet):
         labels = []
         data = []
         
-        # Siempre mostrar 8 semestres
         for sem_num in range(1, 9):
             labels.append(f'Sem {sem_num}')
             
             if is_admin:
-                # Admin: promedio por semestre de todo el programa
                 detalles = DetalleInscripcion.objects.filter(
                     asignatura__semestre=sem_num,
                     nota_final__isnull=False
@@ -2551,7 +2272,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                 data.append(round(float(avg), 2) if avg else 0)
             
             elif is_docente:
-                # Docente: promedios solo de sus secciones para ese semestre
                 secciones_docente = Seccion.objects.filter(docente=user, asignatura__semestre=sem_num)
                 avg = DetalleInscripcion.objects.filter(
                     seccion__in=secciones_docente,
@@ -2574,13 +2294,11 @@ class EstadisticasViewSet(viewsets.ViewSet):
         
         user = request.user
         
-        # Verificar que sea estudiante
         try:
             estudiante = Estudiante.objects.get(usuario=user)
         except Estudiante.DoesNotExist:
             return Response({'error': 'Usuario no es estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Calcular avance
         avance = estudiante.calcular_avance()
         total_asignaturas = estudiante.programa.asignatura_set.count() if estudiante.programa else 0
         aprobadas = DetalleInscripcion.objects.filter(
@@ -2594,11 +2312,9 @@ class EstadisticasViewSet(viewsets.ViewSet):
         except Exception:
             nombre = str(estudiante.usuario)
         
-        # Datos para el gráfico radar (promedios por semestre)
         labels = []
         chart_data = []
         
-        # Desglose académico (formato compatible con admin)
         desglose = {}
         
         detalles = DetalleInscripcion.objects.filter(
@@ -2614,7 +2330,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                     'subjects': []
                 }
             
-            # Buscar si ya existe la asignatura (para agrupar por sección)
             existing_subject = None
             for subj in desglose[sem_key]['subjects']:
                 if subj['id'] == detalle.asignatura.id:
@@ -2642,7 +2357,6 @@ class EstadisticasViewSet(viewsets.ViewSet):
                     'sections': [section_data]
                 })
         
-        # Calcular promedios por semestre para el gráfico (siempre 8 semestres)
         for sem_num in range(1, 9):
             labels.append(f'Sem {sem_num}')
             if sem_num in desglose:

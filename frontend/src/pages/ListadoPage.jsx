@@ -2,14 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Download, Search, User, GraduationCap, Shield, Edit, Trash2, ArrowUpDown, X, Save } from 'lucide-react'
 import { generateMockUsers } from '../utils/mockData'
 
-// Configuración de pestañas
 const TABS = [
     { id: 'Estudiantes', label: 'Estudiantes', icon: GraduationCap, endpoint: 'estudiantes', download: 'listado_estudiantes.xlsx' },
     { id: 'Docentes', label: 'Docentes', icon: User, endpoint: 'docentes', download: 'listado_docentes.xlsx' },
     { id: 'Administradores', label: 'Administradores', icon: Shield, endpoint: 'administradores', download: 'listado_admins.xlsx' },
 ]
 
-// Función de ordenamiento
 const sortData = (data, key, direction) => {
     if (!key) return data
     return [...data].sort((a, b) => {
@@ -39,12 +37,10 @@ export default function ListadoPage() {
 
     const activeConfig = TABS.find(t => t.id === activeTab)
 
-    // Cargar programas una vez
     useEffect(() => {
         fetchProgramas()
     }, [])
 
-    // Cargar datos cuando cambia la pestaña
     useEffect(() => {
         fetchData()
     }, [activeTab, programas])
@@ -60,7 +56,6 @@ export default function ListadoPage() {
         }
     }
 
-    // Función para obtener datos de FakerAPI
     const fetchFakerData = async (quantity, seed) => {
         try {
             const res = await fetch(`https://fakerapi.it/api/v2/persons?_quantity=${quantity}&_locale=es_ES&_seed=${seed}`)
@@ -77,15 +72,12 @@ export default function ListadoPage() {
     const fetchData = async () => {
         setLoading(true)
         try {
-            // Determinar seed basado en pestaña activa
             let seed = 12345
             if (activeTab === 'Docentes') seed = 67890
             if (activeTab === 'Administradores') seed = 11223
 
-            // 1. Obtener datos de FakerAPI
             const fakerData = await fetchFakerData(10, seed)
 
-            // 2. Normalizar datos fake
             let fakeResults = []
             if (fakerData) {
                 fakeResults = fakerData.map((p, idx) => {
@@ -112,14 +104,12 @@ export default function ListadoPage() {
                     }
                 })
             } else {
-                // Fallback a datos locales si FakerAPI falla
                 fakeResults = generateMockUsers(10, activeTab.slice(0, -1), programas).map(u => ({
                     ...u,
                     isFake: true
                 }))
             }
 
-            // Filtrar resultados fake si hay búsqueda
             if (search) {
                 const s = search.toLowerCase()
                 fakeResults = fakeResults.filter(item =>
@@ -129,7 +119,6 @@ export default function ListadoPage() {
                 )
             }
 
-            // 3. Intentar obtener datos reales de la API
             let realResults = []
             try {
                 const url = search
@@ -148,12 +137,10 @@ export default function ListadoPage() {
                 console.warn('API real no disponible:', e.message)
             }
 
-            // Combinar: reales primero, luego fake
             setData([...realResults, ...fakeResults])
 
         } catch (error) {
             console.error('Error cargando datos:', error)
-            // Fallback completo a datos locales
             setData(generateMockUsers(10, activeTab.slice(0, -1), programas))
         } finally {
             setLoading(false)
@@ -249,12 +236,10 @@ export default function ListadoPage() {
             cedula: `${cedulaPrefix}-${editForm.cedula}`,
         }
 
-        // Limpiar campos no relevantes
         if (activeTab !== 'Estudiantes') delete payload.programa
         if (activeTab !== 'Docentes') delete payload.tipo_contratacion
 
         if (editingItem.isFake) {
-            // Simulación de guardado
             setTimeout(() => {
                 setData(prev => prev.map(d => {
                     if (d.id !== editingItem.id) return d
@@ -297,7 +282,6 @@ export default function ListadoPage() {
         }
     }
 
-    // Componente de cabecera ordenable
     const SortableHeader = ({ label, sortKey }) => (
         <th
             className="p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors select-none"
@@ -310,7 +294,6 @@ export default function ListadoPage() {
         </th>
     )
 
-    // Extraer datos de item para mostrar
     const getDisplayData = (item) => ({
         firstName: item.usuario?.first_name || item.first_name || '-',
         lastName: item.usuario?.last_name || item.last_name || '-',
@@ -457,7 +440,6 @@ export default function ListadoPage() {
     )
 }
 
-// Componente de Modal de Edición
 function EditModal({ item, form, setForm, prefix, setPrefix, programas, isStudent, isDocente, saving, onSave, onClose }) {
     const handleNumericInput = (e) => {
         e.target.value = e.target.value.replace(/[^0-9]/g, '')
@@ -565,7 +547,6 @@ function EditModal({ item, form, setForm, prefix, setPrefix, programas, isStuden
     )
 }
 
-// Componente de campo de entrada reutilizable
 function InputField({ label, value, onChange, type = 'text', numeric = false }) {
     return (
         <div>

@@ -12,7 +12,6 @@ export default function CalificacionesPage() {
     const [expandedSubjects, setExpandedSubjects] = useState({}) // { codigo: boolean }
     const [editedNotas, setEditedNotas] = useState({})
 
-    // Estado para modal de inscripción
     const [inscripcionModal, setInscripcionModal] = useState(null) // seccion object or null
     const [estudiantesDisponibles, setEstudiantesDisponibles] = useState([])
     const [selectedEstudiante, setSelectedEstudiante] = useState('')
@@ -71,7 +70,6 @@ export default function CalificacionesPage() {
         if (!selectedProgram) return
         setLoading(true)
         try {
-            // Append program filter
             const res = await fetch(`${import.meta.env.VITE_API_URL}/secciones/mis-secciones/?programa=${selectedProgram.id}`, {
                 headers: { Authorization: `Token ${token}` }
             })
@@ -107,13 +105,11 @@ export default function CalificacionesPage() {
         setInscripcionModal(seccion)
         setSelectedEstudiante('')
         setBusquedaEstudiante('')
-        // Obtener todos los estudiantes disponibles
         fetchEstudiantesDisponibles()
     }
 
     const handleCloseInscripcionModal = () => {
         setInscripcionModal(null)
-        // Solo limpiar si es error, para mantener mensajes de éxito visibles en dashboard
         if (message?.type === 'error') {
             setMessage(null)
         }
@@ -150,7 +146,6 @@ export default function CalificacionesPage() {
     }
 
     const handleDescargarListado = (seccionId) => {
-        // Abrir URL de descarga en nueva pestaña
         const url = `${import.meta.env.VITE_API_URL}/secciones/${seccionId}/descargar-listado/`
         window.open(url + `?token=${token}`, '_blank')
     }
@@ -172,7 +167,6 @@ export default function CalificacionesPage() {
             const data = await res.json()
             if (res.ok) {
                 setMessage({ type: 'success', text: 'Estudiante eliminado exitosamente.' })
-                // Esperar un momento para que el usuario vea el mensaje y luego recargar
                 setTimeout(() => fetchMisSecciones(), 1000)
             } else {
                 setMessage({ type: 'error', text: data.error || 'Error al eliminar estudiante.' })
@@ -263,26 +257,21 @@ export default function CalificacionesPage() {
         setSaving(false)
     }
 
-    // Calcular nota final considerando nota de reparación
     const calcularNotaFinal = (est) => {
         const notaR = getNotaValue(est, 'nota_reparacion')
 
-        // Si hay nota de reparación, esta es la nota final
         if (notaR !== null && notaR !== undefined && notaR !== '') {
             return parseFloat(notaR).toFixed(2)
         }
 
-        // Si no, calcular promedio de las 4 notas
         const n1 = getNotaValue(est, 'nota1')
         const n2 = getNotaValue(est, 'nota2')
         const n3 = getNotaValue(est, 'nota3')
         const n4 = getNotaValue(est, 'nota4')
 
-        // Verificar si hay al menos una nota cargada
         const algunaNota = [n1, n2, n3, n4].some(n => n !== null && n !== undefined && n !== '')
 
         if (algunaNota) {
-            // Si falta alguna nota, se asume 1 (nota mínima)
             const v1 = (n1 !== null && n1 !== undefined && n1 !== '') ? parseFloat(n1) : 1
             const v2 = (n2 !== null && n2 !== undefined && n2 !== '') ? parseFloat(n2) : 1
             const v3 = (n3 !== null && n3 !== undefined && n3 !== '') ? parseFloat(n3) : 1
@@ -293,18 +282,14 @@ export default function CalificacionesPage() {
         return '--'
     }
 
-    // Verificar si un estudiante tiene nota de reparación activa
     const tieneNotaReparacion = (est) => {
         const notaR = getNotaValue(est, 'nota_reparacion')
         return notaR !== null && notaR !== undefined && notaR !== ''
     }
 
-    // Obtener IDs de estudiantes ya inscritos en la sección actual
     const estudiantesInscritos = inscripcionModal?.estudiantes?.map(e => e.estudiante_id) || []
 
-    // Filtrar estudiantes por búsqueda y excluir ya inscritos
     const estudiantesFiltrados = estudiantesDisponibles.filter(est => {
-        // Excluir si ya está inscrito
         if (estudiantesInscritos.includes(est.id)) return false
 
         const searchLower = busquedaEstudiante.toLowerCase()
@@ -333,7 +318,6 @@ export default function CalificacionesPage() {
         }
     }
 
-    // Lógica de búsqueda y filtrado
     const uniqueSemesters = [...new Set(secciones.map(s => s.semestre).filter(Boolean))].sort((a, b) => a - b)
 
     const filteredSecciones = secciones.filter(seccion => {
@@ -350,7 +334,6 @@ export default function CalificacionesPage() {
         return matchesSearch && matchesSemestre
     })
 
-    // Agrupar secciones por asignatura
     const groupedSecciones = React.useMemo(() => {
         const groups = {}
         filteredSecciones.forEach(sec => {
@@ -364,7 +347,6 @@ export default function CalificacionesPage() {
             groups[sec.asignatura_codigo].secciones.push(sec)
         })
 
-        // Convert to array and sort sections internally
         const result = Object.values(groups)
         result.forEach(group => {
             group.secciones.sort((a, b) => {
@@ -388,7 +370,6 @@ export default function CalificacionesPage() {
             !name.includes('servicio comunitario')
     }
 
-    // Helper for Program Icons
     const getProgramIcon = (name) => {
         if (!name) return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
 
@@ -405,7 +386,6 @@ export default function CalificacionesPage() {
         return <GraduationCap className="text-blue-600 dark:text-blue-400" size={28} />
     }
 
-    // 1. Program Selection View
     if (!selectedProgram) {
         return (
             <div className="space-y-6 animate-in fade-in duration-500">
@@ -683,7 +663,6 @@ export default function CalificacionesPage() {
                                                                                         ))}
                                                                                         {/* Columna Nota R - Reparación */}
                                                                                         {(() => {
-                                                                                            // Determinar si puede tener nota de reparación
                                                                                             const n1 = getNotaValue(est, 'nota1')
                                                                                             const n2 = getNotaValue(est, 'nota2')
                                                                                             const n3 = getNotaValue(est, 'nota3')
@@ -695,7 +674,6 @@ export default function CalificacionesPage() {
                                                                                                 promedioSinR = (parseFloat(n1) + parseFloat(n2) + parseFloat(n3) + parseFloat(n4)) / 4
                                                                                             }
 
-                                                                                            // Solo habilitar si tiene todas las notas Y está reprobado (promedio < 10) O ya tiene nota R
                                                                                             const puedeNotaR = conNotaR || (todasLasNotas && promedioSinR < 10)
 
                                                                                             return (

@@ -21,7 +21,6 @@ def test_reject_large_pensum(db):
     client = APIClient()
     client.login(username='adminv', password='pass')
 
-    # Create large file > MAX_UPLOAD_SIZE
     big = io.BytesIO(b'a' * (settings.MAX_UPLOAD_SIZE + 1))
     big.name = 'big.pdf'
 

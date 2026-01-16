@@ -24,7 +24,6 @@ def test_pensum_upload_only_admin(db, tmp_path):
     client = APIClient()
     client.login(username='admin1', password='pass')
 
-    # preparar archivo fake
     file_obj = io.BytesIO(b'dummy content')
     file_obj.name = 'pensum.pdf'
 
@@ -51,10 +50,8 @@ def test_planificacion_only_docente(db):
 def test_documento_calificaciones_only_estudiante(db):
     setup_groups()
     user = User.objects.create_user('est1', password='pass', email='est1@example.com')
-    # asignar grupo de estudiante al usuario
     g = Group.objects.get(name='Estudiante')
     user.groups.add(g)
-    # create estudiante record
     prog = Programa.objects.create(nombre_programa='Prog 1', titulo_otorgado='T', duracion_anios=4)
     estudiante = Estudiante.objects.create(usuario=user, programa=prog, cedula='V-999', telefono='00')
 

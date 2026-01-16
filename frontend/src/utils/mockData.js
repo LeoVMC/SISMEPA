@@ -3,7 +3,6 @@
  * Evita depender de APIs externas como FakerAPI.
  */
 
-// Nombres y apellidos españoles para datos realistas
 const NOMBRES = [
     'Carlos', 'María', 'Juan', 'Ana', 'Pedro', 'Laura', 'Luis', 'Carmen',
     'José', 'Sofía', 'Miguel', 'Elena', 'Antonio', 'Patricia', 'Francisco',

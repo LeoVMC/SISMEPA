@@ -13,7 +13,6 @@ export default function PlanificacionForm() {
       setResp({ error: 'Selecciona un archivo' })
       return
     }
-    // client-side checks
     const MAX = 10 * 1024 * 1024
     const allowed = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
     if (file.size > MAX) {

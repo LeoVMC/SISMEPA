@@ -24,7 +24,6 @@ export default function Sidebar({ isOpen, onClose }) {
     const showMonitoring = isAdmin || isTeacher
     const dashboardLabel = showMonitoring ? 'Monitoreo' : 'Progreso'
 
-    // Fetch UC Info for students
     useEffect(() => {
         if (!isAdmin && !isTeacher) {
             const fetchUC = async () => {
@@ -42,8 +41,6 @@ export default function Sidebar({ isOpen, onClose }) {
             }
             fetchUC()
 
-            // Listen for enrollment events (if implied) or just polling?
-            // For now just on mount.
         }
     }, [isAdmin, isTeacher, location.pathname]) // Refresh on navigation changes (e.g. after enrollment)
 
@@ -57,12 +54,10 @@ export default function Sidebar({ isOpen, onClose }) {
         { path: '/admin/pensum', icon: FileText, label: 'Pensums' },
     ]
 
-    // Mostrar opción de Usuarios en Línea solo a Admin y Docentes
     if (showMonitoring) {
         menuItems.splice(1, 0, { path: '/active-users', icon: Wifi, label: 'Usuarios en Línea' })
     }
 
-    // Mostrar opción de Calificaciones a Docentes y Administradores
     if (isTeacher || isAdmin) {
         menuItems.push({ path: '/calificaciones', icon: ClipboardList, label: 'Calificaciones' })
     }

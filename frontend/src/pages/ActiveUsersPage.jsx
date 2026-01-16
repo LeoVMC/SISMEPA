@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Search, User, Monitor, Clock, ShieldAlert, Smartphone } from 'lucide-react'
 import { generateOnlineUsers } from '../utils/mockData'
 
-// Constantes
 const STATUS_COLORS = {
     online: 'bg-green-500',
     idle: 'bg-yellow-500',
@@ -23,7 +22,6 @@ export default function ActiveUsersPage() {
     const [selectedSection, setSelectedSection] = useState('all')
     const [mySections, setMySections] = useState([])
 
-    // Datos del usuario actual
     const currentUser = JSON.parse(localStorage.getItem('userData') || '{}')
     const token = localStorage.getItem('apiToken')
     const isAdmin = currentUser.is_staff || currentUser.groups?.some(g => ['Administrador', 'Admin'].includes(g.name))
@@ -35,21 +33,17 @@ export default function ActiveUsersPage() {
         } else {
             loadUsers()
         }
-        // Actualizar estados cada 30 segundos
         const interval = setInterval(updateStatuses, 30000)
         return () => clearInterval(interval)
     }, [])
 
-    // Cargar datos para docentes (sus secciones y estudiantes)
     const loadTeacherData = async () => {
         setLoading(true)
         try {
-            // 1. Obtener mis secciones
             const secRes = await fetch(`${import.meta.env.VITE_API_URL}/secciones/mis-secciones/`, {
                 headers: { Authorization: `Token ${token}` }
             })
 
-            // 2. Obtener usuarios online reales
             const onlineRes = await fetch(`${import.meta.env.VITE_API_URL}/online-users/`, {
                 headers: { Authorization: `Token ${token}` }
             })
@@ -87,7 +81,6 @@ export default function ActiveUsersPage() {
                     })
                 })
 
-                // 3. Agregar datos simulados de FakerAPI
                 const fakeUsers = await fetchFakerUsers(5)
                 const simulatedUsers = fakeUsers.map((u, i) => ({
                     id: `sim-teacher-${i}`,
@@ -104,18 +97,15 @@ export default function ActiveUsersPage() {
             }
         } catch (error) {
             console.error('Error cargando datos de docente:', error)
-            // Fallback a datos locales
             setUsers(generateOnlineUsers(10))
         } finally {
             setLoading(false)
         }
     }
 
-    // Cargar usuarios (admin u otro rol)
     const loadUsers = async () => {
         setLoading(true)
         try {
-            // 1. Obtener datos simulados de FakerAPI
             const fakeUsers = await fetchFakerUsers(15)
             const simulatedUsers = fakeUsers.map((u, i) => {
                 let role = 'Estudiante'
@@ -132,7 +122,6 @@ export default function ActiveUsersPage() {
                 }
             })
 
-            // 2. Intentar obtener usuarios reales online
             if (token) {
                 try {
                     const res = await fetch(`${import.meta.env.VITE_API_URL}/online-users/`, {
@@ -152,7 +141,6 @@ export default function ActiveUsersPage() {
                                 lastActivity: 'Ahora mismo',
                                 device: u.device || 'Desktop'
                             }))
-                        // Reales primero, luego simulados
                         setUsers([...realUsers, ...simulatedUsers])
                         return
                     }
@@ -164,14 +152,12 @@ export default function ActiveUsersPage() {
             setUsers(simulatedUsers)
         } catch (error) {
             console.error('Error cargando usuarios:', error)
-            // Fallback a datos locales si FakerAPI falla
             setUsers(generateOnlineUsers(12))
         } finally {
             setLoading(false)
         }
     }
 
-    // Función para obtener datos de FakerAPI
     const fetchFakerUsers = async (quantity) => {
         try {
             const res = await fetch(`https://fakerapi.it/api/v2/persons?_quantity=${quantity}&_locale=es_ES`)
@@ -182,7 +168,6 @@ export default function ActiveUsersPage() {
         } catch (error) {
             console.warn('FakerAPI no disponible, usando datos locales:', error.message)
         }
-        // Fallback: generar datos locales
         return generateOnlineUsers(quantity).map(u => ({
             firstname: u.name.split(' ')[0],
             lastname: u.name.split(' ')[1] || 'Usuario',
@@ -197,7 +182,6 @@ export default function ActiveUsersPage() {
         })))
     }
 
-    // Filtrar usuarios
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
             const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -216,7 +200,6 @@ export default function ActiveUsersPage() {
 
     const onlineCount = users.filter(u => u.status === 'online').length
 
-    // Verificar permisos
     if (!isAdmin && !isTeacher) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center p-6 text-gray-500">
@@ -326,7 +309,6 @@ export default function ActiveUsersPage() {
     )
 }
 
-// Componente de tarjeta de usuario
 function UserCard({ user }) {
     return (
         <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow flex items-start gap-4">

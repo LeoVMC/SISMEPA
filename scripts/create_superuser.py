@@ -2,7 +2,6 @@ import os
 import django
 import sys
 
-# Add the project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pkgutil
@@ -11,7 +10,6 @@ import importlib.util
 if not hasattr(pkgutil, 'find_loader'):
     def find_loader(fullname):
         if "." in fullname:
-            # This is a simplification for the specific use case
             try:
                 return importlib.util.find_spec(fullname)
             except:

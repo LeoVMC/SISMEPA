@@ -28,7 +28,6 @@ export default function LoginPage() {
         const username = `${cedulaPrefix}-${cedulaNumber}`
 
         try {
-            // Usando el nuevo servicio: api.post maneja URL, headers y JSON stringify
             const res = await api.post('/auth/login/', { username, password })
             const json = await res.json()
 
@@ -37,14 +36,12 @@ export default function LoginPage() {
                 if (token) {
                     localStorage.setItem('apiToken', token)
 
-                    // Obtener detalles del usuario
                     try {
                         const userRes = await api.get('/auth/user/')
                         if (userRes.ok) {
                             const userData = await userRes.json()
                             localStorage.setItem('userData', JSON.stringify(userData))
 
-                            // Lógica de redirección basada en rol
                             if (userData.username === 'admin' || userData.is_staff) {
                                 navigate('/dashboard')
                             } else {
@@ -60,7 +57,6 @@ export default function LoginPage() {
                     setError('Error: No se recibió un token válido.')
                 }
             } else {
-                // Manejar mensajes de error específicos
                 if (json.non_field_errors) {
                     setError(json.non_field_errors.join(' '))
                 } else {

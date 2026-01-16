@@ -5748,3 +5748,16 @@ AttributeError: 'User' object has no attribute 'usuario'
 [2026-01-12 19:07:56,526] INFO gestion.notifications: Correo enviado a ['thedinosaurfire@gmail.com']: Nota de Reparación Cargada: MATEMÁTICA I
 [2026-01-12 19:09:21,182] INFO django.utils.autoreload: /app/gestion/notifications.py changed, reloading.
 [2026-01-12 19:09:22,221] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-12 20:44:53,614] WARNING django.request: Not Found: /favicon.ico
+[2026-01-13 00:16:50,095] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:16:50,188] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:18:59,275] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:18:59,372] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:19:58,982] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:19:59,066] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:20:58,933] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:20:59,010] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:27:44,070] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:27:44,152] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:28:06,641] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-13 00:28:06,723] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/

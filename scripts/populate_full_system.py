@@ -4,7 +4,6 @@ Script maestro para poblar todo el sistema SISMEPA con datos de prueba robustos.
 import os
 import sys
 
-# Setup Django
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, PROJECT_ROOT)
@@ -29,12 +28,10 @@ def run():
     Horario.objects.all().delete()
     print("Datos de inscripciones y secciones limpiados.")
     
-    # 1. Crear Programas y Asignaturas
     print("\n>>> 1. Cargando Pensums...")
     populate_telecom.run()
     recreate_pensum.run()
 
-    # 2. Crear Periodo Académico
     print("\n>>> 2. Creando Periodo Académico...")
     periodo, _ = PeriodoAcademico.objects.get_or_create(
         nombre_periodo="1-2026",
@@ -46,11 +43,9 @@ def run():
             "anio": 2026
         }
     )
-    # Desactivar otros periodos
     PeriodoAcademico.objects.exclude(id=periodo.id).update(activo=False)
     print(f"Periodo Activo: {periodo}")
 
-    # 3. Crear Usuarios Docentes
     print("\n>>> 3. Creando Docentes...")
     docentes = []
     for i in range(1, 4):
@@ -66,12 +61,10 @@ def run():
         )
         docentes.append(docente)
         
-        # Asignar grupo Docente
         g, _ = Group.objects.get_or_create(name='Docente')
         user.groups.add(g)
     print(f"{len(docentes)} docentes creados/verificados.")
 
-    # 4. Crear Estudiantes
     print("\n>>> 4. Creando Estudiantes...")
     prog_sistemas = Programa.objects.get(nombre_programa="Ingeniería de Sistemas")
     prog_telecom = Programa.objects.get(nombre_programa="Ingeniería de Telecomunicaciones")
@@ -99,14 +92,12 @@ def run():
 
     print(f"{len(estudiantes_objs)} estudiantes creados/verificados.")
 
-    # 5. Abrir Secciones (Semestre 1 de ambas carreras)
     print("\n>>> 5. Abriendo Secciones para Semestre 1...")
     asignaturas_sist = Asignatura.objects.filter(programa=prog_sistemas, semestre=1)
     asignaturas_tel = Asignatura.objects.filter(programa=prog_telecom, semestre=1)
     
     secciones_creadas = []
     
-    # Sistemas
     for asig in asignaturas_sist:
         sec, _ = Seccion.objects.get_or_create(
             asignatura=asig,
@@ -114,10 +105,8 @@ def run():
             defaults={'docente': random.choice(docentes).usuario}
         )
         secciones_creadas.append(sec)
-        # Crear horario random
         Horario.objects.get_or_create(seccion=sec, dia=1, hora_inicio=datetime.time(7,0), hora_fin=datetime.time(9,30), aula="A-10")
 
-    # Telecom
     for asig in asignaturas_tel:
         sec, _ = Seccion.objects.get_or_create(
             asignatura=asig,
@@ -129,10 +118,8 @@ def run():
 
     print(f"{len(secciones_creadas)} secciones abiertas.")
 
-    # 6. Inscribir Estudiantes
     print("\n>>> 6. Inscribiendo Estudiantes...")
     
-    # Estudiante Sistemas
     est_sis = estudiantes_objs[0]
     insc_sis, _ = Inscripcion.objects.get_or_create(estudiante=est_sis, periodo=periodo)
     for sec in secciones_creadas:
@@ -143,7 +130,6 @@ def run():
                 defaults={'seccion': sec, 'estatus': 'CURSANDO'}
             )
 
-    # Estudiante Telecom
     est_tel = estudiantes_objs[1]
     insc_tel, _ = Inscripcion.objects.get_or_create(estudiante=est_tel, periodo=periodo)
     for sec in secciones_creadas:
@@ -156,7 +142,6 @@ def run():
 
     print("Inscripciones realizadas.")
 
-    # 7. Crear Administrador para Frontend
     print("\n>>> 7. Creando Administrador con Cédula...")
     admin_cedula = "V-10000001"
     admin_user, created = User.objects.get_or_create(username=admin_cedula, defaults={
