@@ -44,7 +44,7 @@ export default function Sidebar({ isOpen, onClose }) {
             fetchUC()
 
         }
-    }, [isAdmin, isTeacher, location.pathname]) // Refresh on navigation changes (e.g. after enrollment)
+    }, [isAdmin, isTeacher, location.pathname])
 
     let panelLabel = 'Panel Estudiante'
     if (isAdmin) panelLabel = 'Panel Administrador'
@@ -71,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }) {
         )
     }
 
-    // Asesorías - Solo para estudiantes
+
     if (!isAdmin && !isTeacher) {
         menuItems.push({ path: '/asesorias', icon: MessageCircle, label: 'Asesorías' })
     }
@@ -122,7 +122,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 })}
             </nav>
 
-            {/* UC Counter for Students */}
+            {/* Contador de UC para Estudiantes */}
             {!isAdmin && !isTeacher && ucActuales >= 0 && (
                 <div className="px-4 mb-4">
                     <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 border border-gray-700/50 shadow-lg">

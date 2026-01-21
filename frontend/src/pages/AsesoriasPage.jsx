@@ -38,7 +38,7 @@ export default function AsesoriasPage() {
         setInputValue('')
         setIsLoading(true)
 
-        // Simulate AI response delay (placeholder until Gemini integration)
+
         setTimeout(() => {
             const aiResponse = {
                 id: Date.now() + 1,

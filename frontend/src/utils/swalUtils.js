@@ -1,6 +1,5 @@
 import Swal from 'sweetalert2'
 
-// Configuración base para tema oscuro/claro
 const getThemeColors = () => {
     const isDark = document.documentElement.classList.contains('dark')
     return {
@@ -12,7 +11,6 @@ const getThemeColors = () => {
     }
 }
 
-// SweetAlert mixin con estilos del proyecto
 const createThemedSwal = () => {
     const colors = getThemeColors()
     return Swal.mixin({
@@ -31,7 +29,6 @@ const createThemedSwal = () => {
     })
 }
 
-// Alerta de éxito
 export const showSuccess = (title, text = '') => {
     return createThemedSwal().fire({
         icon: 'success',
@@ -43,7 +40,6 @@ export const showSuccess = (title, text = '') => {
     })
 }
 
-// Alerta de error
 export const showError = (title, text = '') => {
     return createThemedSwal().fire({
         icon: 'error',
@@ -53,7 +49,6 @@ export const showError = (title, text = '') => {
     })
 }
 
-// Alerta de información
 export const showInfo = (title, text = '') => {
     return createThemedSwal().fire({
         icon: 'info',
@@ -63,7 +58,6 @@ export const showInfo = (title, text = '') => {
     })
 }
 
-// Alerta de advertencia
 export const showWarning = (title, text = '') => {
     return createThemedSwal().fire({
         icon: 'warning',
@@ -73,7 +67,6 @@ export const showWarning = (title, text = '') => {
     })
 }
 
-// Diálogo de confirmación
 export const showConfirm = async (title, text = '', confirmText = 'Sí, confirmar', cancelText = 'Cancelar') => {
     const result = await createThemedSwal().fire({
         icon: 'question',
@@ -87,7 +80,6 @@ export const showConfirm = async (title, text = '', confirmText = 'Sí, confirma
     return result.isConfirmed
 }
 
-// Diálogo de confirmación para eliminación (estilo peligroso)
 export const showDeleteConfirm = async (title, text = '') => {
     const colors = getThemeColors()
     const result = await Swal.fire({
@@ -111,7 +103,6 @@ export const showDeleteConfirm = async (title, text = '') => {
     return result.isConfirmed
 }
 
-// Toast notification
 export const showToast = (icon, title) => {
     const colors = getThemeColors()
     const Toast = Swal.mixin({
