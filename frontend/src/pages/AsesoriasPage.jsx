@@ -70,7 +70,7 @@ export default function AsesoriasPage() {
                 </div>
             </div>
 
-            {/* Messages Container */}
+            {/* Contenedor de Mensajes */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-950">
                 {messages.map((message) => (
                     <div
@@ -89,7 +89,7 @@ export default function AsesoriasPage() {
                             )}
                         </div>
 
-                        {/* Message Bubble */}
+                        {/* Burbuja de Mensaje */}
                         <div className={`max-w-[75%] ${message.type === 'user' ? 'text-right' : ''}`}>
                             <div className={`inline-block px-4 py-3 rounded-2xl ${message.type === 'ai'
                                 ? 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md'
@@ -104,7 +104,7 @@ export default function AsesoriasPage() {
                     </div>
                 ))}
 
-                {/* Loading Indicator */}
+                {/* Indicador de Carga */}
                 {isLoading && (
                     <div className="flex items-start gap-3 animate-fade-in">
                         <div className="flex-shrink-0 p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
@@ -122,7 +122,7 @@ export default function AsesoriasPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
+            {/* Area de Escritura */}
             <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4">
                 <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                     <input
