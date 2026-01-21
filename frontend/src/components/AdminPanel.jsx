@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { showSuccess } from '../utils/swalUtils'
 
 export default function AdminPanel() {
   const [token, setToken] = useState(localStorage.getItem('apiToken') || '')
@@ -82,13 +83,13 @@ export default function AdminPanel() {
 
   const saveToken = () => {
     localStorage.setItem('apiToken', token)
-    alert('Token guardado en localStorage (dev)')
+    showSuccess('Token Guardado', 'Token guardado en localStorage')
   }
 
   const clearToken = () => {
     localStorage.removeItem('apiToken')
     setToken('')
-    alert('Token removido')
+    showSuccess('Token Eliminado', 'Token removido')
   }
 
   return (

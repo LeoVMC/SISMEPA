@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Download, Search, User, GraduationCap, Shield, Edit, Trash2, ArrowUpDown, X, Save } from 'lucide-react'
 import { generateMockUsers } from '../utils/mockData'
+import { showError, showSuccess, showDeleteConfirm } from '../utils/swalUtils'
 
 const TABS = [
     { id: 'Estudiantes', label: 'Estudiantes', icon: GraduationCap, endpoint: 'estudiantes', download: 'listado_estudiantes.xlsx' },
@@ -172,19 +173,20 @@ export default function ListadoPage() {
                 window.URL.revokeObjectURL(url)
                 document.body.removeChild(a)
             } else {
-                alert('Error al descargar el listado')
+                showError('Error', 'Error al descargar el listado')
             }
         } catch (e) {
-            alert('Error de conexión al descargar')
+            showError('Error de Conexión', 'Error de conexión al descargar')
         }
     }
 
     const handleDelete = async (item) => {
-        if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return
+        const confirmed = await showDeleteConfirm('Eliminar Usuario', '¿Estás seguro de que deseas eliminar este usuario?')
+        if (!confirmed) return
 
         if (item.isFake) {
             setData(prev => prev.filter(d => d.id !== item.id))
-            alert('Usuario (Simulado) eliminado de la vista.')
+            showSuccess('Usuario Eliminado', 'Usuario (Simulado) eliminado de la vista.')
             return
         }
 
@@ -196,10 +198,10 @@ export default function ListadoPage() {
             if (res.ok) {
                 setData(prev => prev.filter(d => d.id !== item.id))
             } else {
-                alert('Error al eliminar usuario')
+                showError('Error', 'Error al eliminar usuario')
             }
         } catch (e) {
-            alert('Error de conexión')
+            showError('Error de Conexión', 'Error de conexión')
         }
     }
 
@@ -252,7 +254,7 @@ export default function ListadoPage() {
                 }))
                 setSaving(false)
                 setEditingItem(null)
-                alert('Cambios guardados (Simulación FakerAPI)')
+                showSuccess('Guardado', 'Cambios guardados (Simulación FakerAPI)')
             }, 500)
             return
         }
@@ -273,10 +275,10 @@ export default function ListadoPage() {
                 setEditingItem(null)
             } else {
                 const err = await res.json()
-                alert('Error: ' + JSON.stringify(err))
+                showError('Error', 'Error: ' + JSON.stringify(err))
             }
         } catch (e) {
-            alert('Error de conexión')
+            showError('Error de Conexión', 'Error de conexión')
         } finally {
             setSaving(false)
         }

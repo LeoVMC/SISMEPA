@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar, MessageCircle } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import api from '../services/api'
+import { showConfirm } from '../utils/swalUtils'
 
 export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
@@ -11,8 +12,9 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const isActive = (path) => location.pathname === path
 
-    const handleLogout = () => {
-        if (!window.confirm('¿Estás seguro de que deseas cerrar la sesión?')) return
+    const handleLogout = async () => {
+        const confirmed = await showConfirm('Cerrar Sesión', '¿Estás seguro de que deseas cerrar la sesión?', 'Sí, cerrar sesión', 'Cancelar')
+        if (!confirmed) return
         localStorage.removeItem('apiToken')
         localStorage.removeItem('userData')
         navigate('/login')
@@ -67,6 +69,11 @@ export default function Sidebar({ isOpen, onClose }) {
             { path: '/admin/register', icon: UserPlus, label: 'Registrar Usuario' },
             { path: '/admin/listado', icon: Users, label: 'Listado' }
         )
+    }
+
+    // Asesorías - Solo para estudiantes
+    if (!isAdmin && !isTeacher) {
+        menuItems.push({ path: '/asesorias', icon: MessageCircle, label: 'Asesorías' })
     }
 
     return (

@@ -9,6 +9,7 @@ import ActiveUsersPage from './pages/ActiveUsersPage'
 import ProfilePage from './pages/ProfilePage'
 import CalificacionesPage from './pages/CalificacionesPage'
 import HorarioPage from './pages/HorarioPage'
+import AsesoriasPage from './pages/AsesoriasPage'
 import AdminLayout from './layouts/AdminLayout'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -147,6 +148,16 @@ export default function App() {
                 <PrivateRoute>
                   <AdminLayout>
                     <CalificacionesPage />
+                  </AdminLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/asesorias"
+              element={
+                <PrivateRoute>
+                  <AdminLayout>
+                    <AsesoriasPage />
                   </AdminLayout>
                 </PrivateRoute>
               }

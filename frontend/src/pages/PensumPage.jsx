@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FileText, Download, Upload, UserPlus, X, ChevronRight, BookOpen, Loader2, AlertCircle, UserCheck, CheckCircle, MonitorCheck, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, Trash2, RadioTower, UserX, Pencil, Ban } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { showConfirm, showDeleteConfirm } from '../utils/swalUtils'
 
 
 const SECCIONES = Array.from({ length: 10 }, (_, i) => `D${i + 1}`)
@@ -485,7 +486,8 @@ export default function PensumPage() {
 
     const handleDeletePlan = async (specificCode = null) => {
         if (!selectedSubject) return
-        if (!confirm('¿Estás seguro de eliminar la planificación?')) return
+        const confirmed = await showDeleteConfirm('Eliminar Planificación', '¿Estás seguro de eliminar la planificación?')
+        if (!confirmed) return
 
         setActionLoading(true)
         setActionMessage(null)
@@ -523,7 +525,8 @@ export default function PensumPage() {
     }
 
     const handleRemoveTutor = async (tutorId, type = 'generic') => {
-        if (!confirm('¿Eliminar tutor?')) return
+        const confirmed = await showDeleteConfirm('Eliminar Tutor', '¿Eliminar tutor?')
+        if (!confirmed) return
         setActionLoading(true)
         const backendSubject = subjectsMap[selectedSubject.code]
 
@@ -553,7 +556,8 @@ export default function PensumPage() {
     }
 
     const handleRemoveDocenteFromSection = async (seccionCode) => {
-        if (!confirm(`¿Eliminar la sección ${seccionCode}? Esta acción es irreversible.`)) return
+        const confirmed = await showDeleteConfirm('Eliminar Sección', `¿Eliminar la sección ${seccionCode}? Esta acción es irreversible.`)
+        if (!confirmed) return
         setActionLoading(true)
         const backendSubject = subjectsMap[selectedSubject.code]
 
@@ -703,7 +707,8 @@ export default function PensumPage() {
     }
 
     const handleDesinscribirme = async (seccionId) => {
-        if (!confirm('¿Estás seguro de desinscribirte de esta sección?')) return
+        const confirmed = await showConfirm('Desinscribirse', '¿Estás seguro de desinscribirte de esta sección?', 'Sí, desinscribirme', 'Cancelar')
+        if (!confirmed) return
         setActionLoading(true)
         setActionMessage(null)
 

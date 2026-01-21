@@ -6261,3 +6261,19 @@ DETAIL:  Key (username)=(V-98765432) already exists.
 [2026-01-16 13:50:24,473] INFO gestion.notifications: Correo enviado a ['librado.kleber09@gmail.com']: Nota de Reparación Cargada: GEOMETRÍA ANALÍTICA
 [2026-01-16 13:52:42,270] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2026-01-16 13:52:42,316] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 14:02:09,919] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 14:02:09,957] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 15:07:34,300] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 15:07:34,344] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 16:52:54,190] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 16:52:54,258] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-16 16:55:34,342] ERROR gestion.notifications: Error enviando correo a ['emdrickd@gmail.com']: [Errno -2] Name or service not known
+[2026-01-16 16:59:07,829] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-16 16:59:07,900] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-16 17:05:59,397] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-16 17:06:11,196] WARNING django.request: Bad Request: /api/auth/login/
+[2026-01-21 11:50:20,695] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-21 12:57:34,552] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-21 13:12:39,909] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-21 13:37:15,341] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-21 13:37:42,612] INFO django.utils.autoreload: Watching for file changes with StatReloader

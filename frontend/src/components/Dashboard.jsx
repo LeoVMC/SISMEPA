@@ -12,6 +12,7 @@ import {
 } from 'chart.js'
 import { Radar } from 'react-chartjs-2'
 import { ChevronDown, ChevronRight, Users, Award, Download, Calendar, ToggleLeft, ToggleRight, Loader2, CheckCircle, AlertCircle, Plus, X } from 'lucide-react'
+import { showError } from '../utils/swalUtils'
 
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
@@ -156,7 +157,7 @@ const Dashboard = () => {
       link.remove()
     } catch (error) {
       console.error('Error descargando progreso:', error)
-      alert('Error al descargar el archivo.')
+      showError('Error', 'Error al descargar el archivo.')
     }
   }
 
@@ -178,7 +179,7 @@ const Dashboard = () => {
       link.remove()
     } catch (error) {
       console.error('Error descargando reporte:', error)
-      alert('Error al descargar el reporte.')
+      showError('Error', 'Error al descargar el reporte.')
     }
   }
 
@@ -265,6 +266,12 @@ const Dashboard = () => {
   const toRoman = (num) => {
     const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X' }
     return lookup[num] || num
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const [year, month, day] = dateString.split('-')
+    return `${day}/${month}/${year}`
   }
 
   const fetchAndProcessPensum = async () => {
@@ -360,9 +367,9 @@ const Dashboard = () => {
               Cargando períodos...
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {periodos.map(periodo => (
-                <div key={periodo.id} className={`p-4 rounded-lg border-2 transition-all ${periodo.es_pasado
+                <div key={periodo.id} className={`w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] flex-shrink-0 snap-center p-4 rounded-lg border-2 transition-all ${periodo.es_pasado
                   ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 opacity-60'
                   : periodo.activo
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
@@ -374,7 +381,7 @@ const Dashboard = () => {
                     <div>
                       <h3 className="font-bold text-gray-800 dark:text-white">{periodo.nombre_periodo}</h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {periodo.fecha_inicio} - {periodo.fecha_fin}
+                        {formatDate(periodo.fecha_inicio)} - {formatDate(periodo.fecha_fin)}
                       </p>
                     </div>
                     <div className="flex flex-col gap-1 items-end">
@@ -419,7 +426,7 @@ const Dashboard = () => {
                       ) : periodo.es_futuro && (
                         <div className="w-full px-3 py-2 rounded-lg text-xs text-center bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
                           <AlertCircle size={14} className="inline mr-1" />
-                          Disponible desde {periodo.fecha_inicio}
+                          Disponible desde {formatDate(periodo.fecha_inicio)}
                         </div>
                       )
                     )}

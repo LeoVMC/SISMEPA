@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { BookOpen, Users, Save, CheckCircle, AlertCircle, ChevronDown, ChevronRight, Loader2, Download, UserPlus, X, Trash2, Search, Filter, GraduationCap, ArrowRight, Cpu, Stethoscope, Building2, Gavel, Briefcase, Zap, Calculator, RadioTower } from 'lucide-react'
 import axios from 'axios'
+import { showError, showDeleteConfirm } from '../utils/swalUtils'
 
 export default function CalificacionesPage() {
     const [secciones, setSecciones] = useState([])
@@ -151,7 +152,8 @@ export default function CalificacionesPage() {
     }
 
     const handleEliminarEstudiante = async (seccionId, estudianteId) => {
-        if (!confirm('¿Estás seguro de eliminar este estudiante de la sección? Esta acción eliminará sus notas y es irreversible.')) return
+        const confirmed = await showDeleteConfirm('Eliminar Estudiante', '¿Estás seguro de eliminar este estudiante de la sección? Esta acción eliminará sus notas y es irreversible.')
+        if (!confirmed) return
         setMessage(null)
 
         try {
@@ -314,7 +316,7 @@ export default function CalificacionesPage() {
             link.remove()
         } catch (error) {
             console.error('Error descargando listado:', error)
-            alert('Error al descargar el listado.')
+            showError('Error', 'Error al descargar el listado.')
         }
     }
 
@@ -687,8 +689,8 @@ export default function CalificacionesPage() {
                                                                                                         onChange={(e) => handleNotaChange(est.detalle_id, 'nota_reparacion', e.target.value)}
                                                                                                         disabled={!puedeNotaR}
                                                                                                         className={`w-16 text-center border rounded px-2 py-1 focus:ring-2 focus:border-transparent ${puedeNotaR
-                                                                                                                ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-white focus:ring-orange-500'
-                                                                                                                : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 text-gray-400 cursor-not-allowed'
+                                                                                                            ? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-white focus:ring-orange-500'
+                                                                                                            : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 text-gray-400 cursor-not-allowed'
                                                                                                             }`}
                                                                                                         placeholder={puedeNotaR ? '--' : 'N/A'}
                                                                                                         title={puedeNotaR
