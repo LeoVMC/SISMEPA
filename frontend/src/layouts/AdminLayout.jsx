@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Menu } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
+import Footer from '../components/Footer'
 
 export default function AdminLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -34,10 +35,13 @@ export default function AdminLayout({ children }) {
                     <ThemeToggle />
                 </div>
 
-                <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto">
-                        {children}
+                <div className="flex-1 overflow-y-auto flex flex-col">
+                    <div className="flex-1 p-4 md:p-8">
+                        <div className="max-w-7xl mx-auto">
+                            {children}
+                        </div>
                     </div>
+                    <Footer />
                 </div>
             </main>
         </div>

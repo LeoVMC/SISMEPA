@@ -6277,3 +6277,17 @@ DETAIL:  Key (username)=(V-98765432) already exists.
 [2026-01-21 13:12:39,909] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-01-21 13:37:15,341] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-01-21 13:37:42,612] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-21 13:58:37,710] WARNING django.request: Not Found: /favicon.ico
+[2026-01-23 15:01:55,570] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-23 15:26:16,943] WARNING django.request: Not Found: /favicon.ico
+[2026-01-29 17:50:16,984] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-01-29 17:55:07,014] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-29 17:55:07,084] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-01-29 17:58:55,941] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-01-29 17:58:56,001] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-04 19:35:22,899] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-04 19:37:21,720] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-04 19:37:21,855] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-04 19:39:03,980] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-04 19:39:04,118] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-07 16:56:50,431] INFO django.utils.autoreload: Watching for file changes with StatReloader
