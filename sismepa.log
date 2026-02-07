@@ -6293,3 +6293,67 @@ DETAIL:  Key (username)=(V-98765432) already exists.
 [2026-02-07 16:56:50,431] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-02-07 17:06:19,959] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
 [2026-02-07 17:06:20,016] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-07 17:23:22,449] INFO django.utils.autoreload: /app/sismepa/settings.py changed, reloading.
+[2026-02-07 17:23:25,244] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:23:51,929] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-02-07 17:23:54,700] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:24:13,373] INFO django.utils.autoreload: /app/sismepa/urls.py changed, reloading.
+[2026-02-07 17:24:15,830] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:29:46,858] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:32:20,569] ERROR gestion.api.views: google-generativeai no está instalado.
+[2026-02-07 17:32:20,576] ERROR django.request: Service Unavailable: /api/chat-asesorias/
+[2026-02-07 17:40:18,636] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:43:08,059] ERROR gestion.api.views: Error en ChatAsesoriasView: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+[2026-02-07 17:43:08,077] ERROR django.request: Internal Server Error: /api/chat-asesorias/
+[2026-02-07 17:43:29,253] ERROR gestion.api.views: Error en ChatAsesoriasView: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+[2026-02-07 17:43:29,262] ERROR django.request: Internal Server Error: /api/chat-asesorias/
+[2026-02-07 17:46:26,742] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:46:41,624] ERROR gestion.api.views: Error en ChatAsesoriasView: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+[2026-02-07 17:46:41,646] ERROR django.request: Internal Server Error: /api/chat-asesorias/
+[2026-02-07 17:47:57,058] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:48:26,510] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:49:00,431] ERROR gestion.api.views: Error en ChatAsesoriasView: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+[2026-02-07 17:49:00,453] ERROR django.request: Internal Server Error: /api/chat-asesorias/
+[2026-02-07 17:52:04,283] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-02-07 17:52:09,236] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:52:53,054] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 18:05:49,284] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-02-07 18:05:54,257] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 18:07:29,562] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 18:12:59,598] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-02-07 18:13:06,006] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 18:13:53,774] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 18:22:04,586] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
+[2026-02-07 18:22:10,710] INFO django.utils.autoreload: Watching for file changes with StatReloader

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import { Menu } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
@@ -6,6 +7,10 @@ import Footer from '../components/Footer'
 
 export default function AdminLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const location = useLocation()
+
+    // Ocultar footer en páginas con scroll propio (como Asesorías)
+    const hideFooter = location.pathname === '/asesorias'
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-950 transition-colors duration-200 relative overflow-hidden">
@@ -41,7 +46,7 @@ export default function AdminLayout({ children }) {
                             {children}
                         </div>
                     </div>
-                    <Footer />
+                    {!hideFooter && <Footer />}
                 </div>
             </main>
         </div>

@@ -2403,3 +2403,96 @@ class EstadisticasViewSet(viewsets.ViewSet):
             }
         })
 
+
+from rest_framework.views import APIView
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class ChatAsesoriasView(APIView):
+    """
+    Endpoint para el chat de asesorías académicas con Gemini AI.
+    Solo disponible para estudiantes autenticados.
+    """
+    permission_classes = [IsEstudiante]
+
+    def post(self, request):
+        mensaje = request.data.get('mensaje', '').strip()
+        es_primer_mensaje = request.data.get('es_primer_mensaje', True)
+        
+        if not mensaje:
+            return Response(
+                {'error': 'El mensaje es requerido.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not settings.GEMINI_API_KEY:
+            logger.error("GEMINI_API_KEY no está configurada.")
+            return Response(
+                {'error': 'El servicio de IA no está disponible temporalmente.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
+        try:
+            import google.generativeai as genai
+            
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            
+            estudiante_info = ""
+            try:
+                estudiante = Estudiante.objects.get(usuario=request.user)
+                estudiante_info = f"""
+                Información del estudiante:
+                - Nombre: {estudiante.usuario.get_full_name()}
+                - Programa: {estudiante.programa.nombre_programa if estudiante.programa else 'No asignado'}
+                - Avance académico: {estudiante.calcular_avance()}%
+                """
+            except Estudiante.DoesNotExist:
+                pass
+            
+            instruccion_inicial = ""
+            if not es_primer_mensaje:
+                instruccion_inicial = """⚠️ INSTRUCCIÓN CRÍTICA: Esta es una CONTINUACIÓN de la conversación.
+- NO saludes
+- NO te presentes
+- NO digas "Hola", "¡Hola!", "Buenos días", "¿En qué puedo ayudarte?" ni similares
+- Ve DIRECTAMENTE a responder la pregunta sin preámbulos
+
+"""
+            
+            system_prompt = f"""{instruccion_inicial}Eres un asistente académico virtual de UNEFA.
+
+{estudiante_info}
+
+Ayudas con: materias, procesos administrativos, consejos de estudio, pensum y motivación académica.
+
+Reglas:
+1. Responde en español, claro y conciso.
+2. Sé amable y profesional.
+3. Si no sabes algo de UNEFA, indica que consulte con coordinación.
+4. Respuestas breves (máximo 3-4 párrafos).
+5. Formato simple, sin markdown excesivo.
+
+Pregunta: {mensaje}"""
+
+            response = model.generate_content(system_prompt)
+            
+            return Response({
+                'respuesta': response.text
+            })
+            
+        except ImportError:
+            logger.error("google-generativeai no está instalado.")
+            return Response(
+                {'error': 'El servicio de IA no está disponible. Contacte al administrador.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            logger.error(f"Error en ChatAsesoriasView: {str(e)}")
+            return Response(
+                {'error': 'Ocurrió un error al procesar tu consulta. Intenta nuevamente.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

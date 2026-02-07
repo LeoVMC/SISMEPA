@@ -11,7 +11,8 @@ from django.conf.urls.static import static
 from gestion.api.views import (
     EstudianteViewSet, AsignaturaViewSet, PensumViewSet,
     PlanificacionViewSet, DocumentoCalificacionesViewSet, UserManagementViewSet, ProgramaViewSet,
-    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet, EstadisticasViewSet, OnlineUsersView
+    DocenteViewSet, AdminViewSet, SeccionViewSet, PeriodoAcademicoViewSet, EstadisticasViewSet, OnlineUsersView,
+    ChatAsesoriasView
 )
 
 router = DefaultRouter()
@@ -33,6 +34,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/online-users/', OnlineUsersView.as_view(), name='online-users'),
+    path('api/chat-asesorias/', ChatAsesoriasView.as_view(), name='chat-asesorias'),
     path('', RedirectView.as_view(url='/api/', permanent=False)),
 ]
 
