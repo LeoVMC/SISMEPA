@@ -6291,3 +6291,5 @@ DETAIL:  Key (username)=(V-98765432) already exists.
 [2026-02-04 19:39:03,980] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2026-02-04 19:39:04,118] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
 [2026-02-07 16:56:50,431] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-07 17:06:19,959] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-07 17:06:20,016] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
