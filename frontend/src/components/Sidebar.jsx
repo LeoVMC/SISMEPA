@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar, MessageCircle } from 'lucide-react'
+import { LayoutDashboard, UserPlus, FileText, LogOut, X, Users, Wifi, User, ClipboardList, Calendar, MessageCircle, HelpCircle } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import HelpModal from './HelpModal'
 import api from '../services/api'
 import { showConfirm } from '../utils/swalUtils'
 
@@ -9,6 +10,7 @@ export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
     const navigate = useNavigate()
     const [ucActuales, setUcActuales] = useState(0)
+    const [showHelp, setShowHelp] = useState(false)
 
     const isActive = (path) => location.pathname === path
 
@@ -157,6 +159,14 @@ export default function Sidebar({ isOpen, onClose }) {
                 </Link>
 
                 <button
+                    onClick={() => setShowHelp(true)}
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-all duration-300 group text-gray-400 hover:bg-gray-800/80 hover:text-white"
+                >
+                    <HelpCircle size={20} className="transition-transform duration-300 group-hover:scale-110" />
+                    <span className="font-medium">Ayuda</span>
+                </button>
+
+                <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-all duration-300 group text-red-400 hover:bg-red-900/20 hover:text-red-300"
                 >
@@ -165,6 +175,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 </button>
             </div>
 
+            <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
         </div >
     )

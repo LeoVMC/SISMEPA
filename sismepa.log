@@ -6357,3 +6357,4 @@ message: "API key not valid. Please pass a valid API key."
 [2026-02-07 18:13:53,774] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-02-07 18:22:04,586] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2026-02-07 18:22:10,710] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-10 19:13:06,292] INFO django.utils.autoreload: Watching for file changes with StatReloader

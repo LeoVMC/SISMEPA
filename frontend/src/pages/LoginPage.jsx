@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, HelpCircle } from 'lucide-react'
 import ThemeToggle from '../components/ThemeToggle'
+import HelpModal from '../components/HelpModal'
 import api from '../services/api'
 
 export default function LoginPage() {
@@ -11,6 +12,7 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [showHelp, setShowHelp] = useState(false)
     const navigate = useNavigate()
 
     const handleNumericInput = (e) => {
@@ -79,6 +81,16 @@ export default function LoginPage() {
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl animate-pulse-soft" />
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-3xl animate-pulse-soft animation-delay-500" />
+            </div>
+
+            <div className="absolute top-4 left-4 z-10">
+                <button
+                    onClick={() => setShowHelp(true)}
+                    className="p-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                    title="Ayuda"
+                >
+                    <HelpCircle size={20} />
+                </button>
             </div>
 
             <div className="absolute top-4 right-4 z-10">
@@ -166,6 +178,8 @@ export default function LoginPage() {
                     </button>
                 </form>
             </div>
+
+            <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
         </div>
     )
 }
