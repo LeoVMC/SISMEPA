@@ -6358,3 +6358,43 @@ message: "API key not valid. Please pass a valid API key."
 [2026-02-07 18:22:04,586] INFO django.utils.autoreload: /app/gestion/api/views.py changed, reloading.
 [2026-02-07 18:22:10,710] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-02-10 19:13:06,292] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-12 08:21:11,487] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2026-02-12 08:26:31,117] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 08:26:31,165] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 08:26:46,858] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 08:26:46,922] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:27:55,706] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:27:55,756] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:41:17,301] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:41:17,349] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:54:33,983] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 09:54:34,040] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:07:56,684] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:07:56,723] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:14:56,034] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:14:56,078] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:45:14,946] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:45:14,988] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:48:47,486] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:48:47,540] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 10:58:04,368] WARNING django.request: Not Found: /favicon.ico
+[2026-02-12 11:09:35,591] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:09:35,634] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:17:20,903] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:17:20,947] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:35:19,665] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:35:19,706] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:38:59,866] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:38:59,907] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:47:54,449] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:47:54,509] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 11:57:56,620] WARNING django.request: Bad Request: /api/secciones/63/inscribirme/
+[2026-02-12 12:04:16,012] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:04:16,058] WARNING django.request: Forbidden: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:09:24,002] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:09:24,048] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:22:03,642] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:22:03,786] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:30:10,480] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 12:30:10,605] WARNING django.request: Bad Request: /api/estudiantes/mis-inscripciones/
+[2026-02-12 21:18:30,873] INFO django.utils.autoreload: Watching for file changes with StatReloader
