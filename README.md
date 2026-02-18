@@ -248,8 +248,10 @@ python manage.py collectstatic   # Recopilar estáticos
 ## 📄 Licencia
 
 Desarrollado por:
-- Leonardo Miranda
+- Leonardo Miranda (Líder de proyecto)
 - Luis Matos
 - Emdrick Díaz
+
+Correo de contacto: leonardovimica943@gmail.com
 
 Este proyecto es de uso académico para la UNEFA, en la asignatura de Lenguajes de Programación III.
