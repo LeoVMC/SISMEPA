@@ -247,4 +247,9 @@ python manage.py collectstatic   # Recopilar estáticos
 
 ## 📄 Licencia
 
-Este proyecto es de uso académico para la UNEFA.
+Desarrollado por:
+-Leonardo Miranda
+-Luis Matos
+-Emdrick Díaz
+
+Este proyecto es de uso académico para la UNEFA, en la asignatura de Lenguajes de Programación III.
